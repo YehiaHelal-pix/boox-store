@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Sitemap: https://boox-store.vercel.app/sitemap.xml
+
+Disallow: /admin
+Disallow: /api

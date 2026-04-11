@@ -1,0 +1,3534 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Boox Store | ملك التفاح</title>
+  <meta property="og:title" content="Boox Store | ملك التفاح 🍎">
+  <meta property="og:description" content="من بوكس تشتري تفاح وانت بالك مرتاح - أجهزة Apple الأصلية بضمان">
+  <meta name="description"
+    content="Boox Store - من بوكس تشتري تفاح وانت بالك مرتاح. متجرك الأول لأجهزة Apple في مصر. بيع، صيانة، واستبدال.">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #03030a;
+      --bg2: #070714;
+      --glass: rgba(255, 255, 255, 0.04);
+      --glass2: rgba(255, 255, 255, 0.07);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --blur: blur(20px) saturate(160%);
+      --neon-1: #6366f1;
+      --neon-2: #22d3ee;
+      --neon-3: #a855f7;
+      --neon-success: #22c55e;
+      --neon-danger: #ef4444;
+      --neon-warn: #f59e0b;
+      --text: #f1f5f9;
+      --text-dim: #64748b;
+      --radius: 16px;
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Cairo', system-ui, sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--neon-1);
+      border-radius: 4px
+    }
+
+    /* ── GLASS ── */
+    .glass {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border)
+    }
+
+    /* ── LOADING SCREEN ── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #03030a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .5s ease, visibility .5s ease
+    }
+
+    #loading-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none
+    }
+
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px
+    }
+
+    .apple-loader-svg {
+      width: clamp(80px, 18vw, 140px)
+    }
+
+    .apple-path {
+      animation: draw-apple 1.8s ease forwards
+    }
+
+    @keyframes draw-apple {
+      0% {
+        stroke-dashoffset: 800;
+        opacity: .3
+      }
+
+      20% {
+        opacity: 1
+      }
+
+      100% {
+        stroke-dashoffset: 0
+      }
+    }
+
+    .loader-brand {
+      position: relative;
+      font-size: clamp(24px, 6vw, 42px);
+      font-weight: 900;
+      letter-spacing: 4px;
+      opacity: 0;
+      animation: brand-appear .6s ease forwards 1.6s
+    }
+
+    .loader-brand-text {
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(135deg, #6366f1, #22d3ee, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+
+    .loader-brand-glow {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(135deg, #6366f1, #22d3ee, #a855f7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: blur(12px);
+      opacity: .7
+    }
+
+    .loader-progress {
+      width: clamp(120px, 28vw, 200px);
+      height: 2px;
+      background: rgba(255, 255, 255, .05);
+      border-radius: 2px;
+      overflow: hidden;
+      opacity: 0;
+      animation: brand-appear .3s ease forwards 1.7s
+    }
+
+    .loader-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      animation: progress-fill .8s ease forwards 1.7s;
+      width: 0
+    }
+
+    @keyframes brand-appear {
+      to {
+        opacity: 1
+      }
+    }
+
+    @keyframes progress-fill {
+      to {
+        width: 100%
+      }
+    }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 10px 16px;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, .05)
+    }
+
+    .nav-logo img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      filter: invert(1);
+      object-fit: contain
+    }
+
+    /* ── DYNAMIC ISLAND ── */
+    .dynamic-island-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      max-width: 400px;
+      margin: 0 auto;
+      z-index: 10
+    }
+
+    .dynamic-island {
+      position: relative;
+      background: rgba(0, 0, 0, .9);
+      border-radius: 30px;
+      border: 1px solid rgba(99, 102, 241, .35);
+      cursor: pointer;
+      transition: all .4s cubic-bezier(.34, 1.56, .64, 1);
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, .2), 0 0 15px rgba(99, 102, 241, .15), inset 0 1px 0 rgba(255, 255, 255, .05);
+      width: 120px;
+      height: 36px;
+      overflow: visible
+    }
+
+    .dynamic-island.expanded {
+      width: min(320px, 78vw);
+      height: 44px;
+      border-radius: 22px;
+      border-color: rgba(99, 102, 241, .7);
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, .5), 0 0 40px rgba(99, 102, 241, .3), inset 0 1px 0 rgba(255, 255, 255, .1)
+    }
+
+    .island-collapsed {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 100%;
+      padding: 0 14px;
+      color: rgba(255, 255, 255, .45);
+      font-size: 13px
+    }
+
+    .island-expanded {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      height: 100%;
+      padding: 0 14px
+    }
+
+    .dynamic-island.expanded .island-collapsed {
+      display: none
+    }
+
+    .dynamic-island.expanded .island-expanded {
+      display: flex
+    }
+
+    .island-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      direction: rtl;
+      min-width: 0
+    }
+
+    .island-input::placeholder {
+      color: rgba(255, 255, 255, .3)
+    }
+
+    .island-clear {
+      color: rgba(255, 255, 255, .4);
+      font-size: 11px;
+      width: 20px;
+      height: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .12);
+      transition: all .2s;
+      flex-shrink: 0;
+      cursor: pointer
+    }
+
+    .island-clear:hover {
+      background: rgba(255, 255, 255, .22);
+      color: #fff
+    }
+
+    /* Electric lines */
+    .electric-lines {
+      position: absolute;
+      inset: -20px;
+      pointer-events: none;
+      z-index: -1
+    }
+
+    .electric-line {
+      position: absolute;
+      border-radius: 2px;
+      opacity: 0
+    }
+
+    .el-1 {
+      top: 0;
+      left: 20%;
+      height: 1px;
+      width: 60%;
+      background: linear-gradient(90deg, transparent, #6366f1, transparent);
+      animation: electric-h 3s ease-in-out infinite 0s
+    }
+
+    .el-2 {
+      bottom: 0;
+      left: 20%;
+      height: 1px;
+      width: 60%;
+      background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+      animation: electric-h 3s ease-in-out infinite 1.5s
+    }
+
+    .el-3 {
+      left: 0;
+      top: 20%;
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(180deg, transparent, #a855f7, transparent);
+      animation: electric-v 2.5s ease-in-out infinite .5s
+    }
+
+    .el-4 {
+      right: 0;
+      top: 20%;
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(180deg, transparent, #22d3ee, transparent);
+      animation: electric-v 2.5s ease-in-out infinite 2s
+    }
+
+    @keyframes electric-h {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scaleX(.3) translateX(-20px)
+      }
+
+      30%,
+      70% {
+        opacity: .9;
+        transform: scaleX(1) translateX(0)
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    @keyframes electric-v {
+
+      0%,
+      100% {
+        opacity: 0;
+        transform: scaleY(.3) translateY(-10px)
+      }
+
+      30%,
+      70% {
+        opacity: .9;
+        transform: scaleY(1) translateY(0)
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    .dynamic-island.expanded~.electric-lines .electric-line {
+      animation-duration: 1.2s
+    }
+
+    /* admin icon */
+    .admin-btn {
+      color: rgba(255, 255, 255, .6);
+      transition: color .2s;
+      padding: 4px
+    }
+
+    .admin-btn:hover {
+      color: #fff
+    }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 max(16px, env(safe-area-inset-bottom)) 0;
+      z-index: 90;
+      border-top: 1px solid rgba(255, 255, 255, .06);
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px
+    }
+
+    .bnav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      color: var(--text-dim);
+      transition: all .25s;
+      font-size: 10px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      position: relative
+    }
+
+    .bnav-btn svg {
+      transition: all .25s;
+      width: 22px;
+      height: 22px
+    }
+
+    .bnav-btn.active {
+      color: var(--neon-1)
+    }
+
+    .bnav-btn.active svg {
+      filter: drop-shadow(0 0 8px var(--neon-1))
+    }
+
+    .bnav-btn::before {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--neon-1);
+      opacity: 0;
+      transition: .25s
+    }
+
+    .bnav-btn.active::before {
+      opacity: 1
+    }
+
+    .bnav-btn:active {
+      transform: scale(.9)
+    }
+
+    /* ── MAIN ── */
+    main {
+      padding-top: 72px;
+      padding-bottom: 90px
+    }
+
+    section {
+      scroll-margin-top: 72px
+    }
+
+    /* ── HERO ── */
+    #home {
+      text-align: center;
+      padding: 48px 16px 32px;
+      position: relative;
+      overflow: hidden
+    }
+
+    #home::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(99, 102, 241, .12), transparent);
+      pointer-events: none
+    }
+
+    .hero-logo {
+      width: clamp(80px, 18vw, 120px);
+      border-radius: 22px;
+      filter: invert(1);
+      margin-bottom: 16px;
+      animation: hero-pop .8s cubic-bezier(.34, 1.56, .64, 1), logo-glow 4s infinite alternate ease-in-out .8s;
+      box-shadow: 0 0 40px rgba(99, 102, 241, .3), 0 0 80px rgba(99, 102, 241, .1)
+    }
+
+    @keyframes logo-glow {
+      0% {
+        box-shadow: 0 0 20px var(--neon-1), 0 0 50px var(--neon-2);
+        transform: translateY(0) scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 40px var(--neon-2), 0 0 80px var(--neon-3);
+        transform: translateY(-5px) scale(1.05);
+      }
+
+      100% {
+        box-shadow: 0 0 20px var(--neon-3), 0 0 50px var(--neon-1);
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes hero-pop {
+      0% {
+        opacity: 0;
+        transform: scale(.5) translateY(20px)
+      }
+
+      100% {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .hero-title {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 8px;
+      animation: hero-text .8s ease .2s both
+    }
+
+    @keyframes hero-text {
+      from {
+        opacity: 0;
+        transform: translateY(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-2), var(--neon-3), var(--neon-1));
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: text-pulse 4s infinite linear, text-glow 2s infinite alternate ease-in-out;
+      display: inline-block;
+    }
+
+    @keyframes text-pulse {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    @keyframes text-glow {
+      from {
+        filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5)) drop-shadow(0 0 20px rgba(34, 211, 238, 0.3));
+        transform: scale(1);
+      }
+
+      to {
+        filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.8)) drop-shadow(0 0 40px rgba(34, 211, 238, 0.6));
+        transform: scale(1.02);
+      }
+    }
+
+    .hero-slogan {
+      color: var(--text-dim);
+      font-size: clamp(.9rem, 2.5vw, 1.15rem);
+      margin-bottom: 28px;
+      animation: hero-text .8s ease .4s both
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 28px;
+      animation: hero-text .8s ease .5s both;
+      flex-wrap: wrap
+    }
+
+    .stat-item {
+      text-align: center
+    }
+
+    .stat-num {
+      font-size: 1.4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-2));
+      -webkit-background-clip: text;
+      color: transparent
+    }
+
+    .stat-lbl {
+      font-size: .75rem;
+      color: var(--text-dim)
+    }
+
+    /* ── CATEGORY PILLS ── */
+    .cat-pills-wrap {
+      overflow-x: auto;
+      white-space: nowrap;
+      padding: 4px 16px 12px;
+      animation: hero-text .8s ease .6s both;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none
+    }
+
+    .cat-pills-wrap::-webkit-scrollbar {
+      display: none
+    }
+
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 24px;
+      font-size: .85rem;
+      font-weight: 600;
+      border: 1px solid var(--glass-border);
+      color: var(--text-dim);
+      margin-left: 8px;
+      transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .cat-pill:hover {
+      border-color: rgba(99, 102, 241, .4);
+      color: var(--text);
+      transform: translateY(-2px)
+    }
+
+    .cat-pill.active {
+      background: rgba(99, 102, 241, .15);
+      border-color: var(--neon-1);
+      color: var(--neon-1);
+      box-shadow: 0 0 16px rgba(99, 102, 241, .2);
+      transform: none
+    }
+
+    .cat-pill .pill-icon {
+      font-size: 1rem
+    }
+
+    /* ── PRODUCTS GRID ── */
+    #products {
+      padding: 16px
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0 16px;
+      max-width: 1200px;
+      margin: 0 auto
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      max-width: 1200px;
+      margin: 0 auto
+    }
+
+    @media(min-width:640px) {
+      .products-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+    }
+
+    @media(min-width:1024px) {
+      .products-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px
+      }
+    }
+
+    .product-card {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+      animation: card-in .5s ease both;
+      cursor: default
+    }
+
+    @keyframes card-in {
+      from {
+        opacity: 0;
+        transform: translateY(24px) scale(.97)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .product-card:hover {
+      border-color: rgba(99, 102, 241, .45);
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, .3), 0 0 24px rgba(99, 102, 241, .15), 0 12px 40px rgba(0, 0, 0, .5);
+      transform: translateY(-6px)
+    }
+
+    .product-img {
+      height: 150px;
+      background: rgba(0, 0, 0, .4);
+      position: relative;
+      overflow: hidden
+    }
+
+    .product-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .4s
+    }
+
+    .product-card:hover .product-img img {
+      transform: scale(1.06)
+    }
+
+    .badge-sold {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(239, 68, 68, .85);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      backdrop-filter: blur(8px)
+    }
+
+    .badge-disc {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(99, 102, 241, .85);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      backdrop-filter: blur(8px)
+    }
+
+    .badge-feat {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      background: rgba(245, 158, 11, .85);
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      backdrop-filter: blur(8px)
+    }
+
+    .product-body {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px
+    }
+
+    .product-name {
+      font-size: .9rem;
+      font-weight: 700;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .product-model {
+      font-size: .75rem;
+      color: var(--text-dim)
+    }
+
+    .product-prices {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .product-price {
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--neon-2)
+    }
+
+    .product-old {
+      font-size: .8rem;
+      color: var(--text-dim);
+      text-decoration: line-through
+    }
+
+    .product-buy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+      color: #fff;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: .85rem;
+      padding: 9px 12px;
+      border-radius: 12px;
+      margin-top: auto;
+      transition: all .2s;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      width: 100%
+    }
+
+    .product-buy:hover {
+      box-shadow: 0 0 24px rgba(99, 102, 241, .5);
+      transform: translateY(-1px)
+    }
+
+    .product-buy:disabled,
+    .product-buy.disabled {
+      opacity: .4;
+      pointer-events: none
+    }
+
+    .products-empty {
+      grid-column: 1/-1;
+      text-align: center;
+      padding: 60px 16px;
+      color: var(--text-dim)
+    }
+
+    .products-empty svg {
+      opacity: .3;
+      margin-bottom: 16px
+    }
+
+    .products-loading {
+      grid-column: 1/-1;
+      display: flex;
+      justify-content: center;
+      padding: 60px;
+      color: var(--text-dim)
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(99, 102, 241, .2);
+      border-top-color: var(--neon-1);
+      border-radius: 50%;
+      animation: spin 1s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ── SERVICES ── */
+    #services {
+      padding: 40px 16px;
+      max-width: 1200px;
+      margin: 0 auto
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 24px
+    }
+
+    @media(min-width:640px) {
+      .services-grid {
+        grid-template-columns: repeat(4, 1fr)
+      }
+    }
+
+    .service-card {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: all .35s cubic-bezier(.34, 1.56, .64, 1);
+      cursor: default;
+      animation: card-in .5s ease both
+    }
+
+    .service-card:hover {
+      transform: translateY(-6px) scale(1.02)
+    }
+
+    .service-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 4px;
+      transition: .3s
+    }
+
+    .service-title {
+      font-weight: 700;
+      font-size: .95rem
+    }
+
+    .service-desc {
+      font-size: .8rem;
+      color: var(--text-dim);
+      line-height: 1.5
+    }
+
+    /* ── FORM SECTIONS ── */
+    .form-section {
+      padding: 40px 16px;
+      max-width: 700px;
+      margin: 0 auto
+    }
+
+    .section-title-lg {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin-bottom: 24px;
+      text-align: center
+    }
+
+    .section-title-lg span {
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+      -webkit-background-clip: text;
+      color: transparent
+    }
+
+    .form-card {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .field-label {
+      font-size: .8rem;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      display: block
+    }
+
+    .field-wrap {
+      display: flex;
+      flex-direction: column
+    }
+
+    .fi {
+      font-family: 'Cairo', sans-serif;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 10px;
+      width: 100%;
+      outline: none;
+      transition: all .25s;
+      font-size: .9rem;
+      direction: rtl
+    }
+
+    .fi:focus {
+      border-color: var(--neon-1);
+      background: rgba(99, 102, 241, .08);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, .15)
+    }
+
+    select.fi option {
+      background: #0d0d1a
+    }
+
+    textarea.fi {
+      min-height: 90px;
+      resize: vertical
+    }
+
+    .upload-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, .04);
+      border: 1.5px dashed rgba(255, 255, 255, .15);
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: .25s;
+      color: var(--text-dim);
+      font-family: 'Cairo', sans-serif;
+      font-size: .9rem;
+      width: 100%
+    }
+
+    .upload-btn:hover {
+      border-color: var(--neon-1);
+      color: var(--text)
+    }
+
+    .upload-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    .upload-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--glass-border)
+    }
+
+    .btn-submit {
+      font-family: 'Cairo', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+      color: #fff;
+      padding: 14px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      letter-spacing: .5px;
+      box-shadow: 0 0 24px rgba(99, 102, 241, .3);
+      transition: all .25s;
+      cursor: pointer;
+      width: 100%;
+      border: none
+    }
+
+    .btn-submit:hover {
+      box-shadow: 0 0 40px rgba(99, 102, 241, .5);
+      transform: translateY(-2px)
+    }
+
+    .btn-submit:active {
+      transform: scale(.97)
+    }
+
+    .btn-submit:disabled {
+      opacity: .5;
+      pointer-events: none
+    }
+
+    .form-success {
+      text-align: center;
+      padding: 32px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px
+    }
+
+    .form-success svg {
+      animation: success-pop .5s cubic-bezier(.34, 1.56, .64, 1)
+    }
+
+    @keyframes success-pop {
+      from {
+        opacity: 0;
+        transform: scale(0)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .form-success h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--neon-success)
+    }
+
+    /* ── CONTACT ── */
+    #contact {
+      padding: 40px 16px;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center
+    }
+
+    .contact-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 28px
+    }
+
+    .contact-link-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      transition: all .3s cubic-bezier(.34, 1.56, .64, 1);
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer
+    }
+
+    .contact-link-card:hover {
+      transform: translateX(-4px);
+      border-color: var(--hover-color, var(--neon-1));
+      box-shadow: 0 0 24px color-mix(in srgb, var(--hover-color, var(--neon-1)) 20%, transparent)
+    }
+
+    .contact-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .contact-info {
+      text-align: right;
+      flex: 1
+    }
+
+    .contact-info strong {
+      display: block;
+      font-weight: 700
+    }
+
+    .contact-info span {
+      font-size: .8rem;
+      color: var(--text-dim)
+    }
+
+    .contact-arrow {
+      color: var(--text-dim);
+      font-size: 1.1rem
+    }
+
+    /* ── SOCIAL ICONS WALL ── */
+    .social-wall {
+      margin-top: 28px;
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 24px
+    }
+
+    .social-wall-title {
+      font-size: .85rem;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      text-align: center
+    }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px
+    }
+
+    .social-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, .06);
+      background: rgba(255, 255, 255, .02);
+      cursor: pointer;
+      transition: all .35s cubic-bezier(.34, 1.56, .64, 1);
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden
+    }
+
+    .social-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: .3s
+    }
+
+    .social-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--sc-glow)
+    }
+
+    .social-card:hover::before {
+      opacity: 1
+    }
+
+    .social-card:hover .social-icon-wrap {
+      transform: scale(1.15) rotate(-5deg)
+    }
+
+    .social-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: .35s;
+      position: relative;
+      z-index: 1
+    }
+
+    .social-name {
+      font-size: .82rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1
+    }
+
+    .social-handle {
+      font-size: .72rem;
+      color: var(--text-dim);
+      position: relative;
+      z-index: 1
+    }
+
+    /* Instagram */
+    .sc-ig {
+      --sc-glow: #e1306c
+    }
+
+    .sc-ig::before {
+      background: radial-gradient(ellipse at center, rgba(225, 48, 108, .12), transparent 70%)
+    }
+
+    .sc-ig:hover {
+      box-shadow: 0 0 40px rgba(225, 48, 108, .2)
+    }
+
+    .sc-ig .social-icon-wrap {
+      background: linear-gradient(135deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d, #f56040, #f77737, #fcaf45)
+    }
+
+    /* TikTok */
+    .sc-tt {
+      --sc-glow: #69c9d0
+    }
+
+    .sc-tt::before {
+      background: radial-gradient(ellipse at center, rgba(105, 201, 208, .1), transparent 70%)
+    }
+
+    .sc-tt:hover {
+      box-shadow: 0 0 40px rgba(105, 201, 208, .2)
+    }
+
+    .sc-tt .social-icon-wrap {
+      background: linear-gradient(135deg, #010101, #1a1a2e)
+    }
+
+    /* Facebook */
+    .sc-fb {
+      --sc-glow: #1877f2
+    }
+
+    .sc-fb::before {
+      background: radial-gradient(ellipse at center, rgba(24, 119, 242, .12), transparent 70%)
+    }
+
+    .sc-fb:hover {
+      box-shadow: 0 0 40px rgba(24, 119, 242, .2)
+    }
+
+    .sc-fb .social-icon-wrap {
+      background: linear-gradient(135deg, #1877f2, #0a5fc4)
+    }
+
+    /* WhatsApp */
+    .sc-wa {
+      --sc-glow: #25d366
+    }
+
+    .sc-wa::before {
+      background: radial-gradient(ellipse at center, rgba(37, 211, 102, .12), transparent 70%)
+    }
+
+    .sc-wa:hover {
+      box-shadow: 0 0 40px rgba(37, 211, 102, .2)
+    }
+
+    .sc-wa .social-icon-wrap {
+      background: linear-gradient(135deg, #25d366, #128c7e)
+    }
+
+    /* YouTube */
+    .sc-yt {
+      --sc-glow: #ff0000
+    }
+
+    .sc-yt::before {
+      background: radial-gradient(ellipse at center, rgba(255, 0, 0, .12), transparent 70%)
+    }
+
+    .sc-yt:hover {
+      box-shadow: 0 0 40px rgba(255, 0, 0, .2)
+    }
+
+    .sc-yt .social-icon-wrap {
+      background: linear-gradient(135deg, #ff0000, #cc0000)
+    }
+
+    /* Maps */
+    .sc-gm {
+      --sc-glow: #4285f4
+    }
+
+    .sc-gm::before {
+      background: radial-gradient(ellipse at center, rgba(66, 133, 244, .12), transparent 70%)
+    }
+
+    .sc-gm:hover {
+      box-shadow: 0 0 40px rgba(66, 133, 244, .2)
+    }
+
+    .sc-gm .social-icon-wrap {
+      background: linear-gradient(135deg, #4285f4, #34a853)
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px 16px;
+      border-top: 1px solid rgba(255, 255, 255, .05)
+    }
+
+    .footer-logo img {
+      width: 44px;
+      border-radius: 12px;
+      filter: invert(1);
+      opacity: .5
+    }
+
+    .footer-tagline {
+      color: var(--text-dim);
+      font-size: .82rem;
+      margin-top: 12px
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 99999;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      font-size: .9rem;
+      opacity: 0;
+      transition: all .35s;
+      pointer-events: none;
+      white-space: nowrap
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0)
+    }
+
+    /* ── ADMIN PANEL ── */
+    #admin-panel {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 10000;
+      overflow-y: auto;
+      padding: 24px;
+      display: none;
+      animation: panel-in .3s ease
+    }
+
+    @keyframes panel-in {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--glass-border)
+    }
+
+    .adm-close {
+      background: rgba(255, 255, 255, .08);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      color: var(--text);
+      transition: .2s
+    }
+
+    .adm-close:hover {
+      background: rgba(255, 255, 255, .15)
+    }
+
+    .adm-section {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px
+    }
+
+    .adm-section h3 {
+      margin-bottom: 16px;
+      font-size: 1rem;
+      font-weight: 700
+    }
+
+    .adm-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .adm-prod-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid rgba(255, 255, 255, .06)
+    }
+
+    .adm-prod-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #111
+    }
+
+    .adm-prod-del {
+      color: var(--neon-danger);
+      font-size: 1.1rem;
+      margin-right: auto;
+      transition: .2s;
+      padding: 4px
+    }
+
+    .adm-prod-del:hover {
+      transform: scale(1.2)
+    }
+
+    .btn-adm-primary {
+      font-family: 'Cairo', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-3));
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      cursor: pointer;
+      transition: all .2s;
+      box-shadow: 0 0 20px rgba(99, 102, 241, .3);
+      border: none
+    }
+
+    .btn-adm-primary:hover {
+      box-shadow: 0 0 32px rgba(99, 102, 241, .5)
+    }
+
+    .btn-adm-ghost {
+      font-family: 'Cairo', sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, .07);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
+      transition: .2s;
+      border: none
+    }
+
+    .btn-adm-ghost:hover {
+      background: rgba(255, 255, 255, .12)
+    }
+
+    .progress-bar-wrap {
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, .06);
+      overflow: hidden;
+      display: none
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-1), var(--neon-2));
+      width: 0;
+      transition: width .3s
+    }
+
+    /* color pickers */
+    .clr-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .clr-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: .75rem;
+      color: var(--text-dim)
+    }
+
+    .clr-item input[type=color] {
+      -webkit-appearance: none;
+      border: none;
+      padding: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      cursor: pointer;
+      background: none
+    }
+
+    .clr-item input[type=color]::-webkit-color-swatch-wrapper {
+      padding: 0;
+      border-radius: 12px
+    }
+
+    .clr-item input[type=color]::-webkit-color-swatch {
+      border: none;
+      border-radius: 12px
+    }
+
+    /* tab indicator for bottom nav */
+    .bnav-indicator {
+      position: absolute;
+      bottom: 0;
+      width: 24px;
+      height: 3px;
+      background: var(--neon-1);
+      border-radius: 2px 2px 0 0;
+      opacity: 0;
+      transition: .25s;
+      box-shadow: 0 0 8px var(--neon-1)
+    }
+
+    .bnav-btn.active .bnav-indicator {
+      opacity: 1
+    }
+
+    /* ═══════════════ PRELOADER ═══════════════ */
+    .preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      background: #03030a;
+    }
+
+    .preloader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .preloader .apple-loader-svg {
+      width: 80px;
+      height: 100px;
+      overflow: visible;
+    }
+
+    .preloader .apple-path {
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 2000;
+      animation: draw-apple-pre 2s ease-in-out forwards, neon-pulse 1.5s infinite alternate 2s;
+      stroke: var(--neon-2);
+    }
+
+    .preloader-text {
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      letter-spacing: 2px;
+      opacity: 0;
+      animation: fade-up 1s forwards 1.2s;
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .preloader-slogan {
+      font-size: clamp(14px, 3vw, 18px);
+      color: var(--neon-secondary, var(--neon-2));
+      opacity: 0;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+      animation: fade-up 1s forwards 1.5s;
+    }
+
+    @keyframes draw-apple-pre {
+      to {
+        stroke-dashoffset: 0;
+        fill: var(--neon-1);
+      }
+    }
+
+    @keyframes neon-pulse {
+      from {
+        filter: drop-shadow(0 0 5px var(--neon-1)) drop-shadow(0 0 20px var(--neon-1));
+      }
+
+      to {
+        filter: drop-shadow(0 0 15px var(--neon-2)) drop-shadow(0 0 40px var(--neon-2));
+        fill: var(--neon-2);
+        stroke: var(--neon-2);
+      }
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ═══════════════ HERO SLOGAN ═══════════════ */
+    .hero-slogan-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 12px 0 28px 0;
+      animation: slogan-fade-in 1.2s ease forwards;
+      opacity: 0;
+      animation-delay: 0.6s;
+    }
+
+    .slogan-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+      max-width: 80px;
+    }
+
+    .hero-slogan {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: clamp(14px, 3vw, 20px);
+      font-weight: 600;
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    .slogan-text {
+      color: var(--text-dim);
+    }
+
+    .slogan-highlight {
+      background: linear-gradient(135deg, var(--neon-1), var(--neon-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 800;
+      position: relative;
+    }
+
+    .slogan-highlight::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-1), var(--neon-2));
+      border-radius: 2px;
+      animation: underline-grow 1s ease forwards;
+      animation-delay: 1.2s;
+      transform-origin: right;
+      transform: scaleX(0);
+    }
+
+    .slogan-icon {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      animation: icon-bounce 2s ease-in-out infinite;
+      color: var(--text);
+    }
+
+    .slogan-icon svg {
+      width: clamp(16px, 3vw, 22px);
+      height: auto;
+    }
+
+    .slogan-icon:last-child {
+      font-size: clamp(16px, 3vw, 22px);
+      animation-delay: 0.3s;
+    }
+
+    @keyframes slogan-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes underline-grow {
+      from {
+        transform: scaleX(0);
+      }
+
+      to {
+        transform: scaleX(1);
+      }
+    }
+
+    @keyframes icon-bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @media (max-width: 400px) {
+      .slogan-text {
+        display: none;
+      }
+
+      .hero-slogan::before {
+        content: 'تفاح ';
+        color: var(--text-dim);
+      }
+    }
+
+    /* ═══════════════ SCROLL ANIMATIONS ═══════════════ */
+    .anim-reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+    }
+
+    .anim-reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ═══════════════ ADMIN ACCORDION ═══════════════ */
+    .admin-fieldset {
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .admin-legend {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--neon-2);
+      font-weight: 700;
+      font-size: .9rem;
+      text-align: right;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+      border: none;
+      border-bottom: 1px solid transparent;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .admin-legend:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .admin-legend::after {
+      content: '▼';
+      font-size: 12px;
+      transition: transform 0.3s;
+      color: var(--text-dim);
+    }
+
+    .admin-fieldset.open .admin-legend {
+      border-bottom-color: var(--glass-border);
+    }
+
+    .admin-fieldset.open .admin-legend::after {
+      transform: rotate(180deg);
+    }
+
+    .admin-fieldset-content {
+      padding: 16px;
+      display: none;
+    }
+
+    .admin-fieldset.open .admin-fieldset-content {
+      display: block;
+    }
+
+    /* ════════════════════════════════════════════════════
+   BOOX FLUID RESPONSIVE SYSTEM — ADDITIVE ONLY
+   لا يعدل أي شيء موجود — يضيف فقط
+════════════════════════════════════════════════════ */
+
+    /* ── 1. Fluid Variables ── */
+    :root {
+      --text-xs: clamp(10px, 1.5vw, 12px);
+      --text-sm: clamp(12px, 1.8vw, 14px);
+      --text-base: clamp(14px, 2vw, 16px);
+      --text-md: clamp(16px, 2.5vw, 18px);
+      --text-lg: clamp(18px, 3vw, 24px);
+      --text-xl: clamp(22px, 4vw, 32px);
+      --text-2xl: clamp(28px, 5vw, 42px);
+      --text-3xl: clamp(36px, 7vw, 64px);
+      --text-hero: clamp(40px, 8vw, 80px);
+      --space-1: clamp(4px, 1vw, 6px);
+      --space-2: clamp(8px, 1.5vw, 12px);
+      --space-3: clamp(12px, 2vw, 16px);
+      --space-4: clamp(16px, 2.5vw, 24px);
+      --space-5: clamp(20px, 3vw, 32px);
+      --space-6: clamp(24px, 4vw, 48px);
+      --space-8: clamp(32px, 5vw, 64px);
+      --container-pad: clamp(16px, 5vw, 80px);
+      --section-pad: clamp(48px, 8vw, 120px);
+      --radius-sm: clamp(8px, 1.5vw, 12px);
+      --radius-md: clamp(12px, 2vw, 16px);
+      --radius-lg: clamp(16px, 2.5vw, 24px);
+      --radius-xl: clamp(20px, 3vw, 32px);
+    }
+
+    /* ── 2. Base Fluid Fixes ── */
+    html {
+      overflow-x: hidden;
+    }
+
+    body {
+      overflow-x: hidden;
+    }
+
+    img,
+    video,
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    input,
+    button,
+    textarea,
+    select {
+      max-width: 100%;
+      font-size: max(16px, 1em);
+      /* يمنع iOS zoom عند الفوكس */
+    }
+
+    /* ── 3. Products Grid — Fluid ── */
+    .products-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 28vw, 260px), 1fr)) !important;
+      gap: clamp(10px, 2vw, 24px) !important;
+      align-items: start !important;
+    }
+
+    /* جوال: 2 عمود ثابت دائماً */
+    @media (max-width: 500px) {
+      .products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: clamp(8px, 3vw, 12px) !important;
+      }
+    }
+
+    /* تابلت */
+    @media (min-width: 640px) and (max-width: 1023px) {
+      .products-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+      }
+    }
+
+    /* لابتوب */
+    @media (min-width: 1024px) and (max-width: 1279px) {
+      .products-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
+    }
+
+    /* شاشة كبيرة */
+    @media (min-width: 1280px) {
+      .products-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+      }
+    }
+
+    /* ── 4. Product Card — Fluid ── */
+    .product-card {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .product-card-img-wrap,
+    .product-card img:first-child,
+    .card-img-wrap {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .product-card-img-wrap img,
+    .card-img-wrap img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+    }
+
+    .product-card-title,
+    .card-title {
+      font-size: clamp(12px, 2vw, 15px) !important;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .product-card-price,
+    .card-price {
+      font-size: clamp(14px, 2.5vw, 18px) !important;
+      font-weight: 800 !important;
+    }
+
+    /* ── 5. Navbar Fluid ── */
+    .navbar,
+    nav,
+    header {
+      padding-inline: clamp(12px, 3vw, 48px) !important;
+    }
+
+    .navbar-icon-btn,
+    .nav-btn,
+    .icon-btn {
+      min-width: clamp(36px, 5vw, 44px) !important;
+      min-height: clamp(36px, 5vw, 44px) !important;
+    }
+
+    /* أصغر شاشة: إخفاء الأيقونات الأقل أهمية */
+    @media (max-width: 360px) {
+      .navbar-icon-btn:not(.cart-btn):not([data-action="admin"]):not([data-action="whatsapp"]) {
+        display: none !important;
+      }
+    }
+
+    /* ── 6. Hero Section Fluid ── */
+    .hero-section,
+    #section-home,
+    .hero {
+      padding: var(--section-pad) var(--container-pad) !important;
+      min-height: clamp(400px, 80svh, 900px) !important;
+    }
+
+    .hero-logo,
+    .brand-logo-img {
+      height: clamp(80px, 15vw, 160px) !important;
+      width: auto !important;
+    }
+
+    .hero-title,
+    .brand-name-wrap,
+    h1 {
+      font-size: clamp(28px, 6vw, 64px) !important;
+      line-height: 1.1 !important;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(14px, 2.5vw, 20px) !important;
+    }
+
+    .hero-slogan,
+    .brand-slogan {
+      font-size: clamp(12px, 2.2vw, 18px) !important;
+    }
+
+    .hero-pill {
+      font-size: clamp(10px, 1.8vw, 14px) !important;
+      padding: clamp(5px, 1vw, 8px) clamp(10px, 2vw, 18px) !important;
+      white-space: nowrap !important;
+    }
+
+    /* ── 7. Section Padding Fluid ── */
+    section,
+    .page-section {
+      padding-block: var(--section-pad) !important;
+      padding-inline: var(--container-pad) !important;
+    }
+
+    /* ── 8. Section Headers Fluid ── */
+    .section-title,
+    h2 {
+      font-size: clamp(20px, 4vw, 36px) !important;
+    }
+
+    .section-subtitle,
+    h3 {
+      font-size: clamp(14px, 2.5vw, 20px) !important;
+    }
+
+    /* ── 9. Services Grid Fluid ── */
+    .services-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(clamp(200px, 40vw, 300px), 1fr)) !important;
+      gap: clamp(12px, 2.5vw, 24px) !important;
+    }
+
+    .service-card {
+      padding: clamp(16px, 3vw, 36px) !important;
+    }
+
+    /* ── 10. Forms Fluid ── */
+    .customer-form,
+    .glass-form {
+      width: 100% !important;
+      max-width: clamp(300px, 90vw, 680px) !important;
+      margin-inline: auto !important;
+      padding: clamp(20px, 4vw, 48px) !important;
+    }
+
+    .form-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)) !important;
+      gap: clamp(10px, 2vw, 16px) !important;
+    }
+
+    .glass-input,
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100% !important;
+      padding: clamp(10px, 2vw, 14px) clamp(12px, 2.5vw, 16px) !important;
+      font-size: max(16px, clamp(13px, 2vw, 15px)) !important;
+      min-height: 44px !important;
+      border-radius: var(--radius-md) !important;
+      box-sizing: border-box !important;
+    }
+
+    .condition-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 100px), 1fr)) !important;
+      gap: clamp(6px, 1.5vw, 10px) !important;
+    }
+
+    .condition-btn {
+      min-height: 44px !important;
+      font-size: clamp(11px, 1.8vw, 14px) !important;
+      padding: clamp(8px, 1.5vw, 12px) !important;
+      white-space: nowrap !important;
+    }
+
+    .btn-primary.btn-full,
+    .btn-whatsapp-submit {
+      width: 100% !important;
+      padding: clamp(14px, 2.5vw, 18px) !important;
+      font-size: clamp(14px, 2.2vw, 17px) !important;
+      min-height: 52px !important;
+      border-radius: var(--radius-lg) !important;
+    }
+
+    /* ── 11. Social Icons Fluid ── */
+    .social-row {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: clamp(10px, 2vw, 16px) !important;
+      justify-content: center !important;
+    }
+
+    .social-btn {
+      width: clamp(44px, 6vw, 56px) !important;
+      height: clamp(44px, 6vw, 56px) !important;
+    }
+
+    .social-svg {
+      width: clamp(20px, 3vw, 26px) !important;
+      height: clamp(20px, 3vw, 26px) !important;
+    }
+
+    /* ── 12. Footer Fluid ── */
+    footer,
+    .footer {
+      padding: var(--section-pad) var(--container-pad) !important;
+    }
+
+    .footer-logo {
+      height: clamp(50px, 8vw, 80px) !important;
+      width: auto !important;
+    }
+
+    /* ── 13. Modal / Cart Drawer Fluid ── */
+    .modal-box,
+    .modal-content {
+      width: 100% !important;
+      max-width: clamp(300px, 95vw, 700px) !important;
+      max-height: 92dvh !important;
+      padding: clamp(16px, 4vw, 40px) !important;
+      overflow-y: auto !important;
+    }
+
+    .cart-drawer {
+      width: clamp(280px, 85vw, 420px) !important;
+    }
+
+    /* ── 14. Dynamic Island Fluid ── */
+    .dynamic-island {
+      width: clamp(100px, 20vw, 140px) !important;
+    }
+
+    .dynamic-island.expanded {
+      width: min(340px, 75vw) !important;
+    }
+
+    /* ── 15. Bottom Nav Safe Area ── */
+    .bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom) !important;
+      height: calc(clamp(52px, 8vw, 64px) + env(safe-area-inset-bottom)) !important;
+    }
+
+    /* ── 16. Body Top Padding ── */
+    body,
+    .page-body,
+    main {
+      padding-top: clamp(52px, 7vw, 72px);
+    }
+
+    /* ── 17. Landscape Orientation ── */
+    @media (max-height: 500px) and (orientation: landscape) {
+
+      .hero-section,
+      .hero,
+      #section-home {
+        min-height: auto !important;
+        padding-block: clamp(24px, 4vw, 40px) !important;
+      }
+
+      .hero-logo,
+      .brand-logo-img {
+        height: 60px !important;
+      }
+
+      .bottom-nav {
+        display: none !important;
+      }
+    }
+
+    /* ── 18. 4K Screens ── */
+    @media (min-width: 2560px) {
+      :root {
+        --container-pad: 120px !important;
+        --section-pad: 160px !important;
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(6, 1fr) !important;
+      }
+    }
+
+    /* ── 19. Reduced Motion ── */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ── 20. Prevent Overflow anywhere ── */
+    * {
+      min-width: 0;
+    }
+
+    .container,
+    section,
+    .page-section,
+    form,
+    .customer-form {
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    /* ════════════════════════════════════════════════════
+   END BOOX FLUID RESPONSIVE SYSTEM
+════════════════════════════════════════════════════ */
+    /* ════ STARS CANVAS ════ */
+    #stars-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* كل العناصر تبقى فوق النجوم */
+    .navbar,
+    nav,
+    header,
+    .bottom-nav,
+    footer,
+    .footer,
+    section,
+    .page-section,
+    .modal-overlay,
+    .cart-drawer,
+    #loading-screen,
+    #admin-panel,
+    .toast-container,
+    main,
+    .hero-section,
+    #brand-reveal,
+    .dynamic-island-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ════ NEON ELECTRIC INPUT BORDERS ════ */
+    input[type="text"],
+    input[type="tel"],
+    input[type="email"],
+    input[type="search"],
+    input[type="number"],
+    input[type="password"],
+    textarea,
+    select,
+    .glass-input {
+      border: 1px solid rgba(99, 102, 241, 0.25) !important;
+      outline: none !important;
+      transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        background 0.3s ease !important;
+    }
+
+    input[type="text"]:hover,
+    input[type="tel"]:hover,
+    input[type="email"]:hover,
+    input[type="number"]:hover,
+    input[type="password"]:hover,
+    textarea:hover,
+    select:hover,
+    .glass-input:hover {
+      border-color: rgba(99, 102, 241, 0.45) !important;
+      box-shadow:
+        0 0 0 1px rgba(99, 102, 241, 0.15),
+        0 0 8px rgba(99, 102, 241, 0.10) !important;
+    }
+
+    input[type="text"]:focus,
+    input[type="tel"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus,
+    input[type="password"]:focus,
+    select:focus,
+    .glass-input:focus {
+      border-color: rgba(99, 102, 241, 0.85) !important;
+      background: rgba(99, 102, 241, 0.04) !important;
+      box-shadow:
+        0 0 0 1px rgba(99, 102, 241, 0.50),
+        0 0 12px rgba(99, 102, 241, 0.35),
+        0 0 24px rgba(99, 102, 241, 0.15),
+        inset 0 0 8px rgba(99, 102, 241, 0.05) !important;
+      animation: neon-input-pulse 2s ease-in-out infinite !important;
+    }
+
+    textarea:focus,
+    textarea.glass-input:focus {
+      border-color: rgba(168, 85, 247, 0.75) !important;
+      background: rgba(168, 85, 247, 0.04) !important;
+      box-shadow:
+        0 0 0 1px rgba(168, 85, 247, 0.45),
+        0 0 14px rgba(168, 85, 247, 0.30),
+        0 0 28px rgba(168, 85, 247, 0.12),
+        inset 0 0 10px rgba(168, 85, 247, 0.05) !important;
+      animation: neon-textarea-pulse 2s ease-in-out infinite !important;
+    }
+
+    @keyframes neon-input-pulse {
+
+      0%,
+      100% {
+        box-shadow:
+          0 0 0 1px rgba(99, 102, 241, 0.50),
+          0 0 12px rgba(99, 102, 241, 0.35),
+          0 0 24px rgba(99, 102, 241, 0.15);
+      }
+
+      50% {
+        box-shadow:
+          0 0 0 2px rgba(34, 211, 238, 0.50),
+          0 0 18px rgba(34, 211, 238, 0.40),
+          0 0 36px rgba(99, 102, 241, 0.20);
+      }
+    }
+
+    @keyframes neon-textarea-pulse {
+
+      0%,
+      100% {
+        box-shadow:
+          0 0 0 1px rgba(168, 85, 247, 0.45),
+          0 0 14px rgba(168, 85, 247, 0.30),
+          0 0 28px rgba(168, 85, 247, 0.12);
+      }
+
+      50% {
+        box-shadow:
+          0 0 0 2px rgba(99, 102, 241, 0.50),
+          0 0 20px rgba(99, 102, 241, 0.35),
+          0 0 40px rgba(168, 85, 247, 0.18);
+      }
+    }
+
+    input:invalid:not(:placeholder-shown),
+    textarea:invalid:not(:placeholder-shown) {
+      border-color: rgba(239, 68, 68, 0.6) !important;
+      box-shadow:
+        0 0 0 1px rgba(239, 68, 68, 0.30),
+        0 0 10px rgba(239, 68, 68, 0.20) !important;
+      animation: none !important;
+    }
+
+    input:valid:not(:placeholder-shown):not([type="search"]),
+    textarea:valid:not(:placeholder-shown) {
+      border-color: rgba(34, 197, 94, 0.5) !important;
+      box-shadow:
+        0 0 0 1px rgba(34, 197, 94, 0.20),
+        0 0 8px rgba(34, 197, 94, 0.15) !important;
+      animation: none !important;
+    }
+
+    .condition-btn.active,
+    .condition-btn[data-active="true"] {
+      border-color: rgba(99, 102, 241, 0.80) !important;
+      color: #a5b4fc !important;
+      animation: neon-condition 1.5s ease-in-out infinite !important;
+    }
+
+    @keyframes neon-condition {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.50), 0 0 16px rgba(99, 102, 241, 0.35);
+      }
+
+      50% {
+        box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.50), 0 0 20px rgba(34, 211, 238, 0.40);
+      }
+    }
+
+    /* Dynamic Island input — بدون animation */
+    .island-input:focus,
+    .model-search:focus {
+      border: none !important;
+      box-shadow: none !important;
+      animation: none !important;
+      background: none !important;
+    }
+
+    /* ════ END NEON INPUT BORDERS ════ */
+  </style>
+</head>
+
+<body>
+  <canvas id="stars-canvas" aria-hidden="true"></canvas>
+  <!-- ═══ PRELOADER ═══ -->
+  <div id="preloader" class="preloader glass-dark">
+    <div class="preloader-content">
+      <svg class="apple-loader-svg" viewBox="0 0 384 512" fill="none" stroke="var(--neon-primary)" stroke-width="8"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path class="apple-path"
+          d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+      </svg>
+      <div class="preloader-text gradient-text">Boox Store</div>
+      <div class="preloader-slogan">ملك التفاح</div>
+    </div>
+  </div>
+  <!-- ═══ LOADING SCREEN ═══ -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <svg class="apple-loader-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+        <path class="apple-path"
+          d="M150.7 0c-9.4.4-20.6 6.3-27.2 13.7-6 6.7-10.9 16.7-9 26.4 10.2-.4 20.6-6.5 27-13.9 6.1-6.9 10.5-16.8 9.2-26.2z M151 40.3c-15 0-21.3 7.2-31.8 7.2-10.8 0-19-7.1-32-7.1-12.7 0-26.2 7.7-34.8 20.9C40 76 37.3 100.7 49.7 120.8c8.2 13.4 19.2 28.5 33.5 28.6 12.7.1 16.3-8.1 33.7-8.2 17.4-.1 20.7 8.3 33.4 8.1 14.3-.1 25.9-16.7 34.1-30 5.9-9.6 8.1-14.4 12.7-25.2-33.3-12.7-38.6-60-5.8-77.5-8.9-11.2-21.5-16.3-40.3-16.3z"
+          fill="none" stroke="url(#ng)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"
+          stroke-dasharray="800" stroke-dashoffset="800" />
+        <defs>
+          <linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6366f1" />
+            <stop offset="50%" stop-color="#22d3ee" />
+            <stop offset="100%" stop-color="#a855f7" />
+          </linearGradient>
+          <filter id="nglow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+      </svg>
+      <div class="loader-brand"><span class="loader-brand-text">Boox Store</span><span class="loader-brand-glow">Boox
+          Store</span></div>
+      <div class="loader-progress">
+        <div class="loader-progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav id="navbar" class="glass">
+    <div class="nav-logo"><img src="./assets/boox-logo.jpg" alt="Boox Store Logo"></div>
+    <div class="dynamic-island-wrap" id="di-wrap">
+      <div class="electric-lines">
+        <div class="electric-line el-1"></div>
+        <div class="electric-line el-2"></div>
+        <div class="electric-line el-3"></div>
+        <div class="electric-line el-4"></div>
+      </div>
+      <div class="dynamic-island" id="di">
+        <div class="island-collapsed"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+            stroke="rgba(255,255,255,.5)" stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="6" />
+            <path d="m21 21-4.35-4.35" />
+          </svg><span style="font-size:13px;color:rgba(255,255,255,.4)">بحث...</span></div>
+        <div class="island-expanded"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1"
+            stroke-width="2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="6" />
+            <path d="m21 21-4.35-4.35" />
+          </svg><input type="search" id="s-inp" class="island-input" placeholder="ابحث عن منتج، موديل، تصنيف..."
+            autocomplete="off" autocorrect="off"><button id="s-clr" class="island-clear" aria-label="مسح">✕</button>
+        </div>
+      </div>
+    </div>
+    <button onclick="opAdm()" class="admin-btn" aria-label="Admin Panel"><svg viewBox="0 0 24 24" width="22" height="22"
+        fill="currentColor">
+        <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9V6a6 6 0 00-12 0v2H4v14h16V8h-2zm-8 0V6a2 2 0 114 0v2H8z" />
+      </svg></button>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main>
+
+    <!-- ═ HERO ═ -->
+    <section id="home">
+      <img src="./assets/boox-logo.jpg" alt="Boox Store" class="hero-logo">
+      <h1 class="hero-title"><span>Boox Store</span></h1>
+      <div class="hero-slogan-wrap">
+        <div class="slogan-line"></div>
+        <p class="hero-slogan">
+          <span class="slogan-icon"><svg viewBox="0 0 384 512" fill="currentColor" width="22" height="22">
+              <path
+                d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+            </svg></span>
+          <span class="slogan-text">من بوكس تشتري تفاح</span>
+          <span class="slogan-highlight">وانت بالك مرتاح</span>
+          <span class="slogan-icon">✨</span>
+        </p>
+        <div class="slogan-line"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num" id="count-products">0</div>
+          <div class="stat-lbl">منتج متاح</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100%</div>
+          <div class="stat-lbl">ضمان</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">24/7</div>
+          <div class="stat-lbl">دعم فوري</div>
+        </div>
+      </div>
+      <div class="cat-pills-wrap" id="cat-pills"></div>
+    </section>
+
+    <!-- ═ PRODUCTS ═ -->
+    <section id="products">
+      <div class="section-header">
+        <h2 class="section-title">🛍️ منتجاتنا</h2><span id="pr-count"
+          style="color:var(--text-dim);font-size:.85rem;"></span>
+      </div>
+      <div class="products-grid" id="pr-grid">
+        <div class="products-loading">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═ SERVICES ═ -->
+    <section id="services">
+      <h2 class="section-title" style="text-align:center;margin-bottom:4px;">خدماتنا</h2>
+      <p style="text-align:center;color:var(--text-dim);font-size:.85rem;margin-bottom:0">كل ما تحتاجه في مكان واحد</p>
+      <div class="services-grid">
+        <div class="service-card" style="animation-delay:.05s">
+          <div class="service-icon-wrap" style="background:rgba(99,102,241,.15)"><svg viewBox="0 0 24 24" width="28"
+              height="28" fill="none" stroke="#6366f1" stroke-width="2">
+              <rect x="5" y="2" width="14" height="20" rx="2" />
+              <path d="M12 18h.01" />
+            </svg></div>
+          <div class="service-title">بيع أجهزة Apple</div>
+          <div class="service-desc">أجهزة أصلية مضمونة بأفضل الأسعار</div>
+        </div>
+        <div class="service-card" style="animation-delay:.1s">
+          <div class="service-icon-wrap" style="background:rgba(34,211,238,.15)"><svg viewBox="0 0 24 24" width="28"
+              height="28" fill="none" stroke="#22d3ee" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3-3a5 5 0 01-7 7l-4-4a5 5 0 017-7z" />
+              <path d="M9 17l-4-4" />
+            </svg></div>
+          <div class="service-title">صيانة احترافية</div>
+          <div class="service-desc">إصلاح سريع مع ضمان على الإصلاح</div>
+        </div>
+        <div class="service-card" style="animation-delay:.15s">
+          <div class="service-icon-wrap" style="background:rgba(168,85,247,.15)"><svg viewBox="0 0 24 24" width="28"
+              height="28" fill="none" stroke="#a855f7" stroke-width="2">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+            </svg></div>
+          <div class="service-title">استبدال وترقية</div>
+          <div class="service-desc">بدّل جهازك القديم بأفضل سعر تقييم</div>
+        </div>
+        <div class="service-card" style="animation-delay:.2s">
+          <div class="service-icon-wrap" style="background:rgba(245,158,11,.15)"><svg viewBox="0 0 24 24" width="28"
+              height="28" fill="none" stroke="#f59e0b" stroke-width="2">
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17" />
+              <circle cx="17" cy="19" r="1" />
+              <circle cx="9" cy="19" r="1" />
+            </svg></div>
+          <div class="service-title">إكسسوارات Apple</div>
+          <div class="service-desc">ملحقات أصلية وعروض حصرية</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═ MAINTENANCE ═ -->
+    <section id="maintenance" class="form-section">
+      <h2 class="section-title-lg" id="maint-toggle" onclick="toggleMaintSection()"
+        style="cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:center; gap:10px;">
+        🔧 <span>طلب صيانة</span>
+        <svg id="maint-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round"
+          style="transition: transform 0.35s ease; transform: rotate(0deg); color:var(--neon-2);">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </h2>
+      <div id="maint-body"
+        style="overflow:hidden; max-height:0; transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; opacity:0;">
+        <div class="form-card" id="m-card">
+          <div class="form-row">
+            <div class="field-wrap"><label class="field-label">الاسم</label><input type="text" id="m-name" class="fi"
+                placeholder="اسمك الكريم" required></div>
+            <div class="field-wrap"><label class="field-label">رقم الهاتف</label><input type="tel" id="m-phone"
+                class="fi" placeholder="+20 xxx xxxx xxx" required></div>
+          </div>
+          <div class="field-wrap"><label class="field-label">الجهاز</label><select id="m-model" class="fi" required>
+              <option value="" disabled selected>اختر الجهاز</option>
+            </select></div>
+          <div class="field-wrap"><label class="field-label">وصف المشكلة</label><textarea id="m-problem" class="fi"
+              placeholder="اوصف المشكلة بالتفصيل..." required></textarea></div>
+          <div class="field-wrap"><label class="field-label">ملاحظات إضافية (اختياري)</label><textarea id="m-notes"
+              class="fi" placeholder="أي معلومات إضافية..."></textarea></div>
+          <div class="field-wrap">
+            <label class="field-label">صور المشكلة (اختياري)</label>
+            <label for="m-media" class="upload-btn">📷 اختر صور &nbsp;<span
+                style="font-size:.75rem;color:var(--text-dim)">(يمكن اختيار أكثر من صورة)</span></label>
+            <input type="file" id="m-media" multiple accept="image/*" capture="environment" style="display:none">
+            <div class="upload-preview" id="m-preview"></div>
+            <div class="progress-bar-wrap" id="m-prog">
+              <div class="progress-bar-fill" id="m-prog-fill"></div>
+            </div>
+          </div>
+          <button type="button" class="btn-submit" id="m-btn" onclick="subMaint()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
+            إرسال طلب الصيانة
+          </button>
+        </div>
+        <div class="form-success" id="m-success">
+          <svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="#22c55e" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <h3>تم إرسال طلبك بنجاح!</h3>
+          <p style="color:var(--text-dim)">سنتواصل معك قريباً على الرقم المُدخل</p>
+          <button onclick="resetForm('m')" class="btn-submit" style="margin-top:8px">طلب جديد</button>
+        </div>
+      </div><!-- /#maint-body -->
+    </section>
+
+    <!-- ═ TRADE ═ -->
+    <section id="trade" class="form-section">
+      <h2 class="section-title-lg" id="trade-toggle" onclick="toggleTradeSection()"
+        style="cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:center; gap:10px;">
+        🔄 <span>استبدال الجهاز</span>
+        <svg id="trade-arrow" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+          stroke-width="2.5" stroke-linecap="round"
+          style="transition: transform 0.35s ease; transform: rotate(0deg); color:var(--neon-2);">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </h2>
+      <div id="trade-body"
+        style="overflow:hidden; max-height:0; transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease; opacity:0;">
+        <div class="form-card" id="t-card">
+          <div class="form-row">
+            <div class="field-wrap"><label class="field-label">الاسم</label><input type="text" id="t-name" class="fi"
+                placeholder="اسمك الكريم" required></div>
+            <div class="field-wrap"><label class="field-label">رقم الهاتف</label><input type="tel" id="t-phone"
+                class="fi" placeholder="+20 xxx xxxx xxx" required></div>
+          </div>
+          <div class="field-wrap"><label class="field-label">🔻 جهازك الحالي</label><select id="t-curr-m" class="fi"
+              required>
+              <option value="" disabled selected>اختر جهازك الحالي</option>
+            </select></div>
+          <div class="form-row">
+            <div class="field-wrap"><label class="field-label">التخزين الحالي</label><select id="t-curr-s" class="fi"
+                required>
+                <option value="" disabled selected>التخزين</option>
+                <option>64GB</option>
+                <option>128GB</option>
+                <option>256GB</option>
+                <option>512GB</option>
+                <option>1TB</option>
+              </select></div>
+            <div class="field-wrap"><label class="field-label">حالة الجهاز</label><select id="t-curr-c" class="fi"
+                required>
+                <option value="" disabled selected>الحالة</option>
+                <option>ممتاز</option>
+                <option>جيد جداً</option>
+                <option>جيد</option>
+                <option>مقبول</option>
+              </select></div>
+          </div>
+          <div class="field-wrap"><label class="field-label">🔺 الجهاز المطلوب</label><select id="t-req-m" class="fi"
+              required>
+              <option value="" disabled selected>اختر الجهاز المطلوب</option>
+            </select></div>
+          <div class="field-wrap"><label class="field-label">تخزين المطلوب</label><select id="t-req-s" class="fi"
+              required>
+              <option value="" disabled selected>التخزين</option>
+              <option>128GB</option>
+              <option>256GB</option>
+              <option>512GB</option>
+              <option>1TB</option>
+            </select></div>
+          <div class="field-wrap"><label class="field-label">ملاحظات (اختياري)</label><textarea id="t-notes" class="fi"
+              placeholder="أي تفاصيل إضافية..."></textarea></div>
+          <div class="field-wrap">
+            <label class="field-label">صور جهازك الحالي (اختياري)</label>
+            <label for="t-media" class="upload-btn">📷 إرفاق صور الجهاز</label>
+            <input type="file" id="t-media" multiple accept="image/*" capture="environment" style="display:none">
+            <div class="upload-preview" id="t-preview"></div>
+            <div class="progress-bar-wrap" id="t-prog">
+              <div class="progress-bar-fill" id="t-prog-fill"></div>
+            </div>
+          </div>
+          <button type="button" class="btn-submit" id="t-btn" onclick="subTrade()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+            </svg>
+            طلب الاستبدال
+          </button>
+        </div>
+        <div class="form-success" id="t-success">
+          <svg viewBox="0 0 24 24" width="72" height="72" fill="none" stroke="#22c55e" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+          </svg>
+          <h3>تم إرسال طلب الاستبدال!</h3>
+          <p style="color:var(--text-dim)">سنقيّم جهازك ونتواصل معك قريباً</p>
+          <button onclick="resetForm('t')" class="btn-submit" style="margin-top:8px">طلب جديد</button>
+        </div>
+      </div><!-- /#trade-body -->
+    </section>
+
+    <!-- ═ CONTACT ═ -->
+    <section id="contact">
+      <h2 class="section-title-lg">📍 <span>تواصل معنا</span></h2>
+
+      <div class="contact-cards">
+        <a href="https://wa.me/201000000000" target="_blank" class="contact-link-card" style="--hover-color:#25d366">
+          <div class="contact-icon-wrap" style="background:rgba(37,211,102,.15)"><svg viewBox="0 0 24 24" width="26"
+              height="26" fill="#25d366">
+              <path
+                d="M12 2C6.477 2 2 6.477 2 12c0 1.764.457 3.42 1.26 4.88L2 22l5.25-1.38A10 10 0 1012 2zm5.472 12.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606l.273-.42c.13-.199.106-.44-.055-.589l-1.395-1.354c-.146-.142-.349-.147-.51-.007-.48.417-1.053 1.116-1.157 1.852-.104.736.17 1.68.87 2.717 1.268 1.885 2.907 3.413 4.763 4.224 1.018.443 1.875.574 2.608.446.733-.128 1.758-.717 2.006-1.41.248-.693.248-1.286.173-1.41-.075-.124-.273-.199-.57-.348z" />
+            </svg></div>
+          <div class="contact-info"><strong>واتساب</strong><span>تواصل فوري مع خدمة العملاء</span></div>
+          <span class="contact-arrow">→</span>
+        </a>
+        <a href="https://maps.app.goo.gl/ryLFkd2CCWUFcsxV6" target="_blank" class="contact-link-card"
+          style="--hover-color:#4285f4">
+          <div class="contact-icon-wrap" style="background:rgba(66,133,244,.15)"><svg viewBox="0 0 24 24" width="26"
+              height="26" fill="#4285f4">
+              <path
+                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            </svg></div>
+          <div class="contact-info"><strong>موقعنا</strong><span>افتحنا على خريطة Google</span></div>
+          <span class="contact-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- Social Wall -->
+      <div class="social-wall">
+        <p class="social-wall-title">تابعنا على وسائل التواصل</p>
+        <div class="social-grid">
+
+          <!-- Instagram -->
+          <a href="https://www.instagram.com/ahmed_boox22" class="social-card sc-ig" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              </svg>
+            </div>
+            <div class="social-name">Instagram</div>
+            <div class="social-handle">@booxstore</div>
+          </a>
+
+          <!-- TikTok -->
+          <a href="https://www.tiktok.com/@boox_store" class="social-card sc-tt" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
+              </svg>
+            </div>
+            <div class="social-name">TikTok</div>
+            <div class="social-handle">@booxstore</div>
+          </a>
+
+          <!-- Facebook -->
+          <a href="https://www.facebook.com/ahmed.m.yahia.2025" class="social-card sc-fb" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </div>
+            <div class="social-name">Facebook</div>
+            <div class="social-handle">Boox Store</div>
+          </a>
+
+          <!-- WhatsApp -->
+          <a href="https://wa.me/201113614021" class="social-card sc-wa" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M12 2C6.477 2 2 6.477 2 12c0 1.764.457 3.42 1.26 4.88L2 22l5.25-1.38A10 10 0 1012 2zm5.472 12.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606l.273-.42c.13-.199.106-.44-.055-.589l-1.395-1.354c-.146-.142-.349-.147-.51-.007-.48.417-1.053 1.116-1.157 1.852-.104.736.17 1.68.87 2.717 1.268 1.885 2.907 3.413 4.763 4.224 1.018.443 1.875.574 2.608.446.733-.128 1.758-.717 2.006-1.41.248-.693.248-1.286.173-1.41-.075-.124-.273-.199-.57-.348z" />
+              </svg>
+            </div>
+            <div class="social-name">WhatsApp</div>
+            <div class="social-handle">تواصل الآن</div>
+          </a>
+
+          <!-- YouTube -->
+          <a href="#" class="social-card sc-yt" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" />
+              </svg>
+            </div>
+            <div class="social-name">YouTube</div>
+            <div class="social-handle">@booxstore</div>
+          </a>
+
+          <!-- Google Maps -->
+          <a href="https://maps.app.goo.gl/ryLFkd2CCWUFcsxV6" class="social-card sc-gm" target="_blank">
+            <div class="social-icon-wrap">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                <path
+                  d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+              </svg>
+            </div>
+            <div class="social-name">موقعنا</div>
+            <div class="social-handle">Google Maps</div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-logo"><img src="./assets/boox-logo.jpg" alt="Logo"></div>
+      <p class="footer-tagline">Boox Store © 2020 · جميع الحقوق محفوظة</p>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+        <span
+          style="font-family: 'Inter', system-ui, sans-serif; font-weight: 700; font-size: 0.95rem; text-shadow: 0 0 10px var(--neon-2), 0 0 20px var(--neon-1); color: #fff; letter-spacing: 0.5px;">
+          Website Designed by Yehia Helal
+        </span>
+        <a href="https://wa.me/201062028428?text=أريد%20تصميم%20موقع" target="_blank"
+          style="display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; color: #aaa; font-size: 0.85rem; transition: color 0.3s ease;"
+          aria-label="تواصل مع المصمم">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#25d366"
+            style="filter: drop-shadow(0 0 8px rgba(37,211,102,0.6));">
+            <path
+              d="M12 2C6.477 2 2 6.477 2 12c0 1.764.457 3.42 1.26 4.88L2 22l5.25-1.38A10 10 0 1012 2zm5.472 12.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606l.273-.42c.13-.199.106-.44-.055-.589l-1.395-1.354c-.146-.142-.349-.147-.51-.007-.48.417-1.053 1.116-1.157 1.852-.104.736.17 1.68.87 2.717 1.268 1.885 2.907 3.413 4.763 4.224 1.018.443 1.875.574 2.608.446.733-.128 1.758-.717 2.006-1.41.248-.693.248-1.286.173-1.41-.075-.124-.273-.199-.57-.348z" />
+          </svg>
+          <span style="font-weight: 500;">تواصل مع مصمم الموقع</span>
+        </a>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ═══ BOTTOM NAV ═══ -->
+  <nav class="bottom-nav glass">
+    <button class="bnav-btn active" id="bn-home" onclick="gSec('home',this)"><svg viewBox="0 0 24 24"
+        fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+      </svg><span>الرئيسية</span>
+      <div class="bnav-indicator"></div>
+    </button>
+    <button class="bnav-btn" id="bn-products" onclick="gSec('products',this)"><svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <path d="M16 10a4 4 0 01-8 0" />
+      </svg><span>المنتجات</span>
+      <div class="bnav-indicator"></div>
+    </button>
+    <button class="bnav-btn" id="bn-maintenance" onclick="gSec('maintenance',this)"><svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3-3a5 5 0 01-7 7l-4-4a5 5 0 017-7z" />
+        <path d="M9 17l-4-4" />
+      </svg><span>صيانة</span>
+      <div class="bnav-indicator"></div>
+    </button>
+    <button class="bnav-btn" id="bn-trade" onclick="gSec('trade',this)"><svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
+      </svg><span>استبدال</span>
+      <div class="bnav-indicator"></div>
+    </button>
+    <button class="bnav-btn" id="bn-contact" onclick="gSec('contact',this)"><svg viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path
+          d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.08 1.2 2 2 0 012.08 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.09a16 16 0 006.34 6.35l1.34-1.34a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+      </svg><span>تواصل</span>
+      <div class="bnav-indicator"></div>
+    </button>
+  </nav>
+
+  <!-- ═══ ADMIN PANEL ═══ -->
+  <div id="admin-panel">
+    <div class="admin-header">
+      <h2 style="font-size:1.2rem;font-weight:900">🔐 لوحة الأدمن</h2>
+      <button onclick="document.getElementById('admin-panel').style.display='none'" class="adm-close">✕ إغلاق</button>
+    </div>
+
+    <!-- Colors -->
+    <div class="adm-section">
+      <h3>🎨 تخصيص الألوان</h3>
+      <div class="clr-row">
+        <div class="clr-item"><span>أساسي</span><input type="color" id="c1" value="#6366f1"
+            oninput="uColr('--neon-1',this.value)"></div>
+        <div class="clr-item"><span>ثانوي</span><input type="color" id="c2" value="#22d3ee"
+            oninput="uColr('--neon-2',this.value)"></div>
+        <div class="clr-item"><span>ثالث</span><input type="color" id="c3" value="#a855f7"
+            oninput="uColr('--neon-3',this.value)"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button class="btn-adm-ghost" onclick="rColr()">↩ إعادة تعيين</button>
+        <button class="btn-adm-primary" onclick="sColr()">💾 حفظ الألوان</button>
+      </div>
+    </div>
+
+    <!-- Add Product -->
+    <div class="adm-section">
+      <h3>➕ إضافة منتج</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+        <input type="text" id="ap-name" class="fi" placeholder="اسم المنتج *" required>
+        <textarea id="ap-desc" class="fi" placeholder="الوصف"></textarea>
+        <div class="adm-grid-2">
+          <input type="number" id="ap-price" class="fi" placeholder="السعر ($) *" required>
+          <input type="number" id="ap-opr" class="fi" placeholder="السعر الأصلي ($)">
+        </div>
+        <select id="ap-cat" class="fi" required>
+          <option value="" disabled selected>التصنيف *</option>
+        </select>
+        <select id="ap-mod" class="fi">
+          <option value="">الموديل (اختياري)</option>
+        </select>
+        <label for="ap-img" class="upload-btn">📷 صورة المنتج</label>
+        <input type="file" id="ap-img" accept="image/*" capture="environment" style="display:none">
+        <div class="progress-bar-wrap" id="ap-prog">
+          <div class="progress-bar-fill" id="ap-prog-fill"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:4px 0">
+          <input type="checkbox" id="ap-stk" checked style="width:auto">
+          <label for="ap-stk" style="font-size:.9rem">متوفر بالمخزون</label>
+          <input type="checkbox" id="ap-feat" style="width:auto;margin-right:16px">
+          <label for="ap-feat" style="font-size:.9rem">منتج مميز</label>
+        </div>
+        <button onclick="addProd()" class="btn-adm-primary">حفظ المنتج</button>
+      </div>
+    </div>
+
+    <!-- Product List -->
+    <div class="adm-section">
+      <h3>📦 المنتجات الحالية</h3>
+      <div id="adm-list" style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+        <div style="color:var(--text-dim);text-align:center;padding:20px">يتم التحميل...</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // ═══ CONFIG ═══
+    const SUPABASE_URL = 'https://sfronpinoavxnlxqjwoa.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmcm9ucGlub2F2eG5seHFqd29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MjEwNDUsImV4cCI6MjA5MTI5NzA0NX0.cbGc87Ca4cdM25EEWEorFVmF0Jfojw2XIHsZ8cgXiFU';
+    const WHATSAPP = '201113614021';
+    let sup;
+    try { sup = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch (e) { }
+
+    // ═══ MODELS & CATS ═══
+    const CATS = { iphone: '📱 iPhone', ipad: '📱 iPad', macbook: '💻 MacBook', accessories: '🎧 إكسسوارات', repairs: '🔧 قطع غيار', other: '📦 أخرى' };
+    const IPHONES = ['iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16', 'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15', 'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14', 'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13', 'iPhone 13 mini', 'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12', 'iPhone 12 mini', 'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11', 'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X', 'iPhone 8 Plus', 'iPhone 8', 'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)'];
+    const IPADS = ['iPad Pro 13" M4', 'iPad Pro 11" M4', 'iPad Pro 13" M2', 'iPad Pro 11" M2', 'iPad Air M2 13"', 'iPad Air M2 11"', 'iPad Air (5th gen)', 'iPad (10th gen)', 'iPad (9th gen)', 'iPad mini (6th gen)'];
+    const MACS = ['MacBook Pro 16" M4 Pro', 'MacBook Pro 16" M4', 'MacBook Pro 14" M4 Pro', 'MacBook Pro 14" M4', 'MacBook Pro 16" M3 Max', 'MacBook Pro 14" M3', 'MacBook Air 15" M3', 'MacBook Air 13" M3', 'MacBook Air 15" M2', 'MacBook Air 13" M2', 'MacBook Air 13" M1'];
+    const ACCS = ['AirPods Pro (2nd gen)', 'AirPods (4th gen)', 'AirPods Max', 'Apple Watch Ultra 2', 'Apple Watch Series 10', 'Apple Watch SE', 'Apple Pencil Pro', 'Magic Keyboard', 'MagSafe Charger'];
+    const ALL_MODELS = [...IPHONES, ...IPADS, ...MACS, ...ACCS];
+
+    // Loading screen
+    window.addEventListener('load', () => {
+      loadSavedColors();
+      populateDropdowns();
+      setTimeout(() => {
+        const s = document.getElementById('loading-screen');
+        if (s) { s.classList.add('fade-out'); setTimeout(() => s.remove(), 500); }
+      }, 2500);
+    });
+
+    function populateDropdowns() {
+      function addOpts(selId, arr) {
+        const el = document.getElementById(selId); if (!el) return;
+        arr.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; el.appendChild(o); });
+      }
+      addOpts('m-model', ALL_MODELS);
+      addOpts('t-curr-m', ALL_MODELS);
+      addOpts('t-req-m', ALL_MODELS);
+      const pCat = document.getElementById('ap-cat');
+      if (pCat) Object.entries(CATS).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v; pCat.appendChild(o); });
+      const pMod = document.getElementById('ap-mod');
+      if (pMod) ALL_MODELS.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; pMod.appendChild(o); });
+    }
+
+    // ═══ CATEGORY PILLS ═══
+    let allPr = [], curCat = 'all', searchQ = '';
+    function buildPills() {
+      const wrap = document.getElementById('cat-pills'); if (!wrap) return;
+      const pills = [{ k: 'all', v: '🌟 الكل' }, ...Object.entries(CATS).map(([k, v]) => ({ k, v }))];
+      wrap.innerHTML = pills.map(p =>
+        `<button class="cat-pill${p.k === 'all' ? ' active' : ''}" onclick="setCat('${p.k}',this)">${p.v}</button>`
+      ).join('');
+    }
+    function setCat(c, btn) {
+      curCat = c;
+      document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts();
+    }
+    buildPills();
+
+    // ═══ SEARCH / ISLAND ═══
+    const diEl = document.getElementById('di');
+    const sInp = document.getElementById('s-inp');
+    const sClr = document.getElementById('s-clr');
+    function expandIsland() {
+      diEl.classList.add('expanded');
+      setTimeout(() => sInp.focus(), 60);
+    }
+    function collapseIsland() {
+      if (sInp.value.trim()) return;
+      diEl.classList.remove('expanded');
+    }
+    diEl.addEventListener('click', () => { if (!diEl.classList.contains('expanded')) expandIsland(); });
+    sInp.addEventListener('blur', () => setTimeout(collapseIsland, 200));
+    sInp.addEventListener('input', () => {
+      sClr.style.display = sInp.value ? 'flex' : 'none';
+      searchQ = sInp.value.toLowerCase();
+      renderProducts();
+    });
+    sClr.addEventListener('click', () => { sInp.value = ''; sClr.style.display = 'none'; searchQ = ''; renderProducts(); sInp.focus(); });
+    document.addEventListener('click', e => { if (!document.getElementById('di-wrap').contains(e.target)) collapseIsland(); });
+
+    // ═══ PRODUCTS ═══
+    async function loadProducts() {
+      if (!sup) { renderProducts(); return; }
+      try {
+        const { data, error } = await sup.from('products').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        allPr = data || [];
+        const cnt = document.getElementById('count-products');
+        if (cnt) animCount(cnt, allPr.filter(p => p.in_stock).length);
+      } catch (e) { allPr = []; }
+      renderProducts();
+    }
+
+    function animCount(el, target) {
+      let n = 0; const step = Math.ceil(target / 30);
+      const t = setInterval(() => { n = Math.min(n + step, target); el.textContent = n + '+'; if (n >= target) clearInterval(t); }, 40);
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('pr-grid'); if (!grid) return;
+      let pr = allPr.filter(p => (curCat === 'all' || p.category === curCat) && (!searchQ || p.name.toLowerCase().includes(searchQ) || (p.device_model || '').toLowerCase().includes(searchQ) || (p.description || '').toLowerCase().includes(searchQ)));
+      const ct = document.getElementById('pr-count');
+      if (ct) ct.textContent = pr.length + ' منتج';
+      if (!pr.length) {
+        grid.innerHTML = `<div class="products-empty"><svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><p>لا توجد منتجات في هذا التصنيف</p></div>`;
+        return;
+      }
+      grid.innerHTML = pr.map((p, i) => {
+        const disc = p.original_price && p.original_price > p.price ? Math.round((1 - p.price / p.original_price) * 100) : 0;
+        return `<div class="product-card" style="animation-delay:${i * 0.05}s">
+      <div class="product-img">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.parentElement.style.background='#111'">` : '<div style="height:100%;display:flex;align-items:center;justify-content:center;opacity:.3"><svg viewBox=\"0 0 24 24\" width=\"48\" height=\"48\" fill=\"currentColor\"><path d=\"M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\"/></svg></div>'}
+        ${!p.in_stock ? '<div class="badge-sold">نفذ ❌</div>' : ''}
+        ${disc > 0 ? `<div class="badge-disc">-${disc}%</div>` : ''}
+        ${p.is_featured ? '<div class="badge-feat">⭐ مميز</div>' : ''}
+      </div>
+      <div class="product-body">
+        <div class="product-name">${p.name}</div>
+        ${p.device_model ? `<div class="product-model">${p.device_model}</div>` : ''}
+        <div class="product-prices">
+          <span class="product-price">${Number(p.price).toLocaleString()}$</span>
+          ${p.original_price ? `<span class="product-old">${Number(p.original_price).toLocaleString()}$</span>` : ''}
+        </div>
+        <a href="https://wa.me/${WHATSAPP}?text=${encodeURIComponent('السلام عليكم، أريد طلب: ' + p.name)}" target="_blank" class="product-buy${p.in_stock ? '' : ' disabled'}" ${p.in_stock ? '' : 'aria-disabled="true"'}>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M2 21l1.65-4.75A9 9 0 1012 21H2z"/></svg>
+          ${p.in_stock ? 'اطلب الآن' : 'غير متاح'}
+        </a>
+      </div>
+    </div>`;
+      }).join('');
+    }
+
+    // Realtime
+    function setupRealtime() {
+      if (!sup) return;
+      try {
+        sup.channel('pr').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => loadProducts()).subscribe();
+      } catch (e) { }
+    }
+    loadProducts(); setupRealtime();
+
+    // ═══ NAV ═══
+    function gSec(id, btn) {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    // auto highlight on scroll
+    const sections = ['home', 'products', 'services', 'maintenance', 'trade', 'contact'];
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+          const active = document.getElementById('bn-' + id);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.3, rootMargin: '-20% 0px -60% 0px' });
+    sections.forEach(s => { const el = document.getElementById(s); if (el) observer.observe(el); });
+
+    // ═══ IMAGE COMPRESSION ═══
+    async function compressImg(file) {
+      try {
+        const bmp = await createImageBitmap(file);
+        const cv = document.createElement('canvas');
+        let w = bmp.width, h = bmp.height, mx = 900;
+        if (w > h) { if (w > mx) { h = h * mx / w; w = mx; } } else { if (h > mx) { w = w * mx / h; h = mx; } }
+        cv.width = Math.round(w); cv.height = Math.round(h);
+        cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height);
+        return new Promise(r => cv.toBlob(r, 'image/jpeg', 0.78));
+      } catch (e) { return file; }
+    }
+
+    async function uploadImg(bucket, file, prefix, progId) {
+      if (!sup) return null;
+      const progWrap = document.getElementById(progId);
+      const progFill = document.getElementById(progId + '-fill');
+      if (progWrap) progWrap.style.display = 'block';
+      if (progFill) progFill.style.width = '20%';
+      try {
+        const blob = await compressImg(file);
+        if (progFill) progFill.style.width = '50%';
+        const name = prefix + '-' + Date.now() + '.jpg';
+        const { error } = await sup.storage.from(bucket).upload(name, blob, { contentType: 'image/jpeg' });
+        if (error) throw error;
+        if (progFill) progFill.style.width = '100%';
+        setTimeout(() => { if (progWrap) progWrap.style.display = 'none'; if (progFill) progFill.style.width = '0'; }, 800);
+        return sup.storage.from(bucket).getPublicUrl(name).data.publicUrl;
+      } catch (e) {
+        if (progWrap) progWrap.style.display = 'none';
+        return null;
+      }
+    }
+
+    // Preview images
+    document.getElementById('m-media').addEventListener('change', e => showPrev(e.target.files, 'm-preview'));
+    document.getElementById('t-media').addEventListener('change', e => showPrev(e.target.files, 't-preview'));
+    function showPrev(files, previewId) {
+      const wrap = document.getElementById(previewId); wrap.innerHTML = '';
+      Array.from(files).forEach(f => { const img = document.createElement('img'); img.className = 'upload-thumb'; const url = URL.createObjectURL(f); img.src = url; wrap.appendChild(img); });
+    }
+
+    // ═══ FORMS ═══
+    async function subMaint() {
+      const btn = document.getElementById('m-btn');
+      const name = document.getElementById('m-name').value.trim();
+      const phone = document.getElementById('m-phone').value.trim();
+      const model = document.getElementById('m-model').value;
+      const problem = document.getElementById('m-problem').value.trim();
+      if (!name || !phone || !model || !problem) { showToast('⚠️ يرجى تعبئة جميع الحقول المطلوبة', 'warn'); return; }
+      btn.disabled = true; btn.textContent = 'يتم الإرسال...';
+      try {
+        let mediaUrls = [];
+        const files = document.getElementById('m-media').files;
+        for (let i = 0; i < files.length; i++) { const u = await uploadImg('maintenance-media', files[i], 'mt', 'm-prog'); if (u) mediaUrls.push(u); }
+        if (sup) {
+          const { error } = await sup.from('maintenance_requests').insert([{ customer_name: name, customer_phone: phone, device_model: model, problem_description: problem, extra_notes: document.getElementById('m-notes').value, media_urls: mediaUrls }]);
+          if (error) throw error;
+        }
+        document.getElementById('m-card').style.display = 'none';
+        document.getElementById('m-success').style.display = 'flex';
+      } catch (e) { showToast('❌ حدث خطأ, حاول مرة أخرى', 'error'); }
+      btn.disabled = false; btn.textContent = 'إرسال طلب الصيانة';
+    }
+
+    async function subTrade() {
+      const btn = document.getElementById('t-btn');
+      const name = document.getElementById('t-name').value.trim();
+      const phone = document.getElementById('t-phone').value.trim();
+      const cm = document.getElementById('t-curr-m').value;
+      const cs = document.getElementById('t-curr-s').value;
+      const cc = document.getElementById('t-curr-c').value;
+      const rm = document.getElementById('t-req-m').value;
+      const rs = document.getElementById('t-req-s').value;
+      if (!name || !phone || !cm || !cs || !cc || !rm || !rs) { showToast('⚠️ يرجى تعبئة جميع الحقول', 'warn'); return; }
+      btn.disabled = true; btn.textContent = 'يتم الإرسال...';
+      try {
+        let mediaUrls = [];
+        const files = document.getElementById('t-media').files;
+        for (let i = 0; i < files.length; i++) { const u = await uploadImg('trade-media', files[i], 'tr', 't-prog'); if (u) mediaUrls.push(u); }
+        if (sup) {
+          const { error } = await sup.from('trade_requests').insert([{ customer_name: name, customer_phone: phone, current_device_model: cm, current_storage: cs, current_condition: cc, wanted_device_model: rm, wanted_storage: rs, trade_notes: document.getElementById('t-notes').value, media_urls: mediaUrls }]);
+          if (error) throw error;
+        }
+        document.getElementById('t-card').style.display = 'none';
+        document.getElementById('t-success').style.display = 'flex';
+      } catch (e) { showToast('❌ حدث خطأ, حاول مرة أخرى', 'error'); }
+      btn.disabled = false; btn.textContent = 'طلب الاستبدال';
+    }
+
+    function resetForm(prefix) {
+      document.getElementById(prefix + '-card').style.display = 'flex';
+      document.getElementById(prefix + '-success').style.display = 'none';
+      document.getElementById(prefix + '-card').querySelectorAll('input,textarea,select').forEach(el => { if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = ''; });
+      document.getElementById(prefix + '-preview').innerHTML = '';
+    }
+
+    // ═══ TOAST ═══
+    function showToast(msg, type = 'info') {
+      const t = document.createElement('div'); t.className = 'toast glass'; t.textContent = msg;
+      const colors = { success: 'var(--neon-success)', error: 'var(--neon-danger)', warn: 'var(--neon-warn)', info: 'var(--neon-2)' };
+      t.style.cssText = `color:${colors[type] || colors.info};border-color:${colors[type] || colors.info}`;
+      document.body.appendChild(t); requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
+
+    // ═══ COLORS ═══
+    function uColr(v, val) { document.documentElement.style.setProperty(v, val); }
+    function sColr() {
+      const c = { '--neon-1': document.getElementById('c1').value, '--neon-2': document.getElementById('c2').value, '--neon-3': document.getElementById('c3').value };
+      localStorage.setItem('bxc', JSON.stringify(c)); showToast('✅ تم حفظ الألوان', 'success');
+    }
+    function rColr() {
+      localStorage.removeItem('bxc');
+      ['--neon-1', '--neon-2', '--neon-3'].forEach(v => document.documentElement.style.removeProperty(v));
+      document.getElementById('c1').value = '#6366f1'; document.getElementById('c2').value = '#22d3ee'; document.getElementById('c3').value = '#a855f7';
+      showToast('↩ استعدت الألوان الافتراضية', 'info');
+    }
+    function loadSavedColors() {
+      const saved = localStorage.getItem('bxc');
+      if (saved) { const c = JSON.parse(saved); Object.entries(c).forEach(([k, v]) => { uColr(k, v); const inp = document.getElementById(k === '--neon-1' ? 'c1' : k === '--neon-2' ? 'c2' : 'c3'); if (inp) inp.value = v; }); }
+    }
+
+    // ═══ ADMIN ═══
+    function opAdm() {
+      if (sessionStorage.getItem('adm') === '1') { document.getElementById('admin-panel').style.display = 'block'; ldAdm(); }
+      else { const p = prompt('🔐 كلمة المرور:'); if (p === '1010') { sessionStorage.setItem('adm', '1'); document.getElementById('admin-panel').style.display = 'block'; ldAdm(); } else if (p !== null) showToast('❌ كلمة مرور خاطئة', 'error'); }
+    }
+
+    async function ldAdm() {
+      if (!sup) return;
+      try {
+        const { data } = await sup.from('products').select('*').order('created_at', { ascending: false });
+        const list = document.getElementById('adm-list');
+        if (!data || !data.length) { list.innerHTML = '<div style="color:var(--text-dim);text-align:center">لا توجد منتجات بعد</div>'; return; }
+        list.innerHTML = data.map(p => `<div class="adm-prod-item"><img class="adm-prod-img" src="${p.image_url || ''}" onerror="this.style.display='none'"><div style="flex:1"><div style="font-size:.9rem;font-weight:600">${p.name}</div><div style="font-size:.78rem;color:var(--text-dim)">${p.price}$ · ${p.in_stock ? '✅ متاح' : '❌ نفذ'}</div></div><button onclick="delProd('${p.id}')" class="adm-prod-del" aria-label="حذف">🗑️</button></div>`).join('');
+      } catch (e) { }
+    }
+
+    window.delProd = async (id) => {
+      if (!confirm('هل تريد حذف هذا المنتج؟')) return;
+      try {
+        const { error } = await sup.from('products').delete().eq('id', id);
+        if (error) throw error; showToast('🗑️ تم الحذف', 'success'); ldAdm(); loadProducts();
+      } catch (e) { showToast('❌ فشل الحذف', 'error'); }
+    };
+
+    async function addProd() {
+      const name = document.getElementById('ap-name').value.trim();
+      const price = document.getElementById('ap-price').value;
+      const cat = document.getElementById('ap-cat').value;
+      if (!name || !price || !cat) { showToast('⚠️ اسم المنتج، السعر، والتصنيف إلزامية', 'warn'); return; }
+      const addBtn = document.querySelector('.btn-adm-primary'); addBtn.disabled = true; addBtn.textContent = 'جاري الحفظ...';
+      try {
+        let imgUrl = null;
+        const imgFile = document.getElementById('ap-img').files[0];
+        if (imgFile) imgUrl = await uploadImg('product-images', imgFile, 'pd', 'ap-prog');
+        if (!sup) throw new Error('No Supabase');
+        const { error } = await sup.from('products').insert([{ name, description: document.getElementById('ap-desc').value, price: parseFloat(price), original_price: parseFloat(document.getElementById('ap-opr').value) || null, category: cat, device_model: document.getElementById('ap-mod').value || null, image_url: imgUrl, in_stock: document.getElementById('ap-stk').checked, is_featured: document.getElementById('ap-feat').checked }]);
+        if (error) throw error;
+        showToast('✅ تمت إضافة المنتج', 'success');
+        ['ap-name', 'ap-desc', 'ap-price', 'ap-opr'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('ap-cat').selectedIndex = 0; document.getElementById('ap-mod').selectedIndex = 0;
+        document.getElementById('ap-stk').checked = true; document.getElementById('ap-feat').checked = false;
+        ldAdm(); loadProducts();
+      } catch (e) { showToast('❌ فشل الحفظ: ' + e.message, 'error'); }
+      addBtn.disabled = false; addBtn.textContent = 'حفظ المنتج';
+    }
+
+    // ═══ PRELOADER DISMISS ═══
+    setTimeout(function () {
+      var pl = document.getElementById('preloader');
+      if (pl) {
+        pl.style.opacity = '0';
+        setTimeout(function () { pl.style.display = 'none'; }, 800);
+      }
+    }, 2800);
+
+    // ═══ SCROLL ANIMATIONS ═══
+    var animateEls = document.querySelectorAll('.service-card, .section-title, .form-card, .contact-cards, .social-wall');
+    animateEls.forEach(function (el) { el.classList.add('anim-reveal'); });
+    var animObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          animObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    setTimeout(function () {
+      document.querySelectorAll('.anim-reveal').forEach(function (el) { animObserver.observe(el); });
+    }, 1000);
+
+    // ═══ TRADE SECTION ACCORDION ═══
+    var _tradeOpen = false;
+    function toggleTradeSection() {
+      var body = document.getElementById('trade-body');
+      var arrow = document.getElementById('trade-arrow');
+      _tradeOpen = !_tradeOpen;
+      if (_tradeOpen) {
+        body.style.maxHeight = body.scrollHeight + 2000 + 'px';
+        body.style.opacity = '1';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        body.style.maxHeight = '0';
+        body.style.opacity = '0';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // ═══ MAINTENANCE SECTION ACCORDION ═══
+    var _maintOpen = false;
+    function toggleMaintSection() {
+      var body = document.getElementById('maint-body');
+      var arrow = document.getElementById('maint-arrow');
+      _maintOpen = !_maintOpen;
+      if (_maintOpen) {
+        body.style.maxHeight = body.scrollHeight + 2000 + 'px';
+        body.style.opacity = '1';
+        arrow.style.transform = 'rotate(180deg)';
+      } else {
+        body.style.maxHeight = '0';
+        body.style.opacity = '0';
+        arrow.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    // ═══ ADMIN ACCORDION TOGGLE ═══
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('admin-legend')) {
+        e.target.parentElement.classList.toggle('open');
+      }
+    });
+
+    /* ════ FLOATING STARS — بطيئة وهادئة ════ */
+    (function initStars() {
+      const canvas = document.getElementById('stars-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, stars = [], animId;
+
+      const CONFIG = {
+        count: 80,
+        minSize: 0.2,
+        maxSize: 1.5,
+        minSpeed: 0.02, /* بطيء جداً */
+        maxSpeed: 0.12, /* بطيء جداً */
+        minOpacity: 0.05,
+        maxOpacity: 0.45,
+        colors: [
+          'rgba(99,102,241,V)',
+          'rgba(34,211,238,V)',
+          'rgba(168,85,247,V)',
+          'rgba(248,250,252,V)',
+          'rgba(148,163,184,V)',
+        ]
+      };
+
+      const r = (a, b) => Math.random() * (b - a) + a;
+
+      function mkStar(fromBottom) {
+        const op = r(CONFIG.minOpacity, CONFIG.maxOpacity);
+        const col = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)]
+          .replace('V', op.toFixed(2));
+        return {
+          x: r(0, W),
+          y: fromBottom ? r(H * 0.5, H + 20) : r(-20, H),
+          size: r(CONFIG.minSize, CONFIG.maxSize),
+          speed: r(CONFIG.minSpeed, CONFIG.maxSpeed),
+          opacity: op,
+          color: col,
+          twinkle: r(0, Math.PI * 2),
+          twinkleSpeed: r(0.005, 0.02), /* وميض بطيء */
+          drift: r(-0.03, 0.03), /* انجراف خفيف */
+        };
+      }
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        stars = Array.from({ length: CONFIG.count }, () => mkStar(false));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        stars.forEach((s, i) => {
+          s.twinkle += s.twinkleSpeed;
+          const t = 0.5 + 0.5 * Math.sin(s.twinkle);
+          const op = (s.opacity * t).toFixed(2);
+          const col = s.color.replace(/[\d.]+\)$/, op + ')');
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fillStyle = col;
+          ctx.fill();
+
+          if (s.size > 1.0) {
+            const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 3);
+            g.addColorStop(0, s.color.replace(/[\d.]+\)$/, (s.opacity * t * 0.3).toFixed(2) + ')'));
+            g.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.size * 3, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.fill();
+          }
+
+          s.y -= s.speed;
+          s.x += s.drift;
+
+          if (s.y < -10 || s.x < -10 || s.x > W + 10) {
+            stars[i] = mkStar(true);
+            if (s.x < -10 || s.x > W + 10) {
+              stars[i].x = r(0, W);
+              stars[i].y = r(H * 0.3, H);
+            }
+          }
+        });
+        animId = requestAnimationFrame(draw);
+      }
+
+      resize();
+      draw();
+
+      let rt;
+      window.addEventListener('resize', () => {
+        clearTimeout(rt);
+        rt = setTimeout(() => { cancelAnimationFrame(animId); resize(); draw(); }, 200);
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else draw();
+      });
+    })();
+    /* ════ END FLOATING STARS ════ */
+  </script>
+</body>
+
+</html>
