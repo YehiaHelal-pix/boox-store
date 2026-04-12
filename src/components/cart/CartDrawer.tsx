@@ -40,8 +40,8 @@ export default function CartDrawer({ isOpen, onClose }: { isOpen: boolean, onClo
                         items.map(item => (
                             <div key={item.id} className="flex gap-4 p-3 glass rounded-[var(--radius)] border border-[var(--border)] relative overflow-hidden group">
                                 <div className="relative w-24 h-24 bg-black/20 rounded-lg overflow-hidden shrink-0">
-                                    {item.image_url ? (
-                                        <Image src={item.image_url} alt={item.name} fill sizes="96px" className="object-cover" />
+                                    {item.images && item.images.length > 0 ? (
+                                        <Image src={item.images[0]} alt={item.name} fill sizes="96px" className="object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-500">لا صورة</div>
                                     )}

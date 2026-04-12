@@ -5,6 +5,12 @@ import { ShieldCheck, Truck, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import AddToCartBtn from '@/components/products/AddToCartBtn'
+import ProductViewTracker from '@/components/products/ProductViewTracker'
+import RecentlyViewed from '@/components/products/RecentlyViewed'
+import SimilarProducts from '@/components/products/SimilarProducts'
+import ShareButton from '@/components/products/ShareButton'
+import CallbackForm from '@/components/products/CallbackForm'
+import ReserveForm from '@/components/products/ReserveForm'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params
@@ -24,6 +30,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
     return (
         <div className="min-h-screen py-10 px-4 lg:px-[var(--container)] max-w-7xl mx-auto">
+            <ProductViewTracker productId={id} />
             <Link href="/products" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-white mb-8 transition-colors glass px-4 py-2 rounded-full w-fit hover:bg-white/5">
                 <ArrowRight size={18} /> العودة للمنتجات
             </Link>
@@ -31,8 +38,8 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <div className="flex flex-col lg:flex-row gap-12 xl:gap-20">
                 <div className="w-full lg:w-1/2">
                     <div className="glass rounded-[2rem] aspect-square relative bg-gradient-to-tr from-[#0a0a14] to-[#1a1a24] overflow-hidden border-[var(--border)] lg:sticky top-[calc(var(--navbar-h)+2rem)] shadow-2xl shadow-black">
-                        {product.image_url ? (
-                            <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-8 hover:scale-105 transition-transform duration-700" priority />
+                        {product.images && product.images.length > 0 ? (
+                            <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-8 hover:scale-105 transition-transform duration-700" priority />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">صورة غير متوفرة</div>
                         )}
@@ -44,7 +51,10 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
                 <div className="w-full lg:w-1/2 flex flex-col gap-8 py-2">
                     <div className="pb-8 border-b border-[var(--border)]">
-                        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-wide">{product.name}</h1>
+                        <div className="flex justify-between items-start gap-4 mb-4">
+                            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight tracking-wide">{product.name}</h1>
+                            <div className="mt-2"><ShareButton title={product.name} /></div>
+                        </div>
                         <div className="flex items-center gap-6">
                             <span className="text-5xl font-black text-[var(--neon-cyan)] block">{product.price.toLocaleString()} ج</span>
                             {product.original_price && (
@@ -80,8 +90,19 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                             </div>
                         )}
                     </div>
+
+                    <div className="mt-12">
+                        <CallbackForm productId={id} />
+                    </div>
+
+                    <div className="mt-8">
+                        <ReserveForm productId={id} productName={product.name} />
+                    </div>
                 </div>
             </div>
+
+            <SimilarProducts category={product.category} excludeId={id} />
+            <RecentlyViewed excludeId={id} />
         </div>
     )
 }

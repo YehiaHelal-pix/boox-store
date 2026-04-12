@@ -1,9 +1,9 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Product } from '@/types/product'
+import type { Product } from '@/lib/supabase/types'
 
-export function useProducts(category?: string) {
+export function useProducts() {
     const [products, setProducts] = useState<Product[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -11,13 +11,18 @@ export function useProducts(category?: string) {
     const fetchProducts = useCallback(async () => {
         setLoading(true)
         const sb = createClient()
-        let q = sb.from('products').select('*').order('sort_order').order('created_at', { ascending: false })
-        if (category && category !== 'all') q = q.eq('category', category)
-        const { data, error } = await q
+        // We fetch all visible and in-stock products as filtering is client-side
+        const { data, error } = await sb
+            .from('products')
+            .select('*')
+            .eq('is_visible', true)
+            .eq('in_stock', true)
+            .order('created_at', { ascending: false })
+
         if (error) setError(error.message)
         else setProducts(data || [])
         setLoading(false)
-    }, [category])
+    }, [])
 
     useEffect(() => {
         fetchProducts()

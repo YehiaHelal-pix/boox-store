@@ -1,8 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useToastStore } from '@/components/ui/Toast'
 import { PenTool, Send } from 'lucide-react'
+
+import { buildWhatsAppMessage } from '@/lib/whatsapp'
+import { useCustomer } from '@/hooks/useCustomer'
+import TrackingSection from '@/components/TrackingSection'
 
 const deviceTypes = ['iPhone', 'iPad', 'MacBook', 'AirPods', 'Apple Watch', 'iMac', 'أخرى']
 
@@ -10,6 +14,7 @@ export default function MaintenancePage() {
     const [loading, setLoading] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const addToast = useToastStore(s => s.addToast)
+    const { customer, saveCustomer, isLoaded } = useCustomer()
 
     const [form, setForm] = useState({
         customer_name: '',
@@ -18,6 +23,16 @@ export default function MaintenancePage() {
         device_model: '',
         issue: ''
     })
+
+    useEffect(() => {
+        if (isLoaded) {
+            setForm(f => ({
+                ...f,
+                customer_name: f.customer_name || customer.name || '',
+                phone: f.phone || customer.phone || '',
+            }))
+        }
+    }, [isLoaded, customer.name, customer.phone])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -31,13 +46,15 @@ export default function MaintenancePage() {
         }
         setLoading(true)
         try {
+            saveCustomer({ name: form.customer_name, phone: form.phone })
             const sb = createClient()
             const { error } = await sb.from('maintenance_requests').insert([form])
             if (error) throw error
             setSubmitted(true)
             addToast('تم إرسال طلب الصيانة بنجاح!', 'success')
-            const msg = encodeURIComponent(`طلب صيانة جديد:\nالاسم: ${form.customer_name}\nالهاتف: ${form.phone}\nالجهاز: ${form.device_type} - ${form.device_model}\nالمشكلة: ${form.issue}`)
-            window.open(`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '201113614021'}?text=${msg}`, '_blank')
+
+            const message = buildWhatsAppMessage('maintenance', form)
+            window.open(`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '201113614021'}?text=${encodeURIComponent(message)}`, '_blank')
         } catch {
             addToast('حدث خطأ أثناء الإرسال', 'error')
         } finally {
@@ -100,6 +117,7 @@ export default function MaintenancePage() {
                     {loading ? <span className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Send size={20} /> إرسال الطلب</>}
                 </button>
             </form>
+            <TrackingSection type="maintenance" />
         </div>
     )
 }

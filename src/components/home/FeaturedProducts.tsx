@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Product } from '@/types/product'
+import type { Product } from '@/lib/supabase/types'
 import ProductGrid from '../products/ProductGrid'
 import ProductSkeleton from '../products/ProductSkeleton'
 import Link from 'next/link'
