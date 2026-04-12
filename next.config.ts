@@ -1,18 +1,12 @@
-import type { NextConfig } from 'next';
-
+import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
     images: {
         remotePatterns: [
-            {
-                protocol: 'https',
-                hostname: '**', // Adjust this to match your Supabase storage URL later for better security
-            },
-            {
-                protocol: 'http',
-                hostname: 'localhost',
-            }
+            { protocol: 'https', hostname: '*.supabase.co' },
+            { protocol: 'https', hostname: 'images.unsplash.com' },
+            { protocol: 'https', hostname: 'via.placeholder.com' },
         ],
     },
-};
-
-export default nextConfig;
+    experimental: { serverActions: { allowedOrigins: ['*'] } }
+}
+export default nextConfig
