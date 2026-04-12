@@ -44,18 +44,21 @@ export default function MaintenancePage() {
             addToast('يرجى ملء جميع الحقول', 'error')
             return
         }
+
         setLoading(true)
         try {
             saveCustomer({ name: form.customer_name, phone: form.phone })
             const sb = createClient()
             const { error } = await sb.from('maintenance_requests').insert([form])
+
             if (error) throw error
             setSubmitted(true)
             addToast('تم إرسال طلب الصيانة بنجاح!', 'success')
 
             const message = buildWhatsAppMessage('maintenance', form)
             window.open(`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP || '201113614021'}?text=${encodeURIComponent(message)}`, '_blank')
-        } catch {
+        } catch (err) {
+            console.error('Error sending maintenance request:', err)
             addToast('حدث خطأ أثناء الإرسال', 'error')
         } finally {
             setLoading(false)
