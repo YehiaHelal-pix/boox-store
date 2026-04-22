@@ -1,41 +1,42 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import type { Product } from '@/lib/supabase/types'
+import { useCallback, useEffect, useState } from 'react'
+import type { Product } from '@/types/database'
 
-export function useProducts() {
-    const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+export function useProducts(queryString = '') {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-    const fetchProducts = useCallback(async () => {
-        setLoading(true)
-        const sb = createClient()
-        // We fetch all visible and in-stock products as filtering is client-side
-        const { data, error } = await sb
-            .from('products')
-            .select('*')
-            .eq('is_visible', true)
-            .eq('in_stock', true)
-            .order('created_at', { ascending: false })
+  const fetchProducts = useCallback(async () => {
+    setLoading(true)
+    setError(null)
 
-        if (error) setError(error.message)
-        else setProducts(data || [])
-        setLoading(false)
-    }, [])
+    try {
+      const response = await fetch(`/api/products${queryString ? `?${queryString}` : ''}`, {
+        cache: 'no-store',
+      })
 
-    useEffect(() => {
-        fetchProducts()
-        const sb = createClient()
-        const channel = sb.channel('products-rt')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-                if (payload.eventType === 'INSERT') setProducts(p => [payload.new as Product, ...p])
-                if (payload.eventType === 'UPDATE') setProducts(p => p.map(x => x.id === payload.new.id ? payload.new as Product : x))
-                if (payload.eventType === 'DELETE') setProducts(p => p.filter(x => x.id !== payload.old.id))
-            })
-            .subscribe()
-        return () => { sb.removeChannel(channel) }
-    }, [fetchProducts])
+      const payload = (await response.json()) as Product[] | { error?: string }
 
-    return { products, loading, error, refetch: fetchProducts }
+      if (!response.ok || !Array.isArray(payload)) {
+        setProducts([])
+        setError(!Array.isArray(payload) ? payload.error ?? 'تعذر تحميل المنتجات' : 'تعذر تحميل المنتجات')
+        return
+      }
+
+      setProducts(payload)
+    } catch (fetchError) {
+      const message = fetchError instanceof Error ? fetchError.message : 'تعذر تحميل المنتجات'
+      setProducts([])
+      setError(message)
+    } finally {
+      setLoading(false)
+    }
+  }, [queryString])
+
+  useEffect(() => {
+    void fetchProducts()
+  }, [fetchProducts])
+
+  return { products, loading, error, refresh: fetchProducts }
 }
