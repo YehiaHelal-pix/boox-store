@@ -55,6 +55,7 @@ export interface Product extends Omit<ProductRow, 'price' | 'original_price' | '
   device_model: string
   storage_size: string
   category: string
+  price_on_inquiry: boolean
   category_name_ar: string | null
   category_record: Category | null
   in_stock: boolean
@@ -94,6 +95,14 @@ export interface AdminActivityLog {
   old_data: Record<string, unknown> | null
   new_data: Record<string, unknown> | null
   performed_at: string
+}
+
+export interface AdminUser {
+  id: string
+  user_id: string
+  email: string | null
+  is_active: boolean
+  created_at: string
 }
 
 export interface DashboardStats {

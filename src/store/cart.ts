@@ -30,7 +30,7 @@ export const useCart = create<CartStore>()(
                     : s.items.map(i => i.id === id ? { ...i, quantity: qty } : i)
             })),
             clear: () => set({ items: [] }),
-            total: () => get().items.reduce((s, i) => s + i.price * i.quantity, 0),
+            total: () => get().items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0),
             count: () => get().items.reduce((s, i) => s + i.quantity, 0),
         }),
         { name: 'boox-cart', version: 1 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
@@ -37,8 +37,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

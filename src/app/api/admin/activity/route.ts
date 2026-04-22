@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import type { AdminActivityLog } from '@/types/database'
 
@@ -10,8 +10,9 @@ function jsonError(message: string, status: number) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

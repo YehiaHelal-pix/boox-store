@@ -1,122 +1,154 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-
-interface Product {
-  id: string
-  name: string
-  price: number | null
-  price_on_inquiry: boolean
-  category: string
-  description: string
-  in_stock: boolean
-  image_url: string
-  images: string[]
-}
+import { buildWhatsAppUrl, getConditionLabel } from '@/lib/products'
+import type { Product } from '@/types/database'
 
 export default function ProductPage() {
-  const { id } = useParams()
+  const params = useParams<{ id: string }>()
   const router = useRouter()
+  const identifier = params.id
   const [product, setProduct] = useState<Product | null>(null)
-  const [activeImg, setActiveImg] = useState(0)
+  const [activeImage, setActiveImage] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch(`/api/products/${id}`)
-      .then(r => r.json())
-      .then(data => { setProduct(data); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [id])
+    async function loadProduct() {
+      try {
+        const response = await fetch(`/api/products/${identifier}`, { cache: 'no-store' })
+        const payload = (await response.json()) as Product | { error?: string }
 
-  if (loading) return (
-    <div style={{minHeight:'100vh',background:'#0a0a0f',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontFamily:'Cairo,sans-serif',fontSize:'1.5rem'}}>
-      ⏳ جاري التحميل...
-    </div>
-  )
+        if (!response.ok || Array.isArray(payload) || ('error' in payload && typeof payload.error !== 'undefined')) {
+          setError(!Array.isArray(payload) && 'error' in payload ? payload.error ?? 'المنتج غير موجود' : 'المنتج غير موجود')
+          setProduct(null)
+          return
+        }
 
-  if (!product || (product as any).error) return (
-    <div style={{minHeight:'100vh',background:'#0a0a0f',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',color:'white',fontFamily:'Cairo,sans-serif',gap:'1rem'}}>
-      <div style={{fontSize:'4rem'}}>😕</div>
-      <div style={{fontSize:'1.5rem'}}>المنتج غير موجود</div>
-      <button onClick={() => router.push('/')} style={{padding:'0.75rem 2rem',background:'#6366f1',color:'white',border:'none',borderRadius:'10px',cursor:'pointer',fontSize:'1rem',fontFamily:'Cairo,sans-serif'}}>
-        العودة للرئيسية
-      </button>
-    </div>
-  )
+        setProduct(payload as Product)
+      } catch (requestError) {
+        setError(requestError instanceof Error ? requestError.message : 'المنتج غير موجود')
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const allImages = [
-    ...(product.image_url ? [product.image_url] : []),
-    ...(Array.isArray(product.images) ? product.images : [])
-  ].filter(Boolean)
+    void loadProduct()
+  }, [identifier])
 
-  const WHATSAPP = '201113614021'
-  const msg = encodeURIComponent(
-    `السلام عليكم بوكس ستور 👋\nأنا مهتم بـ: ${product.name}` +
-    (!product.price_on_inquiry && product.price ? `\nالسعر: ${product.price.toLocaleString('ar-EG')} جنيه` : '') +
-    (product.category ? `\nالفئة: ${product.category}` : '') +
-    `\nممكن تساعدني؟`
-  )
+  const productImages = useMemo(() => (product?.images ?? []).filter(Boolean), [product])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center text-white text-xl" dir="rtl">
+        جاري تحميل المنتج...
+      </div>
+    )
+  }
+
+  if (!product || error) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center text-white gap-4 px-4 text-center" dir="rtl">
+        <div className="text-5xl">⌁</div>
+        <div className="text-2xl font-bold">المنتج غير موجود</div>
+        <p className="text-gray-400">{error ?? 'الرابط غير صالح أو المنتج غير متاح حاليًا.'}</p>
+        <button
+          onClick={() => router.push('/products')}
+          className="rounded-xl bg-[var(--neon-cyan)] px-5 py-3 font-bold text-black"
+        >
+          رجوع للمنتجات
+        </button>
+      </div>
+    )
+  }
 
   return (
-    <div style={{minHeight:'100vh',background:'#0a0a0f',color:'white',padding:'1.5rem 1rem',fontFamily:'Cairo,sans-serif',direction:'rtl'}}>
-      <div style={{maxWidth:'960px',margin:'0 auto'}}>
-        
-        <button onClick={() => router.back()} style={{background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'white',padding:'0.5rem 1.25rem',borderRadius:'8px',cursor:'pointer',marginBottom:'1.5rem',fontSize:'0.95rem',fontFamily:'Cairo,sans-serif'}}>
-          ← رجوع
+    <div className="min-h-screen bg-[#0a0a0f] px-4 py-8 text-white" dir="rtl">
+      <div className="mx-auto max-w-6xl">
+        <button
+          onClick={() => router.back()}
+          className="mb-6 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+        >
+          رجوع
         </button>
 
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:'2rem'}}>
-          
-          {/* Images */}
-          <div>
-            <div style={{background:'rgba(255,255,255,0.04)',borderRadius:'16px',overflow:'hidden',aspectRatio:'1',border:'1px solid rgba(255,255,255,0.08)',marginBottom:'0.75rem',display:'flex',alignItems:'center',justifyContent:'center'}}>
-              {allImages[activeImg] ? (
-                <img src={allImages[activeImg]} alt={product.name} style={{width:'100%',height:'100%',objectFit:'cover'}} />
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_minmax(0,0.9fr)]">
+          <section className="rounded-[28px] border border-white/10 bg-[#0d1117] p-4 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+            <div className="aspect-square overflow-hidden rounded-[24px] border border-white/10 bg-black/30">
+              {productImages[activeImage] ? (
+                <img src={productImages[activeImage]} alt={product.name} className="h-full w-full object-cover" />
               ) : (
-                <span style={{fontSize:'5rem'}}>📱</span>
+                <div className="flex h-full items-center justify-center text-gray-500">لا توجد صور</div>
               )}
             </div>
-            {allImages.length > 1 && (
-              <div style={{display:'flex',gap:'0.5rem',flexWrap:'wrap'}}>
-                {allImages.map((img,i) => (
-                  <button key={i} onClick={() => setActiveImg(i)} style={{width:'65px',height:'65px',border:`2px solid ${i===activeImg?'#6366f1':'rgba(255,255,255,0.1)'}`,borderRadius:'8px',overflow:'hidden',cursor:'pointer',padding:0,background:'rgba(255,255,255,0.04)'}}>
-                    <img src={img} alt="" style={{width:'100%',height:'100%',objectFit:'cover'}} />
+            {productImages.length > 1 ? (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {productImages.map((image, index) => (
+                  <button
+                    key={`${image}-${index}`}
+                    onClick={() => setActiveImage(index)}
+                    className={`h-20 w-20 overflow-hidden rounded-2xl border transition ${
+                      index === activeImage ? 'border-[var(--neon-cyan)] shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-white/10'
+                    }`}
+                  >
+                    <img src={image} alt="" className="h-full w-full object-cover" />
                   </button>
                 ))}
               </div>
-            )}
-          </div>
+            ) : null}
+          </section>
 
-          {/* Info */}
-          <div style={{display:'flex',flexDirection:'column',gap:'1rem'}}>
-            <h1 style={{fontSize:'clamp(1.4rem,4vw,2rem)',fontWeight:'800',margin:0,lineHeight:1.3}}>{product.name}</h1>
-            
-            <span style={{display:'inline-block',padding:'0.3rem 1rem',background:'rgba(99,102,241,0.15)',border:'1px solid rgba(99,102,241,0.3)',borderRadius:'999px',fontSize:'0.85rem',width:'fit-content'}}>
-              {product.category}
-            </span>
-
-            <div style={{fontWeight:'700',color:product.in_stock?'#4ade80':'#f87171',fontSize:'1rem'}}>
-              {product.in_stock ? '✅ متاح' : '❌ غير متاح حالياً'}
+          <section className="rounded-[28px] border border-white/10 bg-[#090d13] p-6 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-[var(--neon-cyan)]">
+                {product.category_name_ar ?? product.category}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">{getConditionLabel(product.condition)}</span>
             </div>
 
-            {!product.price_on_inquiry && product.price && (
-              <div style={{fontSize:'clamp(1.5rem,4vw,2.2rem)',fontWeight:'900',color:'#818cf8'}}>
-                {product.price.toLocaleString('ar-EG')} <span style={{fontSize:'1rem',fontWeight:'400'}}>جنيه</span>
+            <h1 className="text-3xl font-black leading-tight md:text-5xl">{product.name}</h1>
+            <p className="mt-3 text-gray-400">{product.description || 'لا يوجد وصف إضافي للمنتج.'}</p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">الموديل: {product.device_model}</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">السعة: {product.storage_size}</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">اللون: {product.color}</span>
+              {typeof product.battery_health === 'number' ? (
+                <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm">البطارية: {product.battery_health}%</span>
+              ) : null}
+            </div>
+
+            <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-5">
+              {product.price_on_inquiry || product.price === null ? (
+                <div className="text-2xl font-black text-[var(--neon-cyan)]">اسأل على السعر</div>
+              ) : (
+                <div className="flex items-end gap-3">
+                  <div className="text-4xl font-black text-[var(--neon-cyan)]">{product.price.toLocaleString('ar-EG')} جنيه</div>
+                  {product.original_price ? <div className="pb-1 text-lg text-gray-500 line-through">{product.original_price.toLocaleString('ar-EG')} جنيه</div> : null}
+                </div>
+              )}
+              <div className={`mt-4 inline-flex rounded-full px-4 py-2 text-sm font-bold ${product.in_stock ? 'bg-emerald-500/15 text-emerald-300' : 'bg-red-500/15 text-red-300'}`}>
+                {product.in_stock ? 'متاح الآن' : 'غير متاح حاليًا'}
               </div>
-            )}
+            </div>
 
-            {product.description && (
-              <p style={{color:'rgba(255,255,255,0.65)',lineHeight:'1.8',margin:0,fontSize:'0.95rem'}}>
-                {product.description}
-              </p>
-            )}
-
-            <a href={`https://wa.me/${WHATSAPP}?text=${msg}`} target="_blank" rel="noopener noreferrer"
-              style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.6rem',padding:'1rem 1.5rem',background:'linear-gradient(135deg,#25D366,#128C7E)',color:'white',borderRadius:'12px',fontWeight:'800',fontSize:'1.05rem',textDecoration:'none',boxShadow:'0 0 25px rgba(37,211,102,0.35)',fontFamily:'Cairo,sans-serif',marginTop:'auto'}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-              اسأل بوكس 🍎
-            </a>
-          </div>
+            <div className="mt-8 grid gap-3 md:grid-cols-2">
+              <a
+                href={buildWhatsAppUrl(product)}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl bg-gradient-to-r from-[#25D366] to-[#128C7E] px-5 py-4 text-center font-black text-white shadow-[0_0_30px_rgba(37,211,102,0.25)] transition hover:-translate-y-0.5"
+              >
+                اسأل بوكس على واتساب
+              </a>
+              <button
+                onClick={() => router.push('/products')}
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-center font-bold text-white transition hover:bg-white/10"
+              >
+                شوف باقي المنتجات
+              </button>
+            </div>
+          </section>
         </div>
       </div>
     </div>

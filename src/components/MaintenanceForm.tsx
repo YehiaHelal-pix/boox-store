@@ -1,5 +1,6 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 
 const ALL_MODELS = [
@@ -38,7 +39,7 @@ export default function MaintenanceForm() {
   // Exact compression logic
   async function compressImg(file: File): Promise<Blob> {
     try {
-      if (typeof window === 'undefined' || !window.createImageBitmap) return file as any
+      if (typeof window === 'undefined' || !window.createImageBitmap) return file
       const bmp = await createImageBitmap(file)
       const cv = document.createElement('canvas')
       let w = bmp.width, h = bmp.height, mx = 900
@@ -46,13 +47,21 @@ export default function MaintenanceForm() {
       else { if (h > mx) { w = w * mx / h; h = mx; } }
       cv.width = Math.round(w); cv.height = Math.round(h)
       cv.getContext('2d')?.drawImage(bmp, 0, 0, cv.width, cv.height)
-      return new Promise(r => cv.toBlob(b => r(b!), 'image/jpeg', 0.78))
-    } catch (e) {
-      return file as any
+      return await new Promise<Blob>((resolve, reject) => {
+        cv.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Image compression failed'))
+            return
+          }
+          resolve(blob)
+        }, 'image/jpeg', 0.78)
+      })
+    } catch {
+      return file
     }
   }
 
-  const uploadImg = async (supabase: any, file: File, prefix: string) => {
+  const uploadImg = async (supabase: SupabaseClient, file: File, prefix: string) => {
     setShowProgress(true)
     setProgressWidth('20%')
     try {
@@ -64,7 +73,7 @@ export default function MaintenanceForm() {
       setProgressWidth('100%')
       setTimeout(() => { setShowProgress(false); setProgressWidth('0%') }, 800)
       return supabase.storage.from('maintenance-media').getPublicUrl(name).data.publicUrl
-    } catch (e) {
+    } catch {
       setShowProgress(false)
       return null
     }
@@ -106,8 +115,8 @@ export default function MaintenanceForm() {
         customer_name: name,
         customer_phone: phone,
         device_model: model,
-        problem_description: problem,
-        extra_notes: notesRef.current?.value || '',
+        issue_description: problem,
+        notes: notesRef.current?.value || '',
         media_urls: mediaUrls
       }])
 

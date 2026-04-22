@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { getAdminAuthState, requireAdminApiAccess } from '@/lib/auth/admin'
 import { logAdminActivity } from '@/lib/admin-activity'
 import {
   buildProductWritePayload,
@@ -60,7 +60,7 @@ async function resolveUniqueSlug(baseName: string) {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const adminMode = isAdminRequest(request)
+    const { isAdmin } = await getAdminAuthState()
     const categories = await getCategories()
     const categoryMap = new Map<string, Category>()
 
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin.from('products').select('*').order('created_at', { ascending: false })
 
-    if (!adminMode) {
+    if (!isAdmin) {
       query = query.eq('is_available', true).eq('is_visible', true)
     }
 
@@ -128,8 +128,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

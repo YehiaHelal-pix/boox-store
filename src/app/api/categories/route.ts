@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { getAdminAuthState, requireAdminApiAccess } from '@/lib/auth/admin'
 import { logAdminActivity } from '@/lib/admin-activity'
 import { slugify } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -14,8 +14,9 @@ function jsonError(message: string, status: number) {
 export async function GET(request: NextRequest) {
   try {
     let query = supabaseAdmin.from('categories').select('*').order('name_ar', { ascending: true })
+    const { isAdmin } = await getAdminAuthState()
 
-    if (!isAdminRequest(request)) {
+    if (!isAdmin) {
       query = query.eq('is_active', true)
     }
 
@@ -33,8 +34,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

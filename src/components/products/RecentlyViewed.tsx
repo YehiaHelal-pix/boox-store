@@ -1,65 +1,78 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { Product } from '@/lib/supabase/types'
+import { normalizeProductRow } from '@/lib/products'
+import type { Category, Product, ProductRow } from '@/types/database'
 import { useCustomer } from '@/hooks/useCustomer'
 import ProductCard from './ProductCard'
 import { Clock } from 'lucide-react'
 
 export default function RecentlyViewed({ excludeId }: { excludeId?: string }) {
-    const { customer, isLoaded } = useCustomer()
-    const [products, setProducts] = useState<Product[]>([])
-    const [loading, setLoading] = useState(true)
+  const { customer, isLoaded } = useCustomer()
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        const fetchRecent = async () => {
-            if (!isLoaded) return
-            const ids = (customer.viewed_products || []).filter(id => id !== excludeId)
+  useEffect(() => {
+    async function fetchRecent() {
+      if (!isLoaded) return
+      const ids = (customer.viewed_products || []).filter((id) => id !== excludeId)
 
-            if (ids.length === 0) {
-                setProducts([])
-                setLoading(false)
-                return
-            }
+      if (ids.length === 0) {
+        setProducts([])
+        setLoading(false)
+        return
+      }
 
-            setLoading(true)
-            const sb = createClient()
-            const { data } = await sb.from('products').select('*').in('id', ids.slice(0, 6))
-            if (data) {
-                // Keep order of ids
-                const sorted = ids.slice(0, 6).map(id => data.find(p => p.id === id)).filter(Boolean) as Product[]
-                setProducts(sorted)
-            }
-            setLoading(false)
-        }
+      setLoading(true)
+      const client = createClient()
+      const [{ data: productRows }, { data: categories }] = await Promise.all([
+        client.from('products').select('*').in('id', ids.slice(0, 6)),
+        client.from('categories').select('*').eq('is_active', true),
+      ])
 
-        fetchRecent()
-    }, [customer.viewed_products, isLoaded, excludeId])
+      const categoryMap = new Map<string, Category>()
+      ;(categories ?? []).forEach((category) => {
+        categoryMap.set(category.id, category)
+        categoryMap.set(category.slug, category)
+      })
 
-    if (!isLoaded || (products.length === 0 && !loading)) return null
+      const normalized = ids
+        .slice(0, 6)
+        .map((id) => (productRows as ProductRow[] | null)?.find((product) => product.id === id))
+        .filter((product): product is ProductRow => Boolean(product))
+        .map((product) => normalizeProductRow(product, categoryMap))
 
-    return (
-        <section className="mt-20">
-            <div className="flex items-center gap-3 mb-8">
-                <div className="p-2 bg-white/5 rounded-lg border border-white/10">
-                    <Clock size={20} className="text-[var(--neon-cyan)]" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">المنتجات التي شاهدتها مؤخراً</h2>
-            </div>
+      setProducts(normalized)
+      setLoading(false)
+    }
 
-            {loading ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="aspect-[3/4] glass rounded-2xl animate-pulse" />
-                    ))}
-                </div>
-            ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {products.map(p => (
-                        <ProductCard key={p.id} product={p} />
-                    ))}
-                </div>
-            )}
-        </section>
-    )
+    void fetchRecent()
+  }, [customer.viewed_products, excludeId, isLoaded])
+
+  if (!isLoaded || (products.length === 0 && !loading)) return null
+
+  return (
+    <section className="mt-20">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-2 bg-white/5 rounded-lg border border-white/10">
+          <Clock size={20} className="text-[var(--neon-cyan)]" />
+        </div>
+        <h2 className="text-2xl font-bold text-white">شاهدته قريب</h2>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="aspect-[3/4] glass rounded-2xl animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }

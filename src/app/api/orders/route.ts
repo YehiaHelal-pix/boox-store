@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { requireAdminApiAccess } from '@/lib/auth/admin'
 import { logAdminActivity } from '@/lib/admin-activity'
 import { isValidPhone, normalizeOrderRow, normalizePhone, toNumber } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -14,8 +14,9 @@ function jsonError(message: string, status: number) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {
@@ -92,8 +93,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

@@ -1,610 +1,726 @@
 'use client'
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { CATEGORY_LABELS, CONDITION_LABELS, GRADE_OPTIONS, STORAGE_OPTIONS } from '@/lib/products'
+import type {
+  AdminActivityLog,
+  Category,
+  DashboardStats,
+  MaintenanceRequest,
+  Order,
+  OrderStatus,
+  Product,
+  ProductCondition,
+  TradeRequest,
+} from '@/types/database'
 
-const CATS = {
-  iphone: '📱 iPhone',
-  ipad: '📱 iPad',
-  macbook: '💻 MacBook',
-  accessories: '🎧 إكسسوارات',
-  repairs: '🔧 قطع غيار',
-  other: '📦 أخرى'
+type AdminTab = 'dashboard' | 'products' | 'orders' | 'maintenance' | 'trade' | 'settings' | 'logs'
+type NoticeType = 'success' | 'error' | 'info'
+
+interface NoticeState {
+  type: NoticeType
+  message: string
 }
 
-const ALL_MODELS = [
-  'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16', 'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15', 'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14', 'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13', 'iPhone 13 mini', 'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12', 'iPhone 12 mini', 'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11', 'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X', 'iPhone 8 Plus', 'iPhone 8', 'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)',
-  'iPad Pro 13" M4', 'iPad Pro 11" M4', 'iPad Pro 13" M2', 'iPad Pro 11" M2', 'iPad Air M2 13"', 'iPad Air M2 11"', 'iPad Air (5th gen)', 'iPad (10th gen)', 'iPad (9th gen)', 'iPad mini (6th gen)',
-  'MacBook Pro 16" M4 Pro', 'MacBook Pro 16" M4', 'MacBook Pro 14" M4 Pro', 'MacBook Pro 14" M4', 'MacBook Pro 16" M3 Max', 'MacBook Pro 14" M3', 'MacBook Air 15" M3', 'MacBook Air 13" M3', 'MacBook Air 15" M2', 'MacBook Air 13" M2', 'MacBook Air 13" M1',
-  'AirPods Pro (2nd gen)', 'AirPods (4th gen)', 'AirPods Max', 'Apple Watch Ultra 2', 'Apple Watch Series 10', 'Apple Watch SE', 'Apple Pencil Pro', 'Magic Keyboard', 'MagSafe Charger'
+interface ProductFormState {
+  name: string
+  description: string
+  price: string
+  original_price: string
+  category: string
+  model: string
+  storage_size: string
+  color: string
+  condition: ProductCondition
+  battery_health: string
+  grade: string
+  price_on_inquiry: boolean
+  in_stock: boolean
+  is_featured: boolean
+  is_visible: boolean
+  is_available: boolean
+  is_tax_exempt: boolean
+  tax_value: string
+}
+
+interface SiteConfigForm {
+  hero_title: string
+  hero_slogan_line1: string
+  hero_slogan_line2: string
+  hero_stat_products_label: string
+  hero_stat_warranty_label: string
+  hero_stat_support_label: string
+  hero_stat_support_value: string
+  hero_stat_warranty_value: string
+  whatsapp_number: string
+  maps_url: string
+  instagram_url: string
+  facebook_url: string
+  tiktok_url: string
+  color_primary: string
+  color_secondary: string
+  color_accent: string
+}
+
+interface AnnouncementForm {
+  is_visible: boolean
+  text: string
+  bg_color: string
+  text_color: string
+}
+
+const DEFAULT_STATS: DashboardStats = {
+  active_products: 0,
+  total_products: 0,
+  pending_orders: 0,
+  total_orders: 0,
+  completed_orders: 0,
+}
+const DEFAULT_PRODUCT_FORM: ProductFormState = {
+  name: '',
+  description: '',
+  price: '',
+  original_price: '',
+  category: 'iphone',
+  model: '',
+  storage_size: '128GB',
+  color: 'أسود',
+  condition: 'like_new',
+  battery_health: '',
+  grade: 'A',
+  price_on_inquiry: false,
+  in_stock: true,
+  is_featured: false,
+  is_visible: true,
+  is_available: true,
+  is_tax_exempt: true,
+  tax_value: '',
+}
+const DEFAULT_SITE_CONFIG: SiteConfigForm = {
+  hero_title: 'Boox Store',
+  hero_slogan_line1: 'أجهزة آبل أصلية بضمان',
+  hero_slogan_line2: 'وأسرع خدمة قبل وبعد البيع',
+  hero_stat_products_label: 'منتج متاح',
+  hero_stat_warranty_label: 'ضمان',
+  hero_stat_support_label: 'دعم فوري',
+  hero_stat_support_value: '24/7',
+  hero_stat_warranty_value: '100%',
+  whatsapp_number: '201113614021',
+  maps_url: 'https://maps.app.goo.gl/ryLFkd2CCWUFcsxV6',
+  instagram_url: 'https://www.instagram.com/ahmed_boox22',
+  facebook_url: 'https://www.facebook.com/ahmed.m.yahia.2025',
+  tiktok_url: 'https://www.tiktok.com/@boox_store',
+  color_primary: '#0ea5e9',
+  color_secondary: '#22d3ee',
+  color_accent: '#f59e0b',
+}
+const DEFAULT_ANNOUNCEMENT: AnnouncementForm = {
+  is_visible: false,
+  text: '',
+  bg_color: '#0f172a',
+  text_color: '#ffffff',
+}
+const ORDER_STATUS_OPTIONS: Array<{ value: OrderStatus; label: string }> = [
+  { value: 'pending', label: 'معلق' },
+  { value: 'confirmed', label: 'متأكد' },
+  { value: 'shipped', label: 'اتشحن' },
+  { value: 'delivered', label: 'اتسلم' },
+  { value: 'cancelled', label: 'اتلغى' },
 ]
 
+async function parseJson<T>(response: Response): Promise<T> {
+  return (await response.json()) as T
+}
+
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false)
-  const [pass, setPass] = useState('')
-  const [products, setProducts] = useState<any[]>([])
-  
-  const [activeTab, setActiveTab] = useState<'products' | 'customize' | 'maintenance' | 'trade' | 'logs'>('products')
-  const [announcement, setAnnouncement] = useState({
-    is_visible: false, text: '', bg_color: '#6366f1', text_color: '#ffffff'
-  })
-  const [maintenanceReqs, setMaintenanceReqs] = useState<any[]>([])
-  const [tradeReqs, setTradeReqs] = useState<any[]>([])
-  const [logs, setLogs] = useState<any[]>([])
-  const [priceType, setPriceType] = useState<'fixed' | 'inquiry'>('fixed')
-  const [price, setPrice] = useState('')
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard')
+  const [loading, setLoading] = useState(false)
+  const [savingProduct, setSavingProduct] = useState(false)
+  const [notice, setNotice] = useState<NoticeState | null>(null)
+  const [stats, setStats] = useState<DashboardStats>(DEFAULT_STATS)
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([])
+  const [tradeRequests, setTradeRequests] = useState<TradeRequest[]>([])
+  const [logs, setLogs] = useState<AdminActivityLog[]>([])
+  const [siteConfig, setSiteConfig] = useState<SiteConfigForm>(DEFAULT_SITE_CONFIG)
+  const [announcement, setAnnouncement] = useState<AnnouncementForm>(DEFAULT_ANNOUNCEMENT)
+  const [productForm, setProductForm] = useState<ProductFormState>(DEFAULT_PRODUCT_FORM)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
 
-  const [siteConfig, setSiteConfig] = useState<any>({
-    hero_title: 'Boox Store',
-    hero_slogan_line1: 'من بوكس تشتري تفاح',
-    hero_slogan_line2: 'وانت بالك مرتاح',
-    whatsapp_number: '201113614021',
-    color_primary: '#6366f1',
-    color_secondary: '#22d3ee',
-    color_accent: '#a855f7',
-    maps_url: 'https://maps.app.goo.gl/ryLFkd2CCWUFcsxV6',
-    instagram_url: 'https://www.instagram.com/ahmed_boox22',
-    facebook_url: 'https://www.facebook.com/ahmed.m.yahia.2025',
-    tiktok_url: 'https://www.tiktok.com/@boox_store'
-  })
-
-  // Form refs
-  const nameRef = useRef<HTMLInputElement>(null)
-  const descRef = useRef<HTMLTextAreaElement>(null)
-  const oprRef = useRef<HTMLInputElement>(null)
-  const catRef = useRef<HTMLSelectElement>(null)
-  const modRef = useRef<HTMLSelectElement>(null)
-  const imgRef = useRef<HTMLInputElement>(null)
-  const imgCamRef = useRef<HTMLInputElement>(null)
-  const stkRef = useRef<HTMLInputElement>(null)
-  const featRef = useRef<HTMLInputElement>(null)
-  const batRef = useRef<HTMLInputElement>(null)
-  const taxExRef = useRef<HTMLInputElement>(null)
-  const taxValRef = useRef<HTMLInputElement>(null)
-
-  const [isAdding, setIsAdding] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState('0%')
-  const [showProgress, setShowProgress] = useState(false)
-  const [previews, setPreviews] = useState<string[]>([])
-
-  const handleMultipleImages = () => {
-    const files = imgRef.current?.files || imgCamRef.current?.files
-    if (!files) return
-    const arr = Array.from(files).map(f => URL.createObjectURL(f))
-    setPreviews(arr)
+  function showNotice(type: NoticeType, message: string) {
+    setNotice({ type, message })
+    window.setTimeout(() => {
+      setNotice((current) => (current?.message === message ? null : current))
+    }, 3500)
   }
 
-  const showToast = (msg: string, type = 'info') => {
-    window.dispatchEvent(new CustomEvent('boox-toast', { detail: { msg, type } }))
+  async function adminFetch<T>(path: string, init?: RequestInit) {
+    const hasJsonBody = typeof init?.body === 'string'
+    const response = await fetch(path, {
+      ...init,
+      headers: {
+        ...(hasJsonBody ? { 'Content-Type': 'application/json' } : {}),
+        ...(init?.headers ?? {}),
+      },
+      cache: 'no-store',
+    })
+
+    const payload = await parseJson<T | { error?: string }>(response)
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = '/auth/login?error=session_expired&next=/admin'
+      }
+
+      if (response.status === 403) {
+        window.location.href = '/auth/forbidden'
+      }
+
+      const message = typeof payload === 'object' && payload && 'error' in payload ? payload.error ?? 'فشل التنفيذ' : 'فشل التنفيذ'
+      throw new Error(message)
+    }
+
+    return payload as T
+  }
+
+  async function loadAdminData() {
+    setLoading(true)
+    try {
+      const [statsData, productData, categoryData, orderData, maintenanceData, tradeData, logsData, settingsData, announcementData] =
+        await Promise.all([
+          adminFetch<DashboardStats>('/api/dashboard/stats'),
+          adminFetch<Product[]>('/api/products'),
+          adminFetch<Category[]>('/api/categories'),
+          adminFetch<Order[]>('/api/orders'),
+          adminFetch<MaintenanceRequest[]>('/api/maintenance'),
+          adminFetch<TradeRequest[]>('/api/trade'),
+          adminFetch<AdminActivityLog[]>('/api/admin/activity'),
+          adminFetch<SiteConfigForm>('/api/settings'),
+          adminFetch<AnnouncementForm>('/api/announcement'),
+        ])
+
+      setStats(statsData)
+      setProducts(productData)
+      setCategories(categoryData)
+      setOrders(orderData)
+      setMaintenanceRequests(maintenanceData)
+      setTradeRequests(tradeData)
+      setLogs(logsData)
+      setSiteConfig({ ...DEFAULT_SITE_CONFIG, ...settingsData })
+      setAnnouncement({ ...DEFAULT_ANNOUNCEMENT, ...announcementData })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'تعذر تحميل لوحة الإدارة'
+      showNotice('error', message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (sessionStorage.getItem('adm') === '1') {
-        setAuthed(true)
-        loadProducts()
-        loadSettings()
-        loadMaintenance()
-        loadTrade()
-        loadAnnouncement()
-      }
-    }
+    void loadAdminData()
   }, [])
 
-  const loadAnnouncement = async () => {
-    try {
-      const res = await fetch('/api/announcement')
-      const d = await res.json()
-      setAnnouncement({
-        is_visible: d.is_visible || false,
-        text: d.text || '',
-        bg_color: d.bg_color || '#6366f1',
-        text_color: d.text_color || '#ffffff'
+  const visibleProducts = useMemo(() => products.filter((product) => product.is_available), [products])
+
+  async function uploadProductImages() {
+    if (selectedFiles.length === 0) return []
+
+    const client = createClient()
+    const urls: string[] = []
+
+    for (const file of selectedFiles) {
+      const fileName = `product-${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name.replace(/\s+/g, '-')}`
+      const { error } = await client.storage.from('product-images').upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
       })
-    } catch (e) {
-      console.error(e)
-    }
-  }
 
-  const saveAnnouncement = async () => {
-    try {
-      const res = await fetch('/api/announcement', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(announcement)
-      })
-      if (res.ok) showToast('✅ تم حفظ الإعلان!', 'success')
-      else showToast('❌ حدث خطأ', 'error')
-    } catch (e: any) {
-      showToast('❌ حدث خطأ: ' + e.message, 'error')
-    }
-  }
-
-  const loadMaintenance = async () => {
-    try {
-      const res = await fetch('/api/maintenance')
-      const data = await res.json()
-      setMaintenanceReqs(Array.isArray(data) ? data : [])
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const loadTrade = async () => {
-    try {
-      const res = await fetch('/api/trade')
-      const data = await res.json()
-      setTradeReqs(Array.isArray(data) ? data : [])
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const loadSettings = async () => {
-    try {
-      const res = await fetch('/api/settings')
-      const data = await res.json()
-      if (data && !data.error) {
-        setSiteConfig((prev: any) => ({ ...prev, ...data }))
-        if (data.color_primary) document.documentElement.style.setProperty('--neon-1', data.color_primary)
-        if (data.color_secondary) document.documentElement.style.setProperty('--neon-2', data.color_secondary)
-        if (data.color_accent) document.documentElement.style.setProperty('--neon-3', data.color_accent)
-      }
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  const saveSettings = async (section: string) => {
-    try {
-      const res = await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(siteConfig)
-      })
-      if (!res.ok) throw new Error('Failed to save settings')
-      showToast(`✅ تم حفظ ${section} بنجاح`, 'success')
-      
-      if (section === 'الألوان') {
-        document.documentElement.style.setProperty('--neon-1', siteConfig.color_primary)
-        document.documentElement.style.setProperty('--neon-2', siteConfig.color_secondary)
-        document.documentElement.style.setProperty('--neon-3', siteConfig.color_accent)
-      }
-    } catch (e: any) {
-      showToast('❌ فشل الحفظ: ' + e.message, 'error')
-    }
-  }
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (pass === 'Boox@Admin2026' || pass === '1010') {
-      sessionStorage.setItem('adm', '1')
-      setAuthed(true)
-      loadProducts()
-    } else {
-      showToast('❌ كلمة مرور خاطئة', 'error')
-    }
-  }
-
-  const loadProducts = async () => {
-    try {
-      const res = await fetch('/api/products')
-      const data = await res.json()
-      setProducts(Array.isArray(data) ? data : [])
-    } catch {
-      showToast('فشل تحميل المنتجات', 'error')
-    }
-  }
-
-
-  const delProd = async (id: string) => {
-    if (!confirm('هل تريد حذف هذا المنتج؟')) return
-    try {
-      const res = await fetch('/api/products', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      })
-      if (!res.ok) throw new Error('Delete failed')
-      showToast('🗑️ تم الحذف بنجاح', 'success')
-      loadProducts()
-    } catch (e: any) {
-      showToast('❌ خطأ: ' + e.message, 'error')
-    }
-  }
-
-  const addProd = async () => {
-    const name = nameRef.current?.value.trim()
-    const cat = catRef.current?.value
-    
-    if (!name || (priceType === 'fixed' && !price) || !cat) {
-      showToast('⚠️ اسم المنتج، السعر، والتصنيف إلزامية', 'warn')
-      return
-    }
-
-    setIsAdding(true)
-    try {
-      let uploadedUrls: string[] = []
-      const files = imgRef.current?.files
-      if (files && files.length > 0) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const sup = createClient()
-        
-        setShowProgress(true)
-        
-        for (let i = 0; i < files.length; i++) {
-          const imgFile = files[i]
-          let blob: Blob = imgFile
-          if (typeof window.createImageBitmap !== 'undefined') {
-            const bmp = await createImageBitmap(imgFile)
-            const cv = document.createElement('canvas')
-            let w = bmp.width, h = bmp.height, mx = 900
-            if (w > h) { if (w > mx) { h = h * mx / w; w = mx; } } 
-            else { if (h > mx) { w = w * mx / h; h = mx; } }
-            cv.width = Math.round(w); cv.height = Math.round(h)
-            cv.getContext('2d')?.drawImage(bmp, 0, 0, cv.width, cv.height)
-            blob = await new Promise<Blob>((r) => cv.toBlob(b => r(b!), 'image/jpeg', 0.78))
-          }
-
-          setUploadProgress(`${Math.round(((i + 0.5) / files.length) * 100)}%`)
-          
-          const imgName = `pd-${Date.now()}-${i}.jpg`
-          const { error } = await sup.storage.from('product-images').upload(imgName, blob, { contentType: 'image/jpeg' })
-          if (error) {
-            console.error("Storage upload error:", error)
-            throw error
-          }
-          const url = sup.storage.from('product-images').getPublicUrl(imgName).data.publicUrl
-          uploadedUrls.push(url)
-          setUploadProgress(`${Math.round(((i + 1) / files.length) * 100)}%`)
-        }
-        setTimeout(() => setShowProgress(false), 800)
+      if (error) {
+        throw new Error(error.message)
       }
 
-      const oprRaw = oprRef.current?.value
-      const opr = oprRaw && !isNaN(parseFloat(oprRaw)) ? parseFloat(oprRaw) : null
-      const mod = modRef.current?.value || null
+      const { data } = client.storage.from('product-images').getPublicUrl(fileName)
+      urls.push(data.publicUrl)
+    }
 
+    return urls
+  }
+
+  async function handleSaveProduct(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setSavingProduct(true)
+
+    try {
+      const images = await uploadProductImages()
       const payload = {
-        name,
-        description: descRef.current?.value || '',
-        price: priceType === 'fixed' ? Number(price) : null,
-        price_on_inquiry: priceType === 'inquiry',
-        original_price: opr,
-        category: cat,
-        device_model: mod,
-        image_url: uploadedUrls.length > 0 ? uploadedUrls[0] : null,
-        images: uploadedUrls.slice(1),
-        in_stock: stkRef.current?.checked ?? true,
-        is_featured: featRef.current?.checked ?? false,
-        battery_health: batRef.current?.value ? parseInt(batRef.current.value) : null,
-        is_tax_exempt: taxExRef.current?.checked ?? true,
-        tax_value: taxValRef.current?.value ? parseFloat(taxValRef.current.value) : null
+        name: productForm.name,
+        description: productForm.description,
+        price: productForm.price ? Number(productForm.price) : null,
+        original_price: productForm.original_price ? Number(productForm.original_price) : null,
+        category: productForm.category,
+        model: productForm.model,
+        storage_size: productForm.storage_size,
+        color: productForm.color,
+        condition: productForm.condition,
+        battery_health: productForm.battery_health ? Number(productForm.battery_health) : null,
+        grade: productForm.grade,
+        price_on_inquiry: productForm.price_on_inquiry,
+        in_stock: productForm.in_stock,
+        is_featured: productForm.is_featured,
+        is_visible: productForm.is_visible,
+        is_available: productForm.is_available,
+        is_tax_exempt: productForm.is_tax_exempt,
+        tax_value: productForm.tax_value ? Number(productForm.tax_value) : null,
+        images,
       }
 
-      const res = await fetch('/api/products', {
+      await adminFetch<Product>('/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       })
 
-      if (!res.ok) throw new Error('Failed to create product')
-      
-      showToast('✅ تمت إضافة المنتج', 'success')
-      
-      // reset
-      if (nameRef.current) nameRef.current.value = ''
-      if (descRef.current) descRef.current.value = ''
-      setPriceType('fixed')
-      setPrice('')
-      if (oprRef.current) oprRef.current.value = ''
-      if (catRef.current) catRef.current.selectedIndex = 0
-      if (modRef.current) modRef.current.selectedIndex = 0
-      if (stkRef.current) stkRef.current.checked = true
-      if (featRef.current) featRef.current.checked = false
-      if (imgRef.current) imgRef.current.value = ''
-      if (imgCamRef.current) imgCamRef.current.value = ''
-      if (batRef.current) batRef.current.value = ''
-      if (taxExRef.current) taxExRef.current.checked = true
-      if (taxValRef.current) taxValRef.current.value = ''
-      setPreviews([])
-
-      loadProducts()
-    } catch (e: any) {
-      showToast('❌ فشل الحفظ: ' + e.message, 'error')
-      setShowProgress(false)
+      setProductForm(DEFAULT_PRODUCT_FORM)
+      setSelectedFiles([])
+      showNotice('success', 'المنتج اتحفظ في قاعدة البيانات بنجاح')
+      await loadAdminData()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'فشل حفظ المنتج'
+      showNotice('error', message)
+    } finally {
+      setSavingProduct(false)
     }
-    setIsAdding(false)
   }
 
-  if (!authed) {
-    return (
-      <div style={{ padding: '50px', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '20px' }}>🔐 لوحة الأدمن</h2>
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '300px' }}>
-          <input 
-            type="password" 
-            placeholder="كلمة المرور" 
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-            className="fi"
-            required
-            autoFocus
-          />
-          <button type="submit" className="btn-adm-primary">دخول</button>
-        </form>
-      </div>
-    )
+  async function handleDeleteProduct(productId: string) {
+    try {
+      await adminFetch<{ success: boolean }>(`/api/products/${productId}`, {
+        method: 'DELETE',
+      })
+      showNotice('success', 'المنتج اتشال من العرض')
+      await loadAdminData()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'فشل حذف المنتج'
+      showNotice('error', message)
+    }
+  }
+
+  async function handleOrderStatusChange(orderId: string, status: OrderStatus) {
+    try {
+      await adminFetch<Order>('/api/orders', {
+        method: 'PUT',
+        body: JSON.stringify({ id: orderId, status }),
+      })
+      showNotice('success', 'حالة الطلب اتحدثت')
+      await loadAdminData()
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'فشل تحديث الطلب'
+      showNotice('error', message)
+    }
+  }
+
+  async function handleSaveSiteConfig() {
+    try {
+      await adminFetch<SiteConfigForm>('/api/settings', {
+        method: 'POST',
+        body: JSON.stringify(siteConfig),
+      })
+      showNotice('success', 'إعدادات الموقع اتحفظت')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'فشل حفظ الإعدادات'
+      showNotice('error', message)
+    }
+  }
+
+  async function handleSaveAnnouncement() {
+    try {
+      await adminFetch<AnnouncementForm>('/api/announcement', {
+        method: 'POST',
+        body: JSON.stringify(announcement),
+      })
+      showNotice('success', 'الإعلان اتحفظ')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'فشل حفظ الإعلان'
+      showNotice('error', message)
+    }
   }
 
   return (
-    <div id="admin-panel" style={{ display: 'block', position: 'static', minHeight: '100vh', width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-      <div className="admin-header">
-        <h2 style={{ fontSize: '1.2rem', fontWeight: 900 }}>🔐 لوحة الأدمن</h2>
-        <button onClick={() => window.location.href = '/'} className="adm-close">✕ العودة للمتجر</button>
-      </div>
-
-      <div style={{ display: 'flex', gap: '8px', padding: '0 20px', overflowX: 'auto', marginBottom: '16px' }}>
-        <button className={activeTab === 'products' ? 'btn-adm-primary' : 'btn-adm-ghost'} onClick={() => setActiveTab('products')} style={{ whiteSpace: 'nowrap' }}>📦 المنتجات</button>
-        <button className={activeTab === 'customize' ? 'btn-adm-primary' : 'btn-adm-ghost'} onClick={() => setActiveTab('customize')} style={{ whiteSpace: 'nowrap' }}>🎨 تخصيص الموقع</button>
-        <button className={activeTab === 'maintenance' ? 'btn-adm-primary' : 'btn-adm-ghost'} onClick={() => setActiveTab('maintenance')} style={{ whiteSpace: 'nowrap' }}>🔧 طلبات الصيانة</button>
-        <button className={activeTab === 'trade' ? 'btn-adm-primary' : 'btn-adm-ghost'} onClick={() => setActiveTab('trade')} style={{ whiteSpace: 'nowrap' }}>🔁 طلبات الاستبدال</button>
-        <button className={activeTab === 'logs' ? 'btn-adm-primary' : 'btn-adm-ghost'} onClick={() => setActiveTab('logs')} style={{ whiteSpace: 'nowrap' }}>📋 سجل العمليات</button>
-      </div>
-
-      {activeTab === 'customize' && (
-        <>
-          <div className="adm-section">
-            <h3 style={{ marginBottom: '12px' }}>🏠 تخصيص الهيرو</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '.85rem' }}>العنوان الرئيسي</label>
-              <input className="fi" value={siteConfig.hero_title || ''} onChange={e => setSiteConfig({...siteConfig, hero_title: e.target.value})} />
-              <label style={{ fontSize: '.85rem' }}>السطر الأول من الشعار</label>
-              <input className="fi" value={siteConfig.hero_slogan_line1 || ''} onChange={e => setSiteConfig({...siteConfig, hero_slogan_line1: e.target.value})} />
-              <label style={{ fontSize: '.85rem' }}>السطر الثاني من الشعار</label>
-              <input className="fi" value={siteConfig.hero_slogan_line2 || ''} onChange={e => setSiteConfig({...siteConfig, hero_slogan_line2: e.target.value})} />
-              
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ fontSize: '.85rem' }}>تسمية المنتجات</label>
-                  <input className="fi" value={siteConfig.hero_stat_products_label || ''} onChange={e => setSiteConfig({...siteConfig, hero_stat_products_label: e.target.value})} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ fontSize: '.85rem' }}>تسمية الضمان</label>
-                  <input className="fi" value={siteConfig.hero_stat_warranty_label || ''} onChange={e => setSiteConfig({...siteConfig, hero_stat_warranty_label: e.target.value})} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ fontSize: '.85rem' }}>قيمة الضمان</label>
-                  <input className="fi" value={siteConfig.hero_stat_warranty_value || ''} onChange={e => setSiteConfig({...siteConfig, hero_stat_warranty_value: e.target.value})} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ fontSize: '.85rem' }}>تسمية الدعم</label>
-                  <input className="fi" value={siteConfig.hero_stat_support_label || ''} onChange={e => setSiteConfig({...siteConfig, hero_stat_support_label: e.target.value})} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <label style={{ fontSize: '.85rem' }}>قيمة الدعم</label>
-                  <input className="fi" value={siteConfig.hero_stat_support_value || ''} onChange={e => setSiteConfig({...siteConfig, hero_stat_support_value: e.target.value})} />
-                </div>
-              </div>
-              <button className="btn-adm-primary" style={{ marginTop: '4px' }} onClick={() => saveSettings('الهيرو')}>💾 حفظ الهيرو</button>
-            </div>
+    <div className="min-h-screen bg-[#05080e] px-4 py-6 lg:px-8" dir="rtl">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-[#0b1018] p-6 shadow-[0_0_60px_rgba(0,0,0,0.35)] lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.35em] text-[var(--neon-cyan)]">Boox Store</p>
+            <h1 className="mt-2 text-3xl font-black text-white lg:text-5xl">لوحة الإدارة</h1>
+            <p className="mt-2 text-sm text-gray-400">إدارة المنتجات والطلبات والمحتوى من مكان واحد.</p>
           </div>
-
-          <div className="adm-section">
-            <h3 style={{ marginBottom: '12px' }}>📞 معلومات التواصل</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontSize: '.85rem' }}>رقم واتساب (بدون +)</label>
-              <input className="fi" value={siteConfig.whatsapp_number || ''} onChange={e => setSiteConfig({...siteConfig, whatsapp_number: e.target.value})} placeholder="201113614021" />
-              <label style={{ fontSize: '.85rem' }}>رابط خريطة جوجل</label>
-              <input className="fi" value={siteConfig.maps_url || ''} onChange={e => setSiteConfig({...siteConfig, maps_url: e.target.value})} />
-              <label style={{ fontSize: '.85rem' }}>رابط إنستاجرام</label>
-              <input className="fi" value={siteConfig.instagram_url || ''} onChange={e => setSiteConfig({...siteConfig, instagram_url: e.target.value})} />
-              <label style={{ fontSize: '.85rem' }}>رابط فيسبوك</label>
-              <input className="fi" value={siteConfig.facebook_url || ''} onChange={e => setSiteConfig({...siteConfig, facebook_url: e.target.value})} />
-              <label style={{ fontSize: '.85rem' }}>رابط تيكتوك</label>
-              <input className="fi" value={siteConfig.tiktok_url || ''} onChange={e => setSiteConfig({...siteConfig, tiktok_url: e.target.value})} />
-              <button className="btn-adm-primary" style={{ marginTop: '4px' }} onClick={() => saveSettings('التواصل')}>💾 حفظ التواصل</button>
-            </div>
-          </div>
-
-          <div className="adm-section">
-            <h3>🎨 تخصيص الألوان</h3>
-            <div className="clr-row">
-              <div className="clr-item"><span>أساسي</span><input type="color" value={siteConfig.color_primary || '#6366f1'} onChange={e => setSiteConfig({...siteConfig, color_primary: e.target.value})} /></div>
-              <div className="clr-item"><span>ثانوي</span><input type="color" value={siteConfig.color_secondary || '#22d3ee'} onChange={e => setSiteConfig({...siteConfig, color_secondary: e.target.value})} /></div>
-              <div className="clr-item"><span>ثالث</span><input type="color" value={siteConfig.color_accent || '#a855f7'} onChange={e => setSiteConfig({...siteConfig, color_accent: e.target.value})} /></div>
-            </div>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
-              <button className="btn-adm-primary" onClick={() => saveSettings('الألوان')}>💾 حفظ الألوان</button>
-            </div>
-          </div>
-
-          <div className="adm-section" style={{marginTop:'1rem'}}>
-            <h3 style={{marginBottom:'1rem'}}>📢 خط الإعلانات المتحرك</h3>
-            <label style={{display:'flex',alignItems:'center',gap:'0.5rem',marginBottom:'1rem',cursor:'pointer'}}>
-              <input type="checkbox" checked={announcement.is_visible}
-                onChange={e => setAnnouncement(p=>({...p,is_visible:e.target.checked}))} />
-              <span style={{ fontSize: '.85rem' }}>إظهار خط الإعلانات</span>
-            </label>
-            <textarea value={announcement.text}
-              onChange={e => setAnnouncement(p=>({...p,text:e.target.value}))}
-              placeholder="اكتب نص الإعلان هنا... مثال: 🔥 عرض خاص على iPhone 15"
-              rows={3} className="fi" style={{width:'100%',marginBottom:'1rem'}} />
-            <div style={{display:'flex',gap:'1rem',marginBottom:'1rem',flexWrap:'wrap'}}>
-              <label style={{ fontSize: '.85rem' }}>لون الخلفية: <input type="color" value={announcement.bg_color}
-                onChange={e => setAnnouncement(p=>({...p,bg_color:e.target.value}))} /></label>
-              <label style={{ fontSize: '.85rem' }}>لون النص: <input type="color" value={announcement.text_color}
-                onChange={e => setAnnouncement(p=>({...p,text_color:e.target.value}))} /></label>
-            </div>
-            <button onClick={saveAnnouncement} className="btn-adm-primary" style={{ marginTop: '4px' }}>💾 حفظ الإعلان</button>
-          </div>
-        </>
-      )}
-
-      {activeTab === 'products' && (
-        <>
-          <div className="adm-section">
-            <h3>➕ إضافة منتج</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '4px' }}>
-              <input type="text" ref={nameRef} className="fi" placeholder="اسم المنتج *" required />
-              <textarea ref={descRef} className="fi" placeholder="الوصف"></textarea>
-              <div style={{marginBottom:'1rem'}}>
-                <label style={{display:'block',marginBottom:'0.5rem',fontWeight:'600'}}>السعر</label>
-                <div style={{display:'flex',gap:'1rem',marginBottom:'0.75rem'}}>
-                  <label style={{cursor:'pointer',display:'flex',alignItems:'center',gap:'0.4rem'}}>
-                    <input type="radio" name="priceType" value="fixed"
-                      checked={priceType === 'fixed'}
-                      onChange={() => setPriceType('fixed')} />
-                    سعر محدد
-                  </label>
-                  <label style={{cursor:'pointer',display:'flex',alignItems:'center',gap:'0.4rem'}}>
-                    <input type="radio" name="priceType" value="inquiry"
-                      checked={priceType === 'inquiry'}
-                      onChange={() => setPriceType('inquiry')} />
-                    اسأل بوكس (بدون سعر)
-                  </label>
-                </div>
-                {priceType === 'fixed' && (
-                  <input
-                    type="number"
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    placeholder="السعر بالجنيه *"
-                    className="fi"
-                  />
-                )}
-              </div>
-              <input type="number" ref={oprRef} className="fi" placeholder="السعر الأصلي ($)" />
-              <select ref={catRef} className="fi" required defaultValue="">
-                <option value="" disabled>التصنيف *</option>
-                {Object.entries(CATS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-              </select>
-              <select ref={modRef} className="fi" defaultValue="">
-                <option value="">الموديل (اختياري)</option>
-                {ALL_MODELS.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-
-              <div className="adm-grid-2">
-                <input type="number" ref={batRef} className="fi" placeholder="🔋 نسبة البطارية (%)" min="1" max="100" />
-                <div className="fi" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)' }}>
-                  <input type="checkbox" ref={taxExRef} defaultChecked style={{ width: 'auto' }} />
-                  <label style={{ fontSize: '.8rem' }}>معفي من الضريبة</label>
-                </div>
-              </div>
-              <input type="number" ref={taxValRef} className="fi" placeholder="💰 قيمة الضريبة (إذا وجد)" />
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
-                <div style={{ fontSize: '.85rem', color: 'var(--text-dim)', marginBottom: '4px' }}>📷 صورة المنتج:</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                  <label htmlFor="ap-img-gal" className="upload-btn" style={{ margin: 0, fontSize: '.85rem' }}>🖼️ المعرض</label>
-                  <label htmlFor="ap-img-cam" className="upload-btn" style={{ margin: 0, fontSize: '.85rem', background: 'rgba(255,255,255,0.08)' }}>📸 الكاميرا</label>
-                </div>
-              </div>
-              <input type="file" id="ap-img-gal" ref={imgRef} accept="image/*" multiple onChange={handleMultipleImages} style={{ display: 'none' }} />
-              <input type="file" id="ap-img-cam" ref={imgCamRef} accept="image/*" capture="environment" multiple onChange={handleMultipleImages} style={{ display: 'none' }} />
-              
-              {previews.length > 0 && (
-                <div style={{display:'flex',gap:'8px',flexWrap:'wrap',marginTop:'8px'}}>
-                  {previews.map((p,i) => (
-                    <img key={i} src={p} alt="" style={{width:'60px',height:'60px',objectFit:'cover',borderRadius:'6px',border:'1px solid rgba(255,255,255,0.1)'}} />
-                  ))}
-                </div>
-              )}
-              
-              <div className="progress-bar-wrap" style={{ display: showProgress ? 'block' : 'none' }}>
-                <div className="progress-bar-fill" style={{ width: uploadProgress }}></div>
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '4px 0' }}>
-                <input type="checkbox" ref={stkRef} defaultChecked style={{ width: 'auto' }} />
-                <label style={{ fontSize: '.9rem' }}>متوفر بالمخزون</label>
-                <input type="checkbox" ref={featRef} style={{ width: 'auto', marginRight: '16px' }} />
-                <label style={{ fontSize: '.9rem' }}>منتج مميز</label>
-              </div>
-              <button onClick={addProd} disabled={isAdding} className="btn-adm-primary">
-                {isAdding ? 'جاري الحفظ...' : 'حفظ المنتج'}
+          <div className="flex flex-wrap gap-2">
+            {(['dashboard', 'products', 'orders', 'maintenance', 'trade', 'settings', 'logs'] as AdminTab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+                  activeTab === tab ? 'bg-[var(--neon-cyan)] text-black' : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
+                }`}
+              >
+                {{
+                  dashboard: 'الإحصائيات',
+                  products: 'المنتجات',
+                  orders: 'الطلبات',
+                  maintenance: 'الصيانة',
+                  trade: 'الاستبدال',
+                  settings: 'الإعدادات',
+                  logs: 'سجل الأدمن',
+                }[tab]}
               </button>
+            ))}
+            <form action="/auth/logout" method="post">
+              <button type="submit" className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
+                خروج
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {notice ? (
+          <div className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${
+            notice.type === 'success'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
+              : notice.type === 'error'
+                ? 'border-red-500/30 bg-red-500/10 text-red-300'
+                : 'border-white/10 bg-white/5 text-white'
+          }`}>
+            {notice.message}
+          </div>
+        ) : null}
+
+        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          {[
+            { label: 'منتجات فعالة', value: stats.active_products },
+            { label: 'إجمالي المنتجات', value: stats.total_products },
+            { label: 'طلبات معلقة', value: stats.pending_orders },
+            { label: 'إجمالي الطلبات', value: stats.total_orders },
+            { label: 'طلبات مكتملة', value: stats.completed_orders },
+          ].map((item) => (
+            <div key={item.label} className="rounded-[28px] border border-white/10 bg-[#0b1018] p-5 shadow-[0_0_40px_rgba(0,0,0,0.25)]">
+              <div className="text-sm text-gray-400">{item.label}</div>
+              <div className="mt-2 text-3xl font-black text-white">{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        {loading ? <div className="rounded-3xl border border-white/10 bg-[#0b1018] p-8 text-center text-white">جاري تحميل بيانات الإدارة...</div> : null}
+
+        {!loading && activeTab === 'dashboard' ? (
+          <div className="grid gap-6 xl:grid-cols-2">
+            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <h2 className="text-xl font-black text-white">ملخص سريع</h2>
+              <div className="mt-4 space-y-3 text-sm text-gray-300">
+                <div>إجمالي المنتجات المعروضة حاليًا: {visibleProducts.length}</div>
+                <div>طلبات محتاجة متابعة: {orders.filter((order) => order.status === 'pending').length}</div>
+                <div>أحدث قسم متاح: {categories[0]?.name_ar ?? '—'}</div>
+              </div>
+            </div>
+            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <h2 className="text-xl font-black text-white">آخر نشاط</h2>
+              <div className="mt-4 space-y-3">
+                {logs.slice(0, 5).map((log) => (
+                  <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <div className="text-sm font-bold text-white">{log.action}</div>
+                    <div className="mt-1 text-xs text-gray-400">{new Date(log.performed_at).toLocaleString('ar-EG')}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+        ) : null}
 
-          <div className="adm-section pb-20">
-            <h3>📦 المنتجات الحالية</h3>
-            <div id="adm-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-              {(Array.isArray(products) ? products : []).length === 0 ? (
-                <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '20px' }}>لا توجد منتجات بعد</div>
-              ) : (
-                (Array.isArray(products) ? products : []).map(p => (
-                  <div key={p.id} className="adm-prod-item">
-                    <img 
-                      className="adm-prod-img" 
-                      src={p.image_url || ''} 
-                      onError={(e) => (e.target as HTMLElement).style.display = 'none'} 
-                      alt={p.name}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '.9rem', fontWeight: 600 }}>{p.name}</div>
-                      <div style={{ fontSize: '.78rem', color: 'var(--text-dim)' }}>
-                        {p.price}$ · {p.in_stock ? '✅ متاح' : '❌ نفذ'} {p.battery_health ? `· 🔋 ${p.battery_health}%` : ''}
+        {!loading && activeTab === 'products' ? (
+          <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
+            <form onSubmit={handleSaveProduct} className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <h2 className="text-2xl font-black text-white">إضافة منتج جديد</h2>
+              <div className="mt-5 space-y-4">
+                <input value={productForm.name} onChange={(event) => setProductForm((current) => ({ ...current, name: event.target.value }))} placeholder="اسم المنتج" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="وصف المنتج" className="min-h-28 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    value={productForm.price}
+                    onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))}
+                    placeholder="السعر"
+                    disabled={productForm.price_on_inquiry}
+                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none disabled:opacity-40"
+                  />
+                  <input value={productForm.original_price} onChange={(event) => setProductForm((current) => ({ ...current, original_price: event.target.value }))} placeholder="السعر قبل الخصم" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={productForm.category} onChange={(event) => setProductForm((current) => ({ ...current, category: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.slug}>
+                        {category.name_ar}
+                      </option>
+                    ))}
+                  </select>
+                  <input value={productForm.model} onChange={(event) => setProductForm((current) => ({ ...current, model: event.target.value }))} placeholder="الموديل" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={productForm.storage_size} onChange={(event) => setProductForm((current) => ({ ...current, storage_size: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
+                    {STORAGE_OPTIONS.map((storage) => (
+                      <option key={storage} value={storage}>
+                        {storage}
+                      </option>
+                    ))}
+                  </select>
+                  <input value={productForm.color} onChange={(event) => setProductForm((current) => ({ ...current, color: event.target.value }))} placeholder="اللون" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={productForm.condition} onChange={(event) => setProductForm((current) => ({ ...current, condition: event.target.value as ProductCondition }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
+                    {(Object.entries(CONDITION_LABELS) as Array<[ProductCondition, string]>).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <input value={productForm.battery_health} onChange={(event) => setProductForm((current) => ({ ...current, battery_health: event.target.value }))} placeholder="البطارية %" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <select value={productForm.grade} onChange={(event) => setProductForm((current) => ({ ...current, grade: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
+                    {GRADE_OPTIONS.map((grade) => (
+                      <option key={grade} value={grade}>
+                        {grade}
+                      </option>
+                    ))}
+                  </select>
+                  <input value={productForm.tax_value} onChange={(event) => setProductForm((current) => ({ ...current, tax_value: event.target.value }))} placeholder="قيمة الضريبة" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
+                </div>
+                <label className="block rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-gray-300">
+                  صور المنتج
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="mt-3 block w-full text-sm text-white file:mr-4 file:rounded-full file:border-0 file:bg-[var(--neon-cyan)] file:px-4 file:py-2 file:font-bold file:text-black"
+                    onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
+                  />
+                </label>
+
+                <div className="grid grid-cols-2 gap-3 text-sm text-white">
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.price_on_inquiry} onChange={(event) => setProductForm((current) => ({ ...current, price_on_inquiry: event.target.checked }))} />
+                    السعر عند الطلب
+                  </label>
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.in_stock} onChange={(event) => setProductForm((current) => ({ ...current, in_stock: event.target.checked }))} />
+                    متاح
+                  </label>
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.is_featured} onChange={(event) => setProductForm((current) => ({ ...current, is_featured: event.target.checked }))} />
+                    مميز
+                  </label>
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.is_visible} onChange={(event) => setProductForm((current) => ({ ...current, is_visible: event.target.checked }))} />
+                    ظاهر في الموقع
+                  </label>
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.is_available} onChange={(event) => setProductForm((current) => ({ ...current, is_available: event.target.checked }))} />
+                    مفعل
+                  </label>
+                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <input type="checkbox" checked={productForm.is_tax_exempt} onChange={(event) => setProductForm((current) => ({ ...current, is_tax_exempt: event.target.checked }))} />
+                    معفي من الضريبة
+                  </label>
+                </div>
+
+                {selectedFiles.length > 0 ? <div className="text-sm text-gray-400">عدد الصور المختارة: {selectedFiles.length}</div> : null}
+
+                <button type="submit" disabled={savingProduct} className="w-full rounded-2xl bg-[var(--neon-cyan)] px-4 py-4 font-black text-black disabled:opacity-60">
+                  {savingProduct ? 'جاري رفع الصور وحفظ المنتج...' : 'حفظ المنتج'}
+                </button>
+              </div>
+            </form>
+
+            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-2xl font-black text-white">المنتجات الحالية</h2>
+                <span className="text-sm text-gray-400">{products.length} منتج</span>
+              </div>
+              <div className="space-y-4">
+                {products.map((product) => (
+                  <div key={product.id} className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+                        {product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : null}
                       </div>
-                      <div style={{ fontSize: '.7rem', color: 'var(--text-dim)' }}>
-                        {p.is_tax_exempt ? '🏷️ معفي من الضريبة' : `💰 ضريبة: ${p.tax_value}$`}
+                      <div>
+                        <div className="font-bold text-white">{product.name}</div>
+                        <div className="text-sm text-gray-400">
+                          {product.category_name_ar ?? CATEGORY_LABELS[product.category] ?? product.category} • {product.storage_size} • {product.color}
+                        </div>
+                        <div className="mt-1 text-sm text-[var(--neon-cyan)]">
+                          {product.price_on_inquiry || product.price === null ? 'السعر عند الطلب' : `${product.price.toLocaleString('ar-EG')} جنيه`}
+                        </div>
                       </div>
                     </div>
-                    <button onClick={() => delProd(p.id)} className="adm-prod-del" aria-label="حذف">🗑️</button>
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-3 py-2 text-xs font-bold ${product.is_available ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}>
+                        {product.is_available ? 'مفعل' : 'متوقف'}
+                      </span>
+                      <button onClick={() => void handleDeleteProduct(product.id)} className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
+                        إخفاء
+                      </button>
+                    </div>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
             </div>
           </div>
-        </>
-      )}
+        ) : null}
 
-      {activeTab === 'maintenance' && (
-        <div className="adm-section pb-20">
-          <h3>🔧 طلبات الصيانة</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-            {maintenanceReqs.length === 0 ? (
-              <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '20px' }}>لا توجد طلبات صيانة</div>
-            ) : (
-              maintenanceReqs.map(r => (
-                <div key={r.id} className="adm-prod-item" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '16px' }}>
-                   <div style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{r.customer_name} - {r.device_type}</div>
-                   <div style={{ fontSize: '.85rem', color: 'var(--text-muted)' }}>{r.issue_description}</div>
-                   <div style={{ fontSize: '.75rem', color: 'var(--neon-2)', marginTop: '8px', padding: '4px 8px', background: 'rgba(34,211,238,0.1)', borderRadius: '4px' }}>
-                     الحالة: {r.status} | الهاتف: {r.phone_number} | التاريخ: {new Date(r.created_at).toLocaleDateString('ar-EG')}
-                   </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'trade' && (
-        <div className="adm-section pb-20">
-          <h3>🔁 طلبات الاستبدال</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
-             {tradeReqs.length === 0 ? (
-                <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '20px' }}>لا توجد طلبات استبدال</div>
-             ) : (
-                tradeReqs.map(r => (
-                  <div key={r.id} className="adm-prod-item" style={{ flexDirection: 'column', alignItems: 'flex-start', padding: '16px' }}>
-                     <div style={{ fontSize: '1rem', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{r.customer_name} يطلب {r.target_device}</div>
-                     <div style={{ fontSize: '.85rem', color: 'var(--text-muted)' }}>جهازه: {r.device_to_trade} (حالة: {r.device_condition})</div>
-                     <div style={{ fontSize: '.75rem', color: 'var(--neon-3)', marginTop: '8px', padding: '4px 8px', background: 'rgba(168,85,247,0.1)', borderRadius: '4px' }}>
-                       الحالة: {r.status} | الهاتف: {r.phone_number} | التاريخ: {new Date(r.created_at).toLocaleDateString('ar-EG')}
-                     </div>
+        {!loading && activeTab === 'orders' ? (
+          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <h2 className="text-2xl font-black text-white">إدارة الطلبات</h2>
+            <div className="mt-5 space-y-4">
+              {orders.map((order) => (
+                <div key={order.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <div className="font-bold text-white">{order.customer_name}</div>
+                      <div className="text-sm text-gray-400">{order.customer_phone}</div>
+                      <div className="mt-1 text-sm text-gray-300">المنتج: {order.product_name ?? 'غير محدد'} • الكمية: {order.quantity}</div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <select
+                        value={order.status}
+                        onChange={(event) => void handleOrderStatusChange(order.id, event.target.value as OrderStatus)}
+                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
+                      >
+                        {ORDER_STATUS_OPTIONS.map((statusOption) => (
+                          <option key={statusOption.value} value={statusOption.value}>
+                            {statusOption.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                ))
-             )}
+                  <div className="mt-3 text-xs text-gray-500">{new Date(order.created_at).toLocaleString('ar-EG')}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        ) : null}
 
-      {activeTab === 'logs' && (
-        <div className="adm-section pb-20">
-          <h3>📋 سجل العمليات</h3>
-          <div style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '20px' }}>قريباً...</div>
-        </div>
-      )}
+        {!loading && activeTab === 'maintenance' ? (
+          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <h2 className="text-2xl font-black text-white">طلبات الصيانة</h2>
+            <div className="mt-5 space-y-4">
+              {maintenanceRequests.map((request) => (
+                <div key={request.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <div className="font-bold text-white">{request.customer_name} • {request.device_model}</div>
+                  <div className="mt-2 text-sm text-gray-300">{request.issue_description}</div>
+                  <div className="mt-2 text-xs text-gray-500">{request.customer_phone} • {request.status}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {!loading && activeTab === 'trade' ? (
+          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <h2 className="text-2xl font-black text-white">طلبات الاستبدال</h2>
+            <div className="mt-5 space-y-4">
+              {tradeRequests.map((request) => (
+                <div key={request.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <div className="font-bold text-white">{request.customer_name}</div>
+                  <div className="mt-2 text-sm text-gray-300">معاه: {request.device_model} • مطلوب: {request.desired_model ?? 'غير محدد'}</div>
+                  <div className="mt-2 text-xs text-gray-500">{request.customer_phone} • {request.status}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {!loading && activeTab === 'settings' ? (
+          <div className="grid gap-6 xl:grid-cols-2">
+            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <h2 className="text-2xl font-black text-white">إعدادات الموقع</h2>
+              <div className="mt-5 space-y-4">
+                {(
+                  [
+                    ['hero_title', 'العنوان الرئيسي'],
+                    ['hero_slogan_line1', 'السطر الأول'],
+                    ['hero_slogan_line2', 'السطر الثاني'],
+                    ['whatsapp_number', 'رقم واتساب'],
+                    ['maps_url', 'رابط الخريطة'],
+                    ['instagram_url', 'إنستجرام'],
+                    ['facebook_url', 'فيسبوك'],
+                    ['tiktok_url', 'تيك توك'],
+                  ] as Array<[keyof SiteConfigForm, string]>
+                ).map(([key, label]) => (
+                  <div key={key}>
+                    <label className="mb-2 block text-sm text-gray-400">{label}</label>
+                    <input
+                      value={siteConfig[key]}
+                      onChange={(event) => setSiteConfig((current) => ({ ...current, [key]: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+                    />
+                  </div>
+                ))}
+                <button onClick={() => void handleSaveSiteConfig()} className="w-full rounded-2xl bg-[var(--neon-cyan)] px-4 py-4 font-black text-black">
+                  حفظ إعدادات الموقع
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+              <h2 className="text-2xl font-black text-white">شريط الإعلان</h2>
+              <div className="mt-5 space-y-4">
+                <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
+                  <input
+                    type="checkbox"
+                    checked={announcement.is_visible}
+                    onChange={(event) => setAnnouncement((current) => ({ ...current, is_visible: event.target.checked }))}
+                  />
+                  إظهار الإعلان
+                </label>
+                <textarea
+                  value={announcement.text}
+                  onChange={(event) => setAnnouncement((current) => ({ ...current, text: event.target.value }))}
+                  placeholder="اكتب نص الإعلان"
+                  className="min-h-32 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
+                    لون الخلفية
+                    <input type="color" value={announcement.bg_color} onChange={(event) => setAnnouncement((current) => ({ ...current, bg_color: event.target.value }))} className="mt-3 block h-12 w-full rounded-xl border-0 bg-transparent" />
+                  </label>
+                  <label className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
+                    لون الخط
+                    <input type="color" value={announcement.text_color} onChange={(event) => setAnnouncement((current) => ({ ...current, text_color: event.target.value }))} className="mt-3 block h-12 w-full rounded-xl border-0 bg-transparent" />
+                  </label>
+                </div>
+                <button onClick={() => void handleSaveAnnouncement()} className="w-full rounded-2xl bg-white px-4 py-4 font-black text-black">
+                  حفظ الإعلان
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {!loading && activeTab === 'logs' ? (
+          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <h2 className="text-2xl font-black text-white">سجل نشاط الأدمن</h2>
+            <div className="mt-5 space-y-4">
+              {logs.map((log) => (
+                <div key={log.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <div className="font-bold text-white">{log.action}</div>
+                  <div className="mt-1 text-sm text-gray-400">{log.entity_type ?? 'عام'}</div>
+                  <div className="mt-2 text-xs text-gray-500">{new Date(log.performed_at).toLocaleString('ar-EG')}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

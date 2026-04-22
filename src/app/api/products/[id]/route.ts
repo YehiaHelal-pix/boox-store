@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isAdminRequest } from '@/lib/admin-auth'
+import { getAdminAuthState, requireAdminApiAccess } from '@/lib/auth/admin'
 import { logAdminActivity } from '@/lib/admin-activity'
 import { buildProductWritePayload, normalizeProductRow, normalizeCondition, slugify } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/admin'
@@ -25,13 +25,17 @@ async function getCategories() {
 }
 
 async function findProduct(identifier: string) {
-  const byId = await supabaseAdmin.from('products').select('*').eq('id', identifier).maybeSingle()
-  if (byId.error) {
-    throw new Error(byId.error.message)
-  }
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier)
 
-  if (byId.data) {
-    return byId.data as ProductRow
+  if (isUuid) {
+    const byId = await supabaseAdmin.from('products').select('*').eq('id', identifier).maybeSingle()
+    if (byId.error) {
+      throw new Error(byId.error.message)
+    }
+
+    if (byId.data) {
+      return byId.data as ProductRow
+    }
   }
 
   const bySlug = await supabaseAdmin.from('products').select('*').eq('slug', identifier).maybeSingle()
@@ -54,7 +58,9 @@ export async function GET(
       return jsonError('المنتج غير موجود', 404)
     }
 
-    if (!(product.is_available ?? true) || !(product.is_visible ?? true)) {
+    const { isAdmin } = await getAdminAuthState()
+
+    if (!isAdmin && (!(product.is_available ?? true) || !(product.is_visible ?? true))) {
       return jsonError('المنتج غير متاح', 404)
     }
 
@@ -76,8 +82,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {
@@ -163,8 +170,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!isAdminRequest(request)) {
-    return jsonError('غير مصرح', 401)
+  const access = await requireAdminApiAccess()
+  if ('response' in access) {
+    return access.response
   }
 
   try {

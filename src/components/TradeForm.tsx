@@ -1,5 +1,6 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 
 const ALL_MODELS = [
@@ -40,7 +41,7 @@ export default function TradeForm() {
 
   async function compressImg(file: File): Promise<Blob> {
     try {
-      if (typeof window === 'undefined' || !window.createImageBitmap) return file as any
+      if (typeof window === 'undefined' || !window.createImageBitmap) return file
       const bmp = await createImageBitmap(file)
       const cv = document.createElement('canvas')
       let w = bmp.width, h = bmp.height, mx = 900
@@ -48,13 +49,21 @@ export default function TradeForm() {
       else { if (h > mx) { w = w * mx / h; h = mx; } }
       cv.width = Math.round(w); cv.height = Math.round(h)
       cv.getContext('2d')?.drawImage(bmp, 0, 0, cv.width, cv.height)
-      return new Promise(r => cv.toBlob(b => r(b!), 'image/jpeg', 0.78))
-    } catch (e) {
-      return file as any
+      return await new Promise<Blob>((resolve, reject) => {
+        cv.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Image compression failed'))
+            return
+          }
+          resolve(blob)
+        }, 'image/jpeg', 0.78)
+      })
+    } catch {
+      return file
     }
   }
 
-  const uploadImg = async (supabase: any, file: File, prefix: string) => {
+  const uploadImg = async (supabase: SupabaseClient, file: File, prefix: string) => {
     setShowProgress(true)
     setProgressWidth('20%')
     try {
@@ -66,7 +75,7 @@ export default function TradeForm() {
       setProgressWidth('100%')
       setTimeout(() => { setShowProgress(false); setProgressWidth('0%') }, 800)
       return supabase.storage.from('trade-media').getPublicUrl(name).data.publicUrl
-    } catch (e) {
+    } catch {
       setShowProgress(false)
       return null
     }
@@ -110,12 +119,10 @@ export default function TradeForm() {
       const { error } = await supabase.from('trade_requests').insert([{
         customer_name: name,
         customer_phone: phone,
-        current_device_model: cm,
-        current_storage: cs,
-        current_condition: cc,
-        wanted_device_model: rm,
-        wanted_storage: rs,
-        trade_notes: notesRef.current?.value || '',
+        device_model: `${cm} - ${cs}`,
+        device_condition: cc,
+        desired_model: `${rm} - ${rs}`,
+        notes: notesRef.current?.value || '',
         media_urls: mediaUrls
       }])
 

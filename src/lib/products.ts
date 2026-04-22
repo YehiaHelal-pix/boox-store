@@ -86,10 +86,7 @@ export function normalizeProductRow(
 ): Product {
   const images = normalizeImages(row.images)
   const categoryKey = row.category ?? 'other'
-  const categoryRecord =
-    (row.category_id && categoryMap?.get(row.category_id)) ??
-    categoryMap?.get(categoryKey) ??
-    null
+  const categoryRecord = row.category_id ? categoryMap?.get(row.category_id) ?? categoryMap?.get(categoryKey) ?? null : categoryMap?.get(categoryKey) ?? null
 
   return {
     ...row,
@@ -103,6 +100,7 @@ export function normalizeProductRow(
     storage_size: row.storage_size ?? row.storage,
     storage: row.storage_size ?? row.storage,
     category: categoryKey,
+    price_on_inquiry: toBoolean(row.price_on_inquiry, false),
     category_name_ar: categoryRecord?.name_ar ?? CATEGORY_LABELS[categoryKey] ?? null,
     category_record: categoryRecord,
     condition: normalizeCondition(row.condition),

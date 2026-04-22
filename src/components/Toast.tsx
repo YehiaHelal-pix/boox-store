@@ -7,17 +7,24 @@ type ToastProps = {
   type: 'success' | 'error' | 'warn' | 'info'
 }
 
+type ToastEvent = Event & {
+  detail: {
+    msg: string
+    type: ToastProps['type']
+  }
+}
+
 export default function ToastContainer() {
   const [toasts, setToasts] = useState<ToastProps[]>([])
 
   useEffect(() => {
-    const handleToast = (e: any) => {
-      const { msg, type } = e.detail
+    function handleToast(event: Event) {
+      const detail = (event as ToastEvent).detail
       const id = Date.now()
-      setToasts(prev => [...prev, { id, msg, type }])
-      
-      setTimeout(() => {
-        setToasts(prev => prev.filter(t => t.id !== id))
+      setToasts((current) => [...current, { id, msg: detail.msg, type: detail.type }])
+
+      window.setTimeout(() => {
+        setToasts((current) => current.filter((toast) => toast.id !== id))
       }, 3000)
     }
 
@@ -25,27 +32,26 @@ export default function ToastContainer() {
     return () => window.removeEventListener('boox-toast', handleToast)
   }, [])
 
-  const colors = { 
-    success: 'var(--neon-success)', 
-    error: 'var(--neon-danger)', 
-    warn: 'var(--neon-warn)', 
-    info: 'var(--neon-2)' 
+  const colors = {
+    success: 'var(--neon-success)',
+    error: 'var(--neon-danger)',
+    warn: 'var(--neon-warn)',
+    info: 'var(--neon-2)',
   }
 
   return (
     <>
-      {toasts.map(t => (
-        <div 
-          key={t.id} 
-          className="toast glass show" 
-          style={{ 
-            color: colors[t.type] || colors.info, 
-            borderColor: colors[t.type] || colors.info,
-            // Toasts stack properly
-            bottom: '100px'
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className="toast glass show"
+          style={{
+            color: colors[toast.type] ?? colors.info,
+            borderColor: colors[toast.type] ?? colors.info,
+            bottom: '100px',
           }}
         >
-          {t.msg}
+          {toast.msg}
         </div>
       ))}
     </>
