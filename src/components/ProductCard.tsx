@@ -1,14 +1,18 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import { MessageCircle, ShieldCheck, ShoppingBag, Star, Truck } from 'lucide-react'
 import type { Product } from '@/types/database'
+import { CONDITION_LABELS } from '@/lib/products'
 import { openWhatsAppInquiry } from '@/lib/whatsapp'
 
 export default function ProductCard({ p, index }: { p: Product; index: number }) {
   const router = useRouter()
+  const isUnavailable = !p.in_stock || !p.is_available
   const discount =
     p.original_price && p.price && p.original_price > p.price
       ? Math.round((1 - p.price / p.original_price) * 100)
       : 0
+  const conditionLabel = CONDITION_LABELS[p.condition] ?? 'مضمون'
 
   return (
     <div
@@ -38,19 +42,41 @@ export default function ProductCard({ p, index }: { p: Product; index: number })
           </div>
         )}
 
-        {!p.in_stock && <div className="badge-sold">نفد</div>}
+        <div className="product-card-shine" />
+        {isUnavailable && <div className="badge-sold">نفد</div>}
         {discount > 0 && <div className="badge-disc">-{discount}%</div>}
-        {p.is_featured && <div className="badge-feat">مميز</div>}
+        {p.is_featured && (
+          <div className="badge-feat">
+            <Star size={12} fill="currentColor" />
+            مميز
+          </div>
+        )}
       </div>
 
       <div className="product-body">
+        <div className="product-card-topline">
+          <span>{p.category_name_ar ?? 'Apple'}</span>
+          <strong>{conditionLabel}</strong>
+        </div>
         <div className="product-name">{p.name}</div>
         <div className="product-model">{p.device_model}</div>
 
-        <div style={{ display: 'flex', gap: '8px', margin: '4px 0', fontSize: '.75rem', opacity: 0.8, flexWrap: 'wrap' }}>
-          {typeof p.battery_health === 'number' && <span>البطارية {p.battery_health}%</span>}
-          <span style={{ color: 'var(--neon-2)' }}>{p.storage_size}</span>
+        <div className="product-specs">
+          {typeof p.battery_health === 'number' && <span>بطارية {p.battery_health}%</span>}
+          <span>{p.storage_size}</span>
           <span>{p.color}</span>
+          {p.grade ? <span>Grade {p.grade}</span> : null}
+        </div>
+
+        <div className="product-service-row">
+          <span>
+            <ShieldCheck size={13} />
+            ضمان
+          </span>
+          <span>
+            <Truck size={13} />
+            توصيل سريع
+          </span>
         </div>
 
         {p.price_on_inquiry || p.price === null ? (
@@ -59,11 +85,12 @@ export default function ProductCard({ p, index }: { p: Product; index: number })
               event.stopPropagation()
               openWhatsAppInquiry(p)
             }}
-            className={`product-buy ${p.in_stock ? '' : 'disabled'}`}
+            className={`product-buy ${isUnavailable ? 'disabled' : ''}`}
             style={{ marginTop: 'auto' }}
-            disabled={!p.in_stock}
+            disabled={isUnavailable}
           >
-            اسأل بوكس
+            <MessageCircle size={16} />
+            اسأل على السعر
           </button>
         ) : (
           <>
@@ -76,10 +103,11 @@ export default function ProductCard({ p, index }: { p: Product; index: number })
                 event.stopPropagation()
                 openWhatsAppInquiry(p)
               }}
-              className={`product-buy ${p.in_stock ? '' : 'disabled'}`}
-              disabled={!p.in_stock}
+              className={`product-buy ${isUnavailable ? 'disabled' : ''}`}
+              disabled={isUnavailable}
             >
-              اسأل بوكس
+              <ShoppingBag size={16} />
+              اطلب عبر واتساب
             </button>
           </>
         )}
