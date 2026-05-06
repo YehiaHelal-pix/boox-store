@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Product } from '@/lib/supabase/types'
+import type { Product } from '@/types/database'
 
 interface CartItem extends Product { quantity: number }
 interface CartStore {

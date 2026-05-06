@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { CATEGORY_LABELS, CONDITION_LABELS, GRADE_OPTIONS, STORAGE_OPTIONS } from '@/lib/products'
 import type {
@@ -222,7 +223,26 @@ export default function AdminPage() {
     void loadAdminData()
   }, [])
 
-  const visibleProducts = useMemo(() => products.filter((product) => product.is_available), [products])
+  const visibleStoreProducts = useMemo(() => products.filter((product) => product.is_available && product.is_visible), [products])
+  const featuredProducts = useMemo(() => products.filter((product) => product.is_featured), [products])
+  const productsNeedingAttention = useMemo(
+    () => products.filter((product) => !product.in_stock || !product.is_available || !product.is_visible),
+    [products],
+  )
+  const activeRequestsCount = useMemo(
+    () =>
+      maintenanceRequests.filter((request) => request.status === 'pending' || request.status === 'in_progress').length +
+      tradeRequests.filter((request) => request.status === 'pending' || request.status === 'in_progress').length,
+    [maintenanceRequests, tradeRequests],
+  )
+  const estimatedInventoryValue = useMemo(
+    () =>
+      products.reduce((sum, product) => {
+        if (!product.is_available || product.price_on_inquiry || product.price === null) return sum
+        return sum + product.price
+      }, 0),
+    [products],
+  )
 
   async function uploadProductImages() {
     if (selectedFiles.length === 0) return []
@@ -347,22 +367,25 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#05080e] px-4 py-6 lg:px-8" dir="rtl">
+    <div className="admin-shell min-h-screen px-4 py-6 lg:px-8" dir="rtl">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-[#0b1018] p-6 shadow-[0_0_60px_rgba(0,0,0,0.35)] lg:flex-row lg:items-end lg:justify-between">
+        <div className="admin-hero mb-6 flex flex-col gap-4 rounded-[32px] p-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-[var(--neon-cyan)]">Boox Store</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-[var(--neon-cyan)]">Boox Control Center</p>
             <h1 className="mt-2 text-3xl font-black text-white lg:text-5xl">لوحة الإدارة</h1>
-            <p className="mt-2 text-sm text-gray-400">إدارة المنتجات والطلبات والمحتوى من مكان واحد.</p>
+            <p className="mt-2 text-sm text-gray-400">إدارة متزامنة للمنتجات والطلبات والصيانة والمحتوى من Supabase.</p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-gray-300">
+              <span className="admin-live-pill">Live DB</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">{visibleStoreProducts.length} منتج ظاهر للعميل</span>
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-amber-200">{activeRequestsCount} طلب خدمة مفتوح</span>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             {(['dashboard', 'products', 'orders', 'maintenance', 'trade', 'settings', 'logs'] as AdminTab[]).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-                  activeTab === tab ? 'bg-[var(--neon-cyan)] text-black' : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
-                }`}
+                className={`admin-tab-btn ${activeTab === tab ? 'active' : ''}`}
               >
                 {{
                   dashboard: 'الإحصائيات',
@@ -376,7 +399,7 @@ export default function AdminPage() {
               </button>
             ))}
             <form action="/auth/logout" method="post">
-              <button type="submit" className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
+              <button type="submit" className="admin-logout-btn">
                 خروج
               </button>
             </form>
@@ -403,7 +426,7 @@ export default function AdminPage() {
             { label: 'إجمالي الطلبات', value: stats.total_orders },
             { label: 'طلبات مكتملة', value: stats.completed_orders },
           ].map((item) => (
-            <div key={item.label} className="rounded-[28px] border border-white/10 bg-[#0b1018] p-5 shadow-[0_0_40px_rgba(0,0,0,0.25)]">
+            <div key={item.label} className="admin-stat-card rounded-[28px] p-5">
               <div className="text-sm text-gray-400">{item.label}</div>
               <div className="mt-2 text-3xl font-black text-white">{item.value}</div>
             </div>
@@ -414,15 +437,31 @@ export default function AdminPage() {
 
         {!loading && activeTab === 'dashboard' ? (
           <div className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <div className="admin-panel-card rounded-[32px] p-6">
               <h2 className="text-xl font-black text-white">ملخص سريع</h2>
-              <div className="mt-4 space-y-3 text-sm text-gray-300">
-                <div>إجمالي المنتجات المعروضة حاليًا: {visibleProducts.length}</div>
-                <div>طلبات محتاجة متابعة: {orders.filter((order) => order.status === 'pending').length}</div>
-                <div>أحدث قسم متاح: {categories[0]?.name_ar ?? '—'}</div>
+              <div className="mt-4 grid gap-3 text-sm text-gray-300 sm:grid-cols-2">
+                <div className="admin-mini-metric">
+                  <span>ظاهر في الموقع</span>
+                  <strong>{visibleStoreProducts.length}</strong>
+                </div>
+                <div className="admin-mini-metric">
+                  <span>منتجات مميزة</span>
+                  <strong>{featuredProducts.length}</strong>
+                </div>
+                <div className="admin-mini-metric">
+                  <span>طلبات محتاجة متابعة</span>
+                  <strong>{orders.filter((order) => order.status === 'pending').length}</strong>
+                </div>
+                <div className="admin-mini-metric">
+                  <span>قيمة المخزون التقريبية</span>
+                  <strong>{estimatedInventoryValue.toLocaleString('ar-EG')} ج</strong>
+                </div>
+              </div>
+              <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
+                أحدث قسم متاح: <strong className="text-white">{categories[0]?.name_ar ?? '—'}</strong>
               </div>
             </div>
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <div className="admin-panel-card rounded-[32px] p-6">
               <h2 className="text-xl font-black text-white">آخر نشاط</h2>
               <div className="mt-4 space-y-3">
                 {logs.slice(0, 5).map((log) => (
@@ -438,8 +477,9 @@ export default function AdminPage() {
 
         {!loading && activeTab === 'products' ? (
           <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-            <form onSubmit={handleSaveProduct} className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <form onSubmit={handleSaveProduct} className="admin-panel-card rounded-[32px] p-6">
               <h2 className="text-2xl font-black text-white">إضافة منتج جديد</h2>
+              <p className="mt-2 text-sm text-gray-400">كل منتج يتم حفظه هنا يظهر مباشرة في واجهة المتجر حسب حالة الظهور والتفعيل.</p>
               <div className="mt-5 space-y-4">
                 <input value={productForm.name} onChange={(event) => setProductForm((current) => ({ ...current, name: event.target.value }))} placeholder="اسم المنتج" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
                 <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="وصف المنتج" className="min-h-28 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
@@ -539,17 +579,23 @@ export default function AdminPage() {
               </div>
             </form>
 
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
+            <div className="admin-panel-card rounded-[32px] p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-2xl font-black text-white">المنتجات الحالية</h2>
-                <span className="text-sm text-gray-400">{products.length} منتج</span>
+                <div className="flex flex-wrap gap-2 text-xs font-bold">
+                  <span className="rounded-full bg-white/5 px-3 py-2 text-gray-300">{products.length} إجمالي</span>
+                  <span className="rounded-full bg-emerald-500/10 px-3 py-2 text-emerald-300">{visibleStoreProducts.length} ظاهر</span>
+                  <span className="rounded-full bg-amber-500/10 px-3 py-2 text-amber-200">{productsNeedingAttention.length} يحتاج مراجعة</span>
+                </div>
               </div>
               <div className="space-y-4">
                 {products.map((product) => (
-                  <div key={product.id} className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div key={product.id} className="admin-product-row flex flex-col gap-3 rounded-3xl p-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
                       <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-                        {product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : null}
+                        {product.image_url ? (
+                          <Image src={product.image_url} alt={product.name} width={64} height={64} className="h-full w-full object-cover" />
+                        ) : null}
                       </div>
                       <div>
                         <div className="font-bold text-white">{product.name}</div>
@@ -564,6 +610,12 @@ export default function AdminPage() {
                     <div className="flex items-center gap-2">
                       <span className={`rounded-full px-3 py-2 text-xs font-bold ${product.is_available ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}>
                         {product.is_available ? 'مفعل' : 'متوقف'}
+                      </span>
+                      <span className={`rounded-full px-3 py-2 text-xs font-bold ${product.is_visible ? 'bg-cyan-500/10 text-cyan-200' : 'bg-amber-500/10 text-amber-200'}`}>
+                        {product.is_visible ? 'ظاهر' : 'مخفي'}
+                      </span>
+                      <span className={`rounded-full px-3 py-2 text-xs font-bold ${product.in_stock ? 'bg-indigo-500/10 text-indigo-200' : 'bg-red-500/10 text-red-300'}`}>
+                        {product.in_stock ? 'متوفر' : 'نفد'}
                       </span>
                       <button onClick={() => void handleDeleteProduct(product.id)} className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
                         إخفاء

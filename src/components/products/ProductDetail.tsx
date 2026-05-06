@@ -3,8 +3,10 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShieldCheck, Truck, ArrowRight, Heart } from 'lucide-react'
+import { ShieldCheck, Truck, ArrowRight, Heart, MessageCircle } from 'lucide-react'
 import { useFavorites } from '@/hooks/useFavorites'
+import { openWhatsAppInquiry } from '@/lib/whatsapp'
+import { CONDITION_LABELS } from '@/lib/products'
 import AddToCartBtn from './AddToCartBtn'
 import CallbackForm from './CallbackForm'
 import ReserveForm from './ReserveForm'
@@ -13,7 +15,9 @@ import ProductViewTracker from './ProductViewTracker'
 import RecentlyViewed from './RecentlyViewed'
 import ProductCard from './ProductCard'
 
-export default function ProductDetail({ product, similar }: { product: any, similar: any[] }) {
+import type { Product } from '@/types/database'
+
+export default function ProductDetail({ product, similar }: { product: Product, similar: Product[] }) {
     const { isFavorite, toggleFavorite } = useFavorites()
 
     return (
@@ -32,7 +36,7 @@ export default function ProductDetail({ product, similar }: { product: any, simi
                             <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] border border-white/5">صورة غير متوفرة</div>
                         )}
                         <div className="absolute top-6 right-6 bg-[var(--glass)] backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10 uppercase tracking-wider text-white shadow-xl">
-                            {product.condition === 'excellent' ? 'ممتاز' : product.condition === 'good' ? 'جيد جداً' : 'جيد'}
+                            {CONDITION_LABELS[product.condition]}
                         </div>
                         <button
                             onClick={(e) => { e.preventDefault(); toggleFavorite(product.id) }}
@@ -50,7 +54,9 @@ export default function ProductDetail({ product, similar }: { product: any, simi
                             <div className="mt-2 flex-shrink-0"><ShareButton title={product.name} /></div>
                         </div>
                         <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mt-4">
-                            <span className="text-4xl font-black text-[var(--neon-cyan)] block">{product.price.toLocaleString('ar-EG')} ج</span>
+                            <span className="text-4xl font-black text-[var(--neon-cyan)] block">
+                                {product.price_on_inquiry || product.price === null ? 'اسأل على السعر' : `${product.price.toLocaleString('ar-EG')} ج`}
+                            </span>
                             {product.original_price && (
                                 <span className="text-xl text-[var(--text-muted)] line-through block opacity-70 mt-1 md:mt-0">{product.original_price.toLocaleString('ar-EG')} ج</span>
                             )}
@@ -83,7 +89,16 @@ export default function ProductDetail({ product, similar }: { product: any, simi
 
                     <div className="mt-4 flex flex-col gap-3">
                         {product.in_stock ? (
-                            <AddToCartBtn product={product} />
+                            <>
+                                <AddToCartBtn product={product} />
+                                <button
+                                    onClick={() => openWhatsAppInquiry(product)}
+                                    className="w-full bg-[#25d366] text-black font-black py-4 px-8 rounded-xl flex items-center justify-center gap-3 hover:scale-[1.02] transition-transform min-h-[56px] text-lg hover:shadow-[0_0_20px_rgba(37,211,102,0.45)] cursor-pointer"
+                                >
+                                    <MessageCircle size={24} />
+                                    اطلب أو استفسر عبر واتساب
+                                </button>
+                            </>
                         ) : (
                             <div className="w-full py-4 text-center glass border border-red-500/50 text-red-500 font-bold rounded-2xl bg-red-500/10 text-lg shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                                 عذراً، هذا المنتج نفد من المخزون

@@ -3,6 +3,7 @@ import Preloader from '@/components/Preloader'
 import Navbar from '@/components/Navbar'
 import Hero from '@/components/Hero'
 import CategoryPills from '@/components/CategoryPills'
+import CommerceHighlights from '@/components/CommerceHighlights'
 import ProductsGrid from '@/components/ProductsGrid'
 import Services from '@/components/Services'
 import MaintenanceForm from '@/components/MaintenanceForm'
@@ -28,6 +29,7 @@ export default function Home() {
             as CategoryPills was originally at the bottom of the home section */}
         <Hero />
         <CategoryPills />
+        <CommerceHighlights />
 
         <ProductsGrid />
         <Services />

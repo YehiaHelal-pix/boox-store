@@ -1,7 +1,7 @@
 'use client'
 import { ShoppingBag } from 'lucide-react'
 import { useCart } from '@/store/cart'
-import type { Product } from '@/lib/supabase/types'
+import type { Product } from '@/types/database'
 import { useToastStore } from '@/components/ui/Toast'
 
 export default function AddToCartBtn({ product }: { product: Product }) {

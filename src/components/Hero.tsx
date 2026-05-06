@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 interface HeroConfig {
   hero_title: string
@@ -91,6 +92,20 @@ export default function Hero() {
           <strong>{siteConfig.hero_stat_support_value}</strong>
           <span>{siteConfig.hero_stat_support_label}</span>
         </div>
+      </div>
+      <div className="hero-commerce-actions anim-reveal">
+        <Link href="#products" className="hero-primary-action">
+          تسوق المنتجات الآن
+        </Link>
+        <Link href="#contact" className="hero-secondary-action">
+          استفسار سريع
+        </Link>
+      </div>
+      <div className="hero-trust-strip anim-reveal" aria-label="ضمانات المتجر">
+        <span>ضمان وفحص</span>
+        <span>استبدال وترقية</span>
+        <span>صيانة احترافية</span>
+        <span>دعم واتساب</span>
       </div>
     </section>
   )
