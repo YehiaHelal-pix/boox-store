@@ -19,6 +19,14 @@ import type { Product } from '@/types/database'
 
 export default function ProductDetail({ product, similar }: { product: Product, similar: Product[] }) {
     const { isFavorite, toggleFavorite } = useFavorites()
+    const tradeParams = new URLSearchParams({
+        product: product.slug,
+        name: product.name,
+    })
+
+    if (product.price !== null) {
+        tradeParams.set('price', String(product.price))
+    }
 
     return (
         <div className="min-h-screen py-10 px-4 lg:px-[var(--container)] max-w-7xl mx-auto">
@@ -105,7 +113,7 @@ export default function ProductDetail({ product, similar }: { product: Product, 
                             </div>
                         )}
                         <Link
-                            href={`/trade?product=${product.slug}&name=${encodeURIComponent(product.name)}&price=${product.price}`}
+                            href={`/trade?${tradeParams.toString()}`}
                             className="w-full py-4 text-center glass border border-orange-500/30 text-orange-400 font-bold rounded-2xl bg-orange-500/5 hover:bg-orange-500/10 transition-colors text-lg"
                         >
                             🔄 استبدل مع جهازك القديم واخصم الفارق
