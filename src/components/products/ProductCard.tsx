@@ -1,137 +1,94 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, RefreshCw, Share2 } from 'lucide-react'
+import { Heart, GitCompare, RefreshCw, Share2 } from 'lucide-react'
 import { useFavorites } from '@/hooks/useFavorites'
-import { CONDITION_LABELS } from '@/lib/products'
-import type { Product, ProductCondition } from '@/types/database'
+import { useComparison } from '@/hooks/useComparison'
+import type { Product } from '@/types/database'
 
 export default function ProductCard({ product }: { product: Product }) {
   const { isFavorite, toggleFavorite } = useFavorites()
-
-  const discount =
-    product.original_price && product.price && product.original_price > product.price
-      ? Math.round((1 - product.price / product.original_price) * 100)
-      : 0
+  const { toggleCompare, isComparing } = useComparison()
 
   return (
-    <div className="group relative bg-gradient-to-b from-[#0c1220] to-[#0a0f1a] rounded-2xl overflow-hidden border border-white/[0.06] hover:border-cyan-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
-      {/* Favorite button */}
+    <div className="relative group bg-[#0a0a0a] rounded-[var(--radius)] overflow-hidden border border-white/10 hover:border-[var(--neon-cyan)] transition-all">
       <button
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
+        onClick={(event) => {
+          event.preventDefault()
           toggleFavorite(product.id)
         }}
-        className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 flex items-center justify-center transition-all border border-white/10"
+        className="absolute top-2 right-2 z-10 p-2 rounded-full bg-black/50 hover:bg-black/80 transition-colors"
       >
-        <Heart size={16} className={isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-white/70'} />
+        <Heart size={18} className={isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-white'} />
       </button>
 
-      {/* Discount badge */}
-      {discount > 0 ? (
-        <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-red-600 to-red-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
-          خصم {discount}%
-        </div>
-      ) : null}
-
-      {/* Featured badge */}
-      {product.is_featured ? (
-        <div className="absolute bottom-[calc(50%+8px)] left-3 z-10 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-          مميز
-        </div>
-      ) : null}
-
       <Link href={`/products/${product.slug}`} className="block">
-        {/* Image */}
-        <div className="relative h-52 w-full bg-gradient-to-b from-[#080c15] to-[#060a13] flex items-center justify-center overflow-hidden">
+        <div className="relative h-48 w-full bg-[#050505]">
           <Image
             src={product.image_url || '/boox-logo.jpg'}
             alt={product.name}
             fill
-            className="object-contain p-6 group-hover:scale-105 transition-transform duration-500"
+            className="object-contain p-4 group-hover:scale-105 transition-transform"
           />
-          {!product.in_stock ? (
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="text-white/80 font-bold text-sm bg-red-500/80 px-4 py-1.5 rounded-lg">نفد من المخزن</span>
-            </div>
-          ) : null}
         </div>
 
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          {/* Condition + Storage row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
-              {CONDITION_LABELS[product.condition as ProductCondition] ?? product.condition}
-            </span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 text-gray-400 border border-white/10">
-              {product.storage_size}
-            </span>
-            {product.color ? (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white/5 text-gray-400 border border-white/10">
-                {product.color}
-              </span>
-            ) : null}
-          </div>
-
-          {/* Name */}
-          <h3 className="font-bold text-white text-[15px] leading-snug line-clamp-2" title={product.name}>
+        <div className="p-4 border-b border-white/5">
+          <h3 className="font-bold text-white truncate" title={product.name}>
             {product.name}
           </h3>
-
-          {/* Battery */}
-          {typeof product.battery_health === 'number' ? (
-            <div className="flex items-center gap-1.5">
-              <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${product.battery_health >= 80 ? 'bg-emerald-400' : product.battery_health >= 60 ? 'bg-amber-400' : 'bg-red-400'}`}
-                  style={{ width: `${product.battery_health}%` }}
-                />
-              </div>
-              <span className="text-[11px] text-gray-500 font-semibold">{product.battery_health}%</span>
-            </div>
+          {product.price_on_inquiry || product.price === null ? (
+            <p className="text-[var(--neon-cyan)] font-black text-lg mt-1">اسأل على السعر</p>
+          ) : (
+            <p className="text-[var(--neon-cyan)] font-black text-lg mt-1">{product.price.toLocaleString('ar-EG')} جنيه</p>
+          )}
+          {product.original_price ? (
+            <p className="line-through text-gray-400 text-xs">{product.original_price.toLocaleString('ar-EG')} جنيه</p>
           ) : null}
-
-          {/* Price */}
-          <div className="pt-2 border-t border-white/5">
-            {product.price_on_inquiry || product.price === null ? (
-              <p className="text-cyan-400 font-bold text-base">اسأل عن السعر</p>
-            ) : (
-              <div className="flex items-baseline gap-2">
-                <p className="text-cyan-400 font-black text-lg">{product.price.toLocaleString('ar-EG')} <span className="text-sm font-semibold">ج.م</span></p>
-                {product.original_price ? (
-                  <p className="line-through text-gray-500 text-xs">{product.original_price.toLocaleString('ar-EG')}</p>
-                ) : null}
-              </div>
-            )}
+          <div className="flex gap-2 mt-2 text-xs text-gray-400 flex-wrap">
+            {typeof product.battery_health === 'number' ? <span className="bg-white/5 py-1 px-2 rounded">البطارية {product.battery_health}%</span> : null}
+            <span className="bg-white/5 py-1 px-2 rounded">{product.storage_size}</span>
+            <span className="bg-white/5 py-1 px-2 rounded">{product.color}</span>
           </div>
         </div>
       </Link>
 
-      {/* Action buttons */}
-      <div className="px-4 pb-4 flex gap-2">
+      <div className="p-3 flex flex-col gap-2 relative z-20">
         <Link
           href={`/trade?product=${product.slug}&name=${encodeURIComponent(product.name)}&price=${product.price ?? 0}`}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 border border-indigo-500/20 rounded-xl text-xs font-bold text-indigo-300 hover:bg-indigo-500/30 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 border border-white/20 rounded-lg text-sm text-white hover:bg-white/5 transition-colors"
         >
-          <RefreshCw size={13} />
-          استبدل جهازك
+          <RefreshCw size={14} />
+          استبدل مع جهازك القديم
         </Link>
-        <button
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            if (navigator.share) {
-              void navigator.share({ title: product.name, url: `${window.location.origin}/products/${product.slug}` })
-              return
-            }
-            void navigator.clipboard.writeText(`${window.location.origin}/products/${product.slug}`)
-          }}
-          className="w-10 h-10 flex items-center justify-center border border-white/10 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
-        >
-          <Share2 size={14} />
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              toggleCompare(product.id)
+            }}
+            className={`flex-1 flex items-center justify-center gap-1 py-1.5 px-2 border rounded-lg text-xs transition-colors ${
+              isComparing(product.id) ? 'border-blue-500 text-blue-500 bg-blue-500/10' : 'border-gray-600 text-gray-300 hover:bg-white/5'
+            }`}
+          >
+            <GitCompare size={13} />
+            قارن
+          </button>
+          <button
+            onClick={() => {
+              if (navigator.share) {
+                void navigator.share({ title: product.name, url: `${window.location.origin}/products/${product.slug}` })
+                return
+              }
+              void navigator.clipboard.writeText(`${window.location.origin}/products/${product.slug}`)
+            }}
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 px-2 border border-gray-600 rounded-lg text-xs text-gray-300 hover:bg-white/5 transition-colors"
+          >
+            <Share2 size={13} />
+            شارك
+          </button>
+        </div>
       </div>
     </div>
   )

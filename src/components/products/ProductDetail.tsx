@@ -1,11 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ShieldCheck, Truck, ArrowRight, Heart, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShieldCheck, Truck, ArrowRight, Heart } from 'lucide-react'
 import { useFavorites } from '@/hooks/useFavorites'
-import { CONDITION_LABELS } from '@/lib/products'
 import AddToCartBtn from './AddToCartBtn'
 import CallbackForm from './CallbackForm'
 import ReserveForm from './ReserveForm'
@@ -13,218 +12,133 @@ import ShareButton from './ShareButton'
 import ProductViewTracker from './ProductViewTracker'
 import RecentlyViewed from './RecentlyViewed'
 import ProductCard from './ProductCard'
-import type { ProductCondition } from '@/types/database'
 
 export default function ProductDetail({ product, similar }: { product: any, similar: any[] }) {
     const { isFavorite, toggleFavorite } = useFavorites()
-    const images = product.images?.length > 0 ? product.images : (product.image_url ? [product.image_url] : [])
-    const [activeImageIndex, setActiveImageIndex] = useState(0)
-
-    const discount =
-        product.original_price && product.price && product.original_price > product.price
-            ? Math.round((1 - product.price / product.original_price) * 100)
-            : 0
 
     return (
-        <div className="min-h-screen py-8 px-4 lg:px-8 max-w-7xl mx-auto">
+        <div className="min-h-screen py-10 px-4 lg:px-[var(--container)] max-w-7xl mx-auto">
             <ProductViewTracker productId={product.id} />
-            <Link href="/products" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors text-sm bg-white/5 border border-white/[0.06] px-4 py-2 rounded-xl w-fit hover:bg-white/10">
-                <ArrowRight size={16} /> العودة للمنتجات
+            <Link href="/products" className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-white mb-8 transition-colors glass px-4 py-2 rounded-full w-fit hover:bg-white/5">
+                <ArrowRight size={18} /> العودة للمنتجات
             </Link>
 
-            <div className="flex flex-col lg:flex-row gap-8 xl:gap-14">
-                {/* Images */}
+            <div className="flex flex-col lg:flex-row gap-12 xl:gap-20">
                 <div className="w-full lg:w-1/2">
-                    <div className="lg:sticky top-24">
-                        <div className="relative rounded-2xl aspect-square bg-gradient-to-br from-[#0c1220] to-[#080e1a] border border-white/[0.06] overflow-hidden group">
-                            {images[activeImageIndex] ? (
-                                <Image
-                                    src={images[activeImageIndex]}
-                                    alt={product.name}
-                                    fill
-                                    sizes="(max-width: 1024px) 100vw, 50vw"
-                                    className="object-contain p-8 group-hover:scale-105 transition-transform duration-700"
-                                    priority
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-600">
-                                    <span className="text-5xl">📱</span>
-                                </div>
-                            )}
-
-                            {/* Badges */}
-                            <div className="absolute top-4 right-4 flex flex-col gap-2">
-                                <span className="bg-indigo-500/20 backdrop-blur-md text-indigo-300 px-3 py-1.5 rounded-lg text-xs font-bold border border-indigo-500/20">
-                                    {CONDITION_LABELS[product.condition as ProductCondition] ?? 'جيد'}
-                                </span>
-                                {discount > 0 ? (
-                                    <span className="bg-red-500/90 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
-                                        خصم {discount}%
-                                    </span>
-                                ) : null}
-                            </div>
-
-                            <button
-                                onClick={(e) => { e.preventDefault(); toggleFavorite(product.id) }}
-                                className="absolute top-4 left-4 z-10 w-11 h-11 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 flex items-center justify-center transition-colors border border-white/10"
-                            >
-                                <Heart size={20} className={isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-white/70'} />
-                            </button>
-
-                            {/* Image navigation arrows */}
-                            {images.length > 1 ? (
-                                <>
-                                    <button
-                                        onClick={() => setActiveImageIndex((i) => (i + 1) % images.length)}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:bg-black/60"
-                                    >
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => setActiveImageIndex((i) => (i - 1 + images.length) % images.length)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/70 hover:bg-black/60"
-                                    >
-                                        <ChevronRight size={18} />
-                                    </button>
-                                </>
-                            ) : null}
+                    <div className="glass rounded-[2rem] aspect-square relative bg-gradient-to-tr from-[#0a0a14] to-[#1a1a24] overflow-hidden border-[var(--border)] lg:sticky top-[calc(var(--navbar-h)+2rem)] shadow-2xl shadow-black group">
+                        {product.images?.[0] ? (
+                            <Image src={product.images[0]} alt={product.name} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain p-8 hover:scale-105 transition-transform duration-700" priority />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)] border border-white/5">صورة غير متوفرة</div>
+                        )}
+                        <div className="absolute top-6 right-6 bg-[var(--glass)] backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10 uppercase tracking-wider text-white shadow-xl">
+                            {product.condition === 'excellent' ? 'ممتاز' : product.condition === 'good' ? 'جيد جداً' : 'جيد'}
                         </div>
-
-                        {/* Thumbnails */}
-                        {images.length > 1 ? (
-                            <div className="flex gap-2 mt-3 overflow-x-auto pb-1">
-                                {images.map((img: string, idx: number) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setActiveImageIndex(idx)}
-                                        className={`w-16 h-16 rounded-xl border overflow-hidden flex-shrink-0 transition-all ${
-                                            idx === activeImageIndex
-                                                ? 'border-cyan-500 ring-1 ring-cyan-500/30'
-                                                : 'border-white/10 hover:border-white/20'
-                                        }`}
-                                    >
-                                        <Image src={img} alt="" width={64} height={64} className="w-full h-full object-contain bg-[#080c15] p-1" />
-                                    </button>
-                                ))}
-                            </div>
-                        ) : null}
+                        <button
+                            onClick={(e) => { e.preventDefault(); toggleFavorite(product.id) }}
+                            className="absolute top-6 left-6 z-10 w-12 h-12 rounded-full bg-black/50 hover:bg-black/80 flex items-center justify-center transition-colors border border-white/5"
+                        >
+                            <Heart size={24} className={isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-white'} />
+                        </button>
                     </div>
                 </div>
 
-                {/* Details */}
-                <div className="w-full lg:w-1/2 flex flex-col gap-5">
-                    <div>
-                        <div className="flex justify-between items-start gap-4 mb-3">
-                            <h1 className="text-3xl md:text-4xl font-black text-white leading-tight">{product.name}</h1>
-                            <div className="flex-shrink-0 mt-1"><ShareButton title={product.name} /></div>
+                <div className="w-full lg:w-1/2 flex flex-col gap-6 py-2">
+                    <div className="pb-6 border-b border-[var(--border)]">
+                        <div className="flex justify-between items-start gap-4 mb-4">
+                            <h1 className="text-4xl md:text-5xl lg:text-5xl font-black text-white leading-tight tracking-wide">{product.name}</h1>
+                            <div className="mt-2 flex-shrink-0"><ShareButton title={product.name} /></div>
                         </div>
-
-                        {/* Price block */}
-                        <div className="bg-gradient-to-r from-cyan-500/5 to-transparent border border-cyan-500/10 rounded-xl px-5 py-4 mt-3">
-                            <div className="flex items-baseline gap-3">
-                                <span className="text-3xl font-black text-cyan-400">{product.price?.toLocaleString('ar-EG') ?? '—'} <span className="text-lg">ج.م</span></span>
-                                {product.original_price ? (
-                                    <span className="text-lg text-gray-500 line-through">{product.original_price.toLocaleString('ar-EG')} ج.م</span>
-                                ) : null}
-                            </div>
-                            {discount > 0 ? (
-                                <span className="text-xs text-red-400 font-bold mt-1 block">وفر {(product.original_price - product.price).toLocaleString('ar-EG')} ج.م</span>
-                            ) : null}
+                        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mt-4">
+                            <span className="text-4xl font-black text-[var(--neon-cyan)] block">{product.price.toLocaleString('ar-EG')} ج</span>
+                            {product.original_price && (
+                                <span className="text-xl text-[var(--text-muted)] line-through block opacity-70 mt-1 md:mt-0">{product.original_price.toLocaleString('ar-EG')} ج</span>
+                            )}
+                        </div>
+                        <div className="flex gap-3 mt-4 flex-wrap">
+                            <span className="bg-white/5 px-3 py-1 rounded-full text-sm text-gray-300 font-medium">بطارية {product.battery_health}%</span>
+                            <span className="bg-white/5 px-3 py-1 rounded-full text-sm text-gray-300 font-medium">{product.storage}</span>
+                            <span className="bg-white/5 px-3 py-1 rounded-full text-sm text-gray-300 font-medium">{product.color}</span>
+                            {product.network && <span className="bg-white/5 px-3 py-1 rounded-full text-sm text-gray-300 font-medium">{product.network}</span>}
                         </div>
                     </div>
 
-                    {/* Specs */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                        {typeof product.battery_health === 'number' ? (
-                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
-                                <div className="text-lg font-black text-white">{product.battery_health}%</div>
-                                <div className="text-[11px] text-gray-500 mt-0.5">البطارية</div>
-                            </div>
-                        ) : null}
-                        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
-                            <div className="text-lg font-black text-white">{product.storage || product.storage_size}</div>
-                            <div className="text-[11px] text-gray-500 mt-0.5">السعة</div>
-                        </div>
-                        <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
-                            <div className="text-lg font-black text-white">{product.color}</div>
-                            <div className="text-[11px] text-gray-500 mt-0.5">اللون</div>
-                        </div>
-                        {product.network ? (
-                            <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 text-center">
-                                <div className="text-lg font-black text-white">{product.network}</div>
-                                <div className="text-[11px] text-gray-500 mt-0.5">الشبكة</div>
-                            </div>
-                        ) : null}
-                    </div>
-
-                    {/* Description */}
-                    <div className="border-t border-white/[0.06] pt-4">
-                        <h3 className="text-base font-bold text-white mb-2">الوصف</h3>
-                        <p className="text-gray-400 leading-relaxed whitespace-pre-wrap text-sm">
+                    <div className="py-2">
+                        <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2">الوصف</h3>
+                        <p className="text-gray-400 leading-relaxed whitespace-pre-wrap text-base opacity-90">
                             {product.description || 'لا يوجد وصف متاح لهذا المنتج.'}
                         </p>
                     </div>
 
-                    {/* Trust badges */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.06] p-3.5 rounded-xl">
-                            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                                <ShieldCheck className="text-emerald-400" size={20} />
-                            </div>
-                            <span className="font-bold text-sm text-white">ضمان أصلي</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
+                        <div className="flex items-center gap-4 text-white glass p-4 rounded-2xl border border-[var(--border)]">
+                            <div className="p-2 bg-[var(--neon)]/10 rounded-xl max-w-fit"><ShieldCheck className="text-[var(--neon-cyan)]" size={24} /></div>
+                            <span className="font-bold text-sm">ضمان أصلي</span>
                         </div>
-                        <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.06] p-3.5 rounded-xl">
-                            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                                <Truck className="text-blue-400" size={20} />
-                            </div>
-                            <span className="font-bold text-sm text-white">توصيل سريع</span>
+                        <div className="flex items-center gap-4 text-white glass p-4 rounded-2xl border border-[var(--border)]">
+                            <div className="p-2 bg-[var(--neon)]/10 rounded-xl max-w-fit"><Truck className="text-[var(--neon-cyan)]" size={24} /></div>
+                            <span className="font-bold text-sm">توصيل سريع مجاني</span>
                         </div>
                     </div>
 
-                    {/* CTA */}
-                    <div className="flex flex-col gap-3 mt-2">
+                    <div className="mt-4 flex flex-col gap-3">
                         {product.in_stock ? (
                             <AddToCartBtn product={product} />
                         ) : (
-                            <div className="w-full py-4 text-center border border-red-500/30 text-red-400 font-bold rounded-xl bg-red-500/10 text-base">
+                            <div className="w-full py-4 text-center glass border border-red-500/50 text-red-500 font-bold rounded-2xl bg-red-500/10 text-lg shadow-[0_0_20px_rgba(239,68,68,0.2)]">
                                 عذراً، هذا المنتج نفد من المخزون
                             </div>
                         )}
                         <Link
                             href={`/trade?product=${product.slug}&name=${encodeURIComponent(product.name)}&price=${product.price}`}
-                            className="w-full py-3.5 text-center border border-amber-500/20 text-amber-400 font-bold rounded-xl bg-amber-500/5 hover:bg-amber-500/10 transition-colors text-sm"
+                            className="w-full py-4 text-center glass border border-orange-500/30 text-orange-400 font-bold rounded-2xl bg-orange-500/5 hover:bg-orange-500/10 transition-colors text-lg"
                         >
-                            🔄 استبدل مع جهازك القديم
+                            🔄 استبدل مع جهازك القديم واخصم الفارق
                         </Link>
                     </div>
 
-                    {/* Forms */}
-                    <div className="flex flex-col gap-6 mt-4 border-t border-white/[0.06] pt-6">
+                    <div className="flex flex-col gap-8 mt-6">
                         <CallbackForm productId={product.id} />
                         <ReserveForm productId={product.id} productName={product.name} />
                     </div>
                 </div>
             </div>
 
-            {/* Similar Products */}
-            {similar.length > 0 ? (
-                <div className="mt-20">
-                    <h2 className="text-xl font-black text-white mb-6 flex items-center gap-2">
-                        <span className="w-1 h-6 bg-cyan-400 rounded-full" />
-                        منتجات مشابهة
-                    </h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {similar.slice(0, 4).map((p: any) => (
-                            <ProductCard key={p.id} product={p} />
+            {/* Similar Products Section */}
+            {similar.length > 0 && (
+                <div className="mt-24">
+                    <h2 className="text-2xl font-bold text-white mb-6 pr-2 border-r-4 border-[var(--neon-cyan)]">منتجات مشابهة قد تعجبك</h2>
+                    <div className="flex overflow-x-auto gap-4 custom-scrollbar pb-6 snap-x">
+                        {similar.map(p => (
+                            <div key={p.id} className="min-w-[280px] w-[280px] snap-center">
+                                <ProductCard product={p} />
+                            </div>
                         ))}
                     </div>
                 </div>
-            ) : null}
+            )}
 
             {/* Recently Viewed */}
-            <div className="mt-16">
+            <div className="mt-20">
                 <RecentlyViewed excludeId={product.id} />
             </div>
+
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 6px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+            `}</style>
         </div>
     )
 }
