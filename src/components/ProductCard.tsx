@@ -1,7 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import type { Product } from '@/types/database'
 import { openWhatsAppInquiry } from '@/lib/whatsapp'
+import { CONDITION_LABELS } from '@/lib/products'
+import type { ProductCondition } from '@/types/database'
 
 export default function ProductCard({ p, index }: { p: Product; index: number }) {
   const router = useRouter()
@@ -31,27 +34,60 @@ export default function ProductCard({ p, index }: { p: Product; index: number })
             }}
           />
         ) : (
-          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
-            <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
-              <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-1 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
-            </svg>
+          <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3, fontSize: '48px' }}>
+            📱
           </div>
         )}
 
-        {!p.in_stock && <div className="badge-sold">نفد</div>}
-        {discount > 0 && <div className="badge-disc">-{discount}%</div>}
-        {p.is_featured && <div className="badge-feat">مميز</div>}
+        {!p.in_stock ? <div className="badge-sold">نفد</div> : null}
+        {discount > 0 ? <div className="badge-disc">خصم {discount}%</div> : null}
+        {p.is_featured ? <div className="badge-feat">مميز</div> : null}
       </div>
 
       <div className="product-body">
+        {/* Condition pill */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '4px' }}>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: 'rgba(99,102,241,0.15)',
+            color: '#a5b4fc',
+            border: '1px solid rgba(99,102,241,0.2)',
+          }}>
+            {CONDITION_LABELS[p.condition as ProductCondition] ?? p.condition}
+          </span>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: '4px',
+            background: 'rgba(255,255,255,0.05)',
+            color: '#94a3b8',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}>
+            {p.storage_size}
+          </span>
+        </div>
+
         <div className="product-name">{p.name}</div>
         <div className="product-model">{p.device_model}</div>
 
-        <div style={{ display: 'flex', gap: '8px', margin: '4px 0', fontSize: '.75rem', opacity: 0.8, flexWrap: 'wrap' }}>
-          {typeof p.battery_health === 'number' && <span>البطارية {p.battery_health}%</span>}
-          <span style={{ color: 'var(--neon-2)' }}>{p.storage_size}</span>
-          <span>{p.color}</span>
-        </div>
+        {/* Battery health bar */}
+        {typeof p.battery_health === 'number' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: '4px 0' }}>
+            <div style={{ flex: 1, height: '5px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%',
+                width: `${p.battery_health}%`,
+                borderRadius: '10px',
+                background: p.battery_health >= 80 ? '#34d399' : p.battery_health >= 60 ? '#fbbf24' : '#f87171',
+              }} />
+            </div>
+            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>{p.battery_health}%</span>
+          </div>
+        ) : null}
 
         {p.price_on_inquiry || p.price === null ? (
           <button
@@ -63,13 +99,13 @@ export default function ProductCard({ p, index }: { p: Product; index: number })
             style={{ marginTop: 'auto' }}
             disabled={!p.in_stock}
           >
-            اسأل بوكس
+            اسأل بوكس عن السعر
           </button>
         ) : (
           <>
             <div className="product-prices">
-              <span className="product-price">{p.price.toLocaleString('ar-EG')} جنيه</span>
-              {p.original_price ? <span className="product-old">{p.original_price.toLocaleString('ar-EG')} جنيه</span> : null}
+              <span className="product-price">{p.price.toLocaleString('ar-EG')} <span style={{ fontSize: '13px', fontWeight: 600 }}>ج.م</span></span>
+              {p.original_price ? <span className="product-old">{p.original_price.toLocaleString('ar-EG')}</span> : null}
             </div>
             <button
               onClick={(event) => {

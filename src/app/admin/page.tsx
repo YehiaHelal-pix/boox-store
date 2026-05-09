@@ -122,14 +122,102 @@ const DEFAULT_ANNOUNCEMENT: AnnouncementForm = {
 }
 const ORDER_STATUS_OPTIONS: Array<{ value: OrderStatus; label: string }> = [
   { value: 'pending', label: 'معلق' },
-  { value: 'confirmed', label: 'متأكد' },
-  { value: 'shipped', label: 'اتشحن' },
-  { value: 'delivered', label: 'اتسلم' },
-  { value: 'cancelled', label: 'اتلغى' },
+  { value: 'confirmed', label: 'مؤكد' },
+  { value: 'shipped', label: 'تم الشحن' },
+  { value: 'delivered', label: 'تم التسليم' },
+  { value: 'cancelled', label: 'ملغي' },
 ]
+
+const TAB_CONFIG: Array<{ id: AdminTab; label: string; icon: string }> = [
+  { id: 'dashboard', label: 'لوحة التحكم', icon: '📊' },
+  { id: 'products', label: 'المنتجات', icon: '📦' },
+  { id: 'orders', label: 'الطلبات', icon: '🛒' },
+  { id: 'maintenance', label: 'الصيانة', icon: '🔧' },
+  { id: 'trade', label: 'الاستبدال', icon: '🔄' },
+  { id: 'settings', label: 'الإعدادات', icon: '⚙️' },
+  { id: 'logs', label: 'السجل', icon: '📋' },
+]
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  confirmed: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+  shipped: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+  delivered: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+  cancelled: 'bg-red-500/15 text-red-300 border-red-500/30',
+  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+  reviewed: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+  completed: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: 'معلق',
+  confirmed: 'مؤكد',
+  shipped: 'تم الشحن',
+  delivered: 'تم التسليم',
+  cancelled: 'ملغي',
+  in_progress: 'قيد التنفيذ',
+  reviewed: 'تمت المراجعة',
+  completed: 'مكتمل',
+}
 
 async function parseJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T
+}
+
+function InputField({ label, value, onChange, placeholder, type = 'text', disabled = false }: {
+  label?: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; disabled?: boolean
+}) {
+  return (
+    <div>
+      {label ? <label className="admin-label">{label}</label> : null}
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        disabled={disabled}
+        className="admin-input"
+      />
+    </div>
+  )
+}
+
+function SelectField({ label, value, onChange, children }: {
+  label?: string; value: string; onChange: (v: string) => void; children: React.ReactNode
+}) {
+  return (
+    <div>
+      {label ? <label className="admin-label">{label}</label> : null}
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="admin-input">
+        {children}
+      </select>
+    </div>
+  )
+}
+
+function CheckboxField({ label, checked, onChange }: {
+  label: string; checked: boolean; onChange: (v: boolean) => void
+}) {
+  return (
+    <label className="admin-checkbox">
+      <div className={`admin-checkbox-box ${checked ? 'active' : ''}`}>
+        {checked ? <span>✓</span> : null}
+      </div>
+      <span>{label}</span>
+    </label>
+  )
+}
+
+function StatCard({ label, value, color, icon }: { label: string; value: number; color: string; icon: string }) {
+  return (
+    <div className="admin-stat-card">
+      <div className={`admin-stat-icon ${color}`}>{icon}</div>
+      <div>
+        <div className="admin-stat-value">{value}</div>
+        <div className="admin-stat-label">{label}</div>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminPage() {
@@ -148,6 +236,7 @@ export default function AdminPage() {
   const [announcement, setAnnouncement] = useState<AnnouncementForm>(DEFAULT_ANNOUNCEMENT)
   const [productForm, setProductForm] = useState<ProductFormState>(DEFAULT_PRODUCT_FORM)
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   function showNotice(type: NoticeType, message: string) {
     setNotice({ type, message })
@@ -283,7 +372,7 @@ export default function AdminPage() {
 
       setProductForm(DEFAULT_PRODUCT_FORM)
       setSelectedFiles([])
-      showNotice('success', 'المنتج اتحفظ في قاعدة البيانات بنجاح')
+      showNotice('success', 'تم حفظ المنتج بنجاح')
       await loadAdminData()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'فشل حفظ المنتج'
@@ -298,7 +387,7 @@ export default function AdminPage() {
       await adminFetch<{ success: boolean }>(`/api/products/${productId}`, {
         method: 'DELETE',
       })
-      showNotice('success', 'المنتج اتشال من العرض')
+      showNotice('success', 'تم إخفاء المنتج')
       await loadAdminData()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'فشل حذف المنتج'
@@ -312,7 +401,7 @@ export default function AdminPage() {
         method: 'PUT',
         body: JSON.stringify({ id: orderId, status }),
       })
-      showNotice('success', 'حالة الطلب اتحدثت')
+      showNotice('success', 'تم تحديث حالة الطلب')
       await loadAdminData()
     } catch (error) {
       const message = error instanceof Error ? error.message : 'فشل تحديث الطلب'
@@ -326,7 +415,7 @@ export default function AdminPage() {
         method: 'POST',
         body: JSON.stringify(siteConfig),
       })
-      showNotice('success', 'إعدادات الموقع اتحفظت')
+      showNotice('success', 'تم حفظ إعدادات الموقع')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'فشل حفظ الإعدادات'
       showNotice('error', message)
@@ -339,7 +428,7 @@ export default function AdminPage() {
         method: 'POST',
         body: JSON.stringify(announcement),
       })
-      showNotice('success', 'الإعلان اتحفظ')
+      showNotice('success', 'تم حفظ الإعلان')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'فشل حفظ الإعلان'
       showNotice('error', message)
@@ -347,380 +436,547 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#05080e] px-4 py-6 lg:px-8" dir="rtl">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 rounded-[32px] border border-white/10 bg-[#0b1018] p-6 shadow-[0_0_60px_rgba(0,0,0,0.35)] lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-[var(--neon-cyan)]">Boox Store</p>
-            <h1 className="mt-2 text-3xl font-black text-white lg:text-5xl">لوحة الإدارة</h1>
-            <p className="mt-2 text-sm text-gray-400">إدارة المنتجات والطلبات والمحتوى من مكان واحد.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {(['dashboard', 'products', 'orders', 'maintenance', 'trade', 'settings', 'logs'] as AdminTab[]).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-                  activeTab === tab ? 'bg-[var(--neon-cyan)] text-black' : 'border border-white/10 bg-white/5 text-white hover:bg-white/10'
-                }`}
-              >
-                {{
-                  dashboard: 'الإحصائيات',
-                  products: 'المنتجات',
-                  orders: 'الطلبات',
-                  maintenance: 'الصيانة',
-                  trade: 'الاستبدال',
-                  settings: 'الإعدادات',
-                  logs: 'سجل الأدمن',
-                }[tab]}
-              </button>
-            ))}
-            <form action="/auth/logout" method="post">
-              <button type="submit" className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
-                خروج
-              </button>
-            </form>
+    <div className="admin-layout" dir="rtl">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen ? (
+        <div className="admin-overlay" onClick={() => setSidebarOpen(false)} />
+      ) : null}
+
+      {/* Sidebar */}
+      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="admin-sidebar-header">
+          <div className="admin-brand">
+            <div className="admin-brand-icon">B</div>
+            <div>
+              <div className="admin-brand-name">Boox Store</div>
+              <div className="admin-brand-role">لوحة الإدارة</div>
+            </div>
           </div>
         </div>
 
+        <nav className="admin-nav">
+          {TAB_CONFIG.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => {
+                setActiveTab(tab.id)
+                setSidebarOpen(false)
+              }}
+              className={`admin-nav-item ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              <span className="admin-nav-icon">{tab.icon}</span>
+              <span>{tab.label}</span>
+              {tab.id === 'orders' && stats.pending_orders > 0 ? (
+                <span className="admin-nav-badge">{stats.pending_orders}</span>
+              ) : null}
+            </button>
+          ))}
+        </nav>
+
+        <div className="admin-sidebar-footer">
+          <form action="/auth/logout" method="post">
+            <button type="submit" className="admin-logout-btn">
+              🚪 تسجيل الخروج
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      {/* Main content */}
+      <main className="admin-main">
+        {/* Top bar */}
+        <header className="admin-topbar">
+          <button onClick={() => setSidebarOpen(true)} className="admin-menu-btn lg:hidden">
+            ☰
+          </button>
+          <div>
+            <h1 className="admin-page-title">
+              {TAB_CONFIG.find((t) => t.id === activeTab)?.icon}{' '}
+              {TAB_CONFIG.find((t) => t.id === activeTab)?.label}
+            </h1>
+          </div>
+          <button onClick={() => void loadAdminData()} className="admin-refresh-btn" title="تحديث البيانات">
+            ↻
+          </button>
+        </header>
+
+        {/* Notice */}
         {notice ? (
-          <div className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${
-            notice.type === 'success'
-              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-              : notice.type === 'error'
-                ? 'border-red-500/30 bg-red-500/10 text-red-300'
-                : 'border-white/10 bg-white/5 text-white'
-          }`}>
+          <div className={`admin-notice ${notice.type}`}>
+            <span>{notice.type === 'success' ? '✓' : notice.type === 'error' ? '✕' : 'ℹ'}</span>
             {notice.message}
           </div>
         ) : null}
 
-        <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          {[
-            { label: 'منتجات فعالة', value: stats.active_products },
-            { label: 'إجمالي المنتجات', value: stats.total_products },
-            { label: 'طلبات معلقة', value: stats.pending_orders },
-            { label: 'إجمالي الطلبات', value: stats.total_orders },
-            { label: 'طلبات مكتملة', value: stats.completed_orders },
-          ].map((item) => (
-            <div key={item.label} className="rounded-[28px] border border-white/10 bg-[#0b1018] p-5 shadow-[0_0_40px_rgba(0,0,0,0.25)]">
-              <div className="text-sm text-gray-400">{item.label}</div>
-              <div className="mt-2 text-3xl font-black text-white">{item.value}</div>
-            </div>
-          ))}
-        </div>
+        {/* Loading */}
+        {loading ? (
+          <div className="admin-loading">
+            <div className="admin-spinner" />
+            <span>جاري تحميل البيانات...</span>
+          </div>
+        ) : null}
 
-        {loading ? <div className="rounded-3xl border border-white/10 bg-[#0b1018] p-8 text-center text-white">جاري تحميل بيانات الإدارة...</div> : null}
-
+        {/* Dashboard Tab */}
         {!loading && activeTab === 'dashboard' ? (
-          <div className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <h2 className="text-xl font-black text-white">ملخص سريع</h2>
-              <div className="mt-4 space-y-3 text-sm text-gray-300">
-                <div>إجمالي المنتجات المعروضة حاليًا: {visibleProducts.length}</div>
-                <div>طلبات محتاجة متابعة: {orders.filter((order) => order.status === 'pending').length}</div>
-                <div>أحدث قسم متاح: {categories[0]?.name_ar ?? '—'}</div>
-              </div>
+          <div className="admin-content-area">
+            <div className="admin-stats-grid">
+              <StatCard label="منتجات فعالة" value={stats.active_products} color="bg-emerald-500/20 text-emerald-400" icon="📦" />
+              <StatCard label="إجمالي المنتجات" value={stats.total_products} color="bg-blue-500/20 text-blue-400" icon="🏷️" />
+              <StatCard label="طلبات معلقة" value={stats.pending_orders} color="bg-amber-500/20 text-amber-400" icon="⏳" />
+              <StatCard label="إجمالي الطلبات" value={stats.total_orders} color="bg-purple-500/20 text-purple-400" icon="📋" />
+              <StatCard label="طلبات مكتملة" value={stats.completed_orders} color="bg-cyan-500/20 text-cyan-400" icon="✅" />
             </div>
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <h2 className="text-xl font-black text-white">آخر نشاط</h2>
-              <div className="mt-4 space-y-3">
-                {logs.slice(0, 5).map((log) => (
-                  <div key={log.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="text-sm font-bold text-white">{log.action}</div>
-                    <div className="mt-1 text-xs text-gray-400">{new Date(log.performed_at).toLocaleString('ar-EG')}</div>
+
+            <div className="grid gap-6 lg:grid-cols-2 mt-6">
+              <div className="admin-card">
+                <h3 className="admin-card-title">ملخص سريع</h3>
+                <div className="admin-summary-list">
+                  <div className="admin-summary-item">
+                    <span className="admin-summary-dot bg-emerald-400" />
+                    <span>المنتجات المعروضة حالياً</span>
+                    <span className="admin-summary-value">{visibleProducts.length}</span>
                   </div>
-                ))}
+                  <div className="admin-summary-item">
+                    <span className="admin-summary-dot bg-amber-400" />
+                    <span>طلبات تحتاج متابعة</span>
+                    <span className="admin-summary-value">{orders.filter((o) => o.status === 'pending').length}</span>
+                  </div>
+                  <div className="admin-summary-item">
+                    <span className="admin-summary-dot bg-blue-400" />
+                    <span>طلبات صيانة</span>
+                    <span className="admin-summary-value">{maintenanceRequests.length}</span>
+                  </div>
+                  <div className="admin-summary-item">
+                    <span className="admin-summary-dot bg-purple-400" />
+                    <span>طلبات استبدال</span>
+                    <span className="admin-summary-value">{tradeRequests.length}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        ) : null}
 
-        {!loading && activeTab === 'products' ? (
-          <div className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)]">
-            <form onSubmit={handleSaveProduct} className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <h2 className="text-2xl font-black text-white">إضافة منتج جديد</h2>
-              <div className="mt-5 space-y-4">
-                <input value={productForm.name} onChange={(event) => setProductForm((current) => ({ ...current, name: event.target.value }))} placeholder="اسم المنتج" className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                <textarea value={productForm.description} onChange={(event) => setProductForm((current) => ({ ...current, description: event.target.value }))} placeholder="وصف المنتج" className="min-h-28 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    value={productForm.price}
-                    onChange={(event) => setProductForm((current) => ({ ...current, price: event.target.value }))}
-                    placeholder="السعر"
-                    disabled={productForm.price_on_inquiry}
-                    className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none disabled:opacity-40"
-                  />
-                  <input value={productForm.original_price} onChange={(event) => setProductForm((current) => ({ ...current, original_price: event.target.value }))} placeholder="السعر قبل الخصم" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={productForm.category} onChange={(event) => setProductForm((current) => ({ ...current, category: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.slug}>
-                        {category.name_ar}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={productForm.model} onChange={(event) => setProductForm((current) => ({ ...current, model: event.target.value }))} placeholder="الموديل" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={productForm.storage_size} onChange={(event) => setProductForm((current) => ({ ...current, storage_size: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
-                    {STORAGE_OPTIONS.map((storage) => (
-                      <option key={storage} value={storage}>
-                        {storage}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={productForm.color} onChange={(event) => setProductForm((current) => ({ ...current, color: event.target.value }))} placeholder="اللون" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={productForm.condition} onChange={(event) => setProductForm((current) => ({ ...current, condition: event.target.value as ProductCondition }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
-                    {(Object.entries(CONDITION_LABELS) as Array<[ProductCondition, string]>).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={productForm.battery_health} onChange={(event) => setProductForm((current) => ({ ...current, battery_health: event.target.value }))} placeholder="البطارية %" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <select value={productForm.grade} onChange={(event) => setProductForm((current) => ({ ...current, grade: event.target.value }))} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none">
-                    {GRADE_OPTIONS.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {grade}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={productForm.tax_value} onChange={(event) => setProductForm((current) => ({ ...current, tax_value: event.target.value }))} placeholder="قيمة الضريبة" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none" />
-                </div>
-                <label className="block rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-gray-300">
-                  صور المنتج
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="mt-3 block w-full text-sm text-white file:mr-4 file:rounded-full file:border-0 file:bg-[var(--neon-cyan)] file:px-4 file:py-2 file:font-bold file:text-black"
-                    onChange={(event) => setSelectedFiles(Array.from(event.target.files ?? []))}
-                  />
-                </label>
-
-                <div className="grid grid-cols-2 gap-3 text-sm text-white">
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.price_on_inquiry} onChange={(event) => setProductForm((current) => ({ ...current, price_on_inquiry: event.target.checked }))} />
-                    السعر عند الطلب
-                  </label>
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.in_stock} onChange={(event) => setProductForm((current) => ({ ...current, in_stock: event.target.checked }))} />
-                    متاح
-                  </label>
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.is_featured} onChange={(event) => setProductForm((current) => ({ ...current, is_featured: event.target.checked }))} />
-                    مميز
-                  </label>
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.is_visible} onChange={(event) => setProductForm((current) => ({ ...current, is_visible: event.target.checked }))} />
-                    ظاهر في الموقع
-                  </label>
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.is_available} onChange={(event) => setProductForm((current) => ({ ...current, is_available: event.target.checked }))} />
-                    مفعل
-                  </label>
-                  <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <input type="checkbox" checked={productForm.is_tax_exempt} onChange={(event) => setProductForm((current) => ({ ...current, is_tax_exempt: event.target.checked }))} />
-                    معفي من الضريبة
-                  </label>
-                </div>
-
-                {selectedFiles.length > 0 ? <div className="text-sm text-gray-400">عدد الصور المختارة: {selectedFiles.length}</div> : null}
-
-                <button type="submit" disabled={savingProduct} className="w-full rounded-2xl bg-[var(--neon-cyan)] px-4 py-4 font-black text-black disabled:opacity-60">
-                  {savingProduct ? 'جاري رفع الصور وحفظ المنتج...' : 'حفظ المنتج'}
-                </button>
-              </div>
-            </form>
-
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl font-black text-white">المنتجات الحالية</h2>
-                <span className="text-sm text-gray-400">{products.length} منتج</span>
-              </div>
-              <div className="space-y-4">
-                {products.map((product) => (
-                  <div key={product.id} className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-white/5 p-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-                        {product.image_url ? <img src={product.image_url} alt={product.name} className="h-full w-full object-cover" /> : null}
-                      </div>
+              <div className="admin-card">
+                <h3 className="admin-card-title">آخر نشاط</h3>
+                <div className="admin-activity-list">
+                  {logs.slice(0, 5).map((log) => (
+                    <div key={log.id} className="admin-activity-item">
+                      <div className="admin-activity-dot" />
                       <div>
-                        <div className="font-bold text-white">{product.name}</div>
-                        <div className="text-sm text-gray-400">
-                          {product.category_name_ar ?? CATEGORY_LABELS[product.category] ?? product.category} • {product.storage_size} • {product.color}
-                        </div>
-                        <div className="mt-1 text-sm text-[var(--neon-cyan)]">
-                          {product.price_on_inquiry || product.price === null ? 'السعر عند الطلب' : `${product.price.toLocaleString('ar-EG')} جنيه`}
-                        </div>
+                        <div className="text-sm font-semibold text-white">{log.action}</div>
+                        <div className="text-xs text-gray-500">{new Date(log.performed_at).toLocaleString('ar-EG')}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`rounded-full px-3 py-2 text-xs font-bold ${product.is_available ? 'bg-emerald-500/15 text-emerald-300' : 'bg-white/10 text-gray-300'}`}>
-                        {product.is_available ? 'مفعل' : 'متوقف'}
-                      </span>
-                      <button onClick={() => void handleDeleteProduct(product.id)} className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300">
-                        إخفاء
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                  {logs.length === 0 ? <p className="text-sm text-gray-500">لا يوجد نشاط حتى الآن</p> : null}
+                </div>
               </div>
             </div>
           </div>
         ) : null}
 
-        {!loading && activeTab === 'orders' ? (
-          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-            <h2 className="text-2xl font-black text-white">إدارة الطلبات</h2>
-            <div className="mt-5 space-y-4">
-              {orders.map((order) => (
-                <div key={order.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                      <div className="font-bold text-white">{order.customer_name}</div>
-                      <div className="text-sm text-gray-400">{order.customer_phone}</div>
-                      <div className="mt-1 text-sm text-gray-300">المنتج: {order.product_name ?? 'غير محدد'} • الكمية: {order.quantity}</div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <select
-                        value={order.status}
-                        onChange={(event) => void handleOrderStatusChange(order.id, event.target.value as OrderStatus)}
-                        className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
-                      >
-                        {ORDER_STATUS_OPTIONS.map((statusOption) => (
-                          <option key={statusOption.value} value={statusOption.value}>
-                            {statusOption.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="mt-3 text-xs text-gray-500">{new Date(order.created_at).toLocaleString('ar-EG')}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {!loading && activeTab === 'maintenance' ? (
-          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-            <h2 className="text-2xl font-black text-white">طلبات الصيانة</h2>
-            <div className="mt-5 space-y-4">
-              {maintenanceRequests.map((request) => (
-                <div key={request.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="font-bold text-white">{request.customer_name} • {request.device_model}</div>
-                  <div className="mt-2 text-sm text-gray-300">{request.issue_description}</div>
-                  <div className="mt-2 text-xs text-gray-500">{request.customer_phone} • {request.status}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {!loading && activeTab === 'trade' ? (
-          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-            <h2 className="text-2xl font-black text-white">طلبات الاستبدال</h2>
-            <div className="mt-5 space-y-4">
-              {tradeRequests.map((request) => (
-                <div key={request.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="font-bold text-white">{request.customer_name}</div>
-                  <div className="mt-2 text-sm text-gray-300">معاه: {request.device_model} • مطلوب: {request.desired_model ?? 'غير محدد'}</div>
-                  <div className="mt-2 text-xs text-gray-500">{request.customer_phone} • {request.status}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {!loading && activeTab === 'settings' ? (
-          <div className="grid gap-6 xl:grid-cols-2">
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <h2 className="text-2xl font-black text-white">إعدادات الموقع</h2>
-              <div className="mt-5 space-y-4">
-                {(
-                  [
-                    ['hero_title', 'العنوان الرئيسي'],
-                    ['hero_slogan_line1', 'السطر الأول'],
-                    ['hero_slogan_line2', 'السطر الثاني'],
-                    ['whatsapp_number', 'رقم واتساب'],
-                    ['maps_url', 'رابط الخريطة'],
-                    ['instagram_url', 'إنستجرام'],
-                    ['facebook_url', 'فيسبوك'],
-                    ['tiktok_url', 'تيك توك'],
-                  ] as Array<[keyof SiteConfigForm, string]>
-                ).map(([key, label]) => (
-                  <div key={key}>
-                    <label className="mb-2 block text-sm text-gray-400">{label}</label>
-                    <input
-                      value={siteConfig[key]}
-                      onChange={(event) => setSiteConfig((current) => ({ ...current, [key]: event.target.value }))}
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
+        {/* Products Tab */}
+        {!loading && activeTab === 'products' ? (
+          <div className="admin-content-area">
+            <div className="grid gap-6 xl:grid-cols-[440px_minmax(0,1fr)]">
+              {/* Add Product Form */}
+              <div className="admin-card">
+                <h3 className="admin-card-title">إضافة منتج جديد</h3>
+                <form onSubmit={handleSaveProduct} className="admin-form">
+                  <InputField value={productForm.name} onChange={(v) => setProductForm((c) => ({ ...c, name: v }))} placeholder="اسم المنتج" />
+                  <div>
+                    <textarea
+                      value={productForm.description}
+                      onChange={(e) => setProductForm((c) => ({ ...c, description: e.target.value }))}
+                      placeholder="وصف المنتج"
+                      className="admin-input min-h-24 resize-none"
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <InputField
+                      label="السعر"
+                      value={productForm.price}
+                      onChange={(v) => setProductForm((c) => ({ ...c, price: v }))}
+                      placeholder="0"
+                      type="number"
+                      disabled={productForm.price_on_inquiry}
+                    />
+                    <InputField
+                      label="السعر قبل الخصم"
+                      value={productForm.original_price}
+                      onChange={(v) => setProductForm((c) => ({ ...c, original_price: v }))}
+                      placeholder="0"
+                      type="number"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <SelectField label="القسم" value={productForm.category} onChange={(v) => setProductForm((c) => ({ ...c, category: v }))}>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.slug}>{cat.name_ar}</option>
+                      ))}
+                    </SelectField>
+                    <InputField label="الموديل" value={productForm.model} onChange={(v) => setProductForm((c) => ({ ...c, model: v }))} placeholder="مثال: iPhone 15 Pro" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <SelectField label="السعة" value={productForm.storage_size} onChange={(v) => setProductForm((c) => ({ ...c, storage_size: v }))}>
+                      {STORAGE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </SelectField>
+                    <InputField label="اللون" value={productForm.color} onChange={(v) => setProductForm((c) => ({ ...c, color: v }))} placeholder="أسود" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <SelectField label="الحالة" value={productForm.condition} onChange={(v) => setProductForm((c) => ({ ...c, condition: v as ProductCondition }))}>
+                      {(Object.entries(CONDITION_LABELS) as Array<[ProductCondition, string]>).map(([v, l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </SelectField>
+                    <InputField label="صحة البطارية %" value={productForm.battery_health} onChange={(v) => setProductForm((c) => ({ ...c, battery_health: v }))} placeholder="100" type="number" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <SelectField label="الدرجة" value={productForm.grade} onChange={(v) => setProductForm((c) => ({ ...c, grade: v }))}>
+                      {GRADE_OPTIONS.map((g) => <option key={g} value={g}>{g}</option>)}
+                    </SelectField>
+                    <InputField label="قيمة الضريبة" value={productForm.tax_value} onChange={(v) => setProductForm((c) => ({ ...c, tax_value: v }))} placeholder="0" type="number" />
+                  </div>
+
+                  {/* Image upload */}
+                  <div className="admin-file-upload">
+                    <div className="admin-file-upload-inner">
+                      <span className="text-2xl">📷</span>
+                      <span className="text-sm text-gray-400">اسحب الصور هنا أو اضغط للاختيار</span>
+                      {selectedFiles.length > 0 ? <span className="text-xs text-cyan-400">{selectedFiles.length} صور مختارة</span> : null}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                        onChange={(e) => setSelectedFiles(Array.from(e.target.files ?? []))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Toggles */}
+                  <div className="admin-toggles-grid">
+                    <CheckboxField label="السعر عند الطلب" checked={productForm.price_on_inquiry} onChange={(v) => setProductForm((c) => ({ ...c, price_on_inquiry: v }))} />
+                    <CheckboxField label="متاح في المخزن" checked={productForm.in_stock} onChange={(v) => setProductForm((c) => ({ ...c, in_stock: v }))} />
+                    <CheckboxField label="منتج مميز" checked={productForm.is_featured} onChange={(v) => setProductForm((c) => ({ ...c, is_featured: v }))} />
+                    <CheckboxField label="ظاهر في الموقع" checked={productForm.is_visible} onChange={(v) => setProductForm((c) => ({ ...c, is_visible: v }))} />
+                    <CheckboxField label="مفعل" checked={productForm.is_available} onChange={(v) => setProductForm((c) => ({ ...c, is_available: v }))} />
+                    <CheckboxField label="معفي من الضريبة" checked={productForm.is_tax_exempt} onChange={(v) => setProductForm((c) => ({ ...c, is_tax_exempt: v }))} />
+                  </div>
+
+                  <button type="submit" disabled={savingProduct} className="admin-submit-btn">
+                    {savingProduct ? 'جاري الحفظ...' : '+ حفظ المنتج'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Products List */}
+              <div className="admin-card">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="admin-card-title mb-0">المنتجات الحالية</h3>
+                  <span className="admin-badge">{products.length} منتج</span>
+                </div>
+
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>المنتج</th>
+                        <th>القسم</th>
+                        <th>السعر</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {products.map((product) => (
+                        <tr key={product.id}>
+                          <td>
+                            <div className="admin-product-cell">
+                              <div className="admin-product-thumb">
+                                {product.image_url ? <img src={product.image_url} alt={product.name} /> : <span>📦</span>}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-white text-sm">{product.name}</div>
+                                <div className="text-xs text-gray-500">{product.storage_size} • {product.color}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="text-sm text-gray-400">{product.category_name_ar ?? CATEGORY_LABELS[product.category] ?? product.category}</td>
+                          <td className="text-sm font-semibold text-cyan-400">
+                            {product.price_on_inquiry || product.price === null ? 'عند الطلب' : `${product.price.toLocaleString('ar-EG')} ج.م`}
+                          </td>
+                          <td>
+                            <span className={`admin-status-badge ${product.is_available ? 'active' : 'inactive'}`}>
+                              {product.is_available ? 'مفعل' : 'متوقف'}
+                            </span>
+                          </td>
+                          <td>
+                            <button onClick={() => void handleDeleteProduct(product.id)} className="admin-action-btn danger">
+                              إخفاء
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Orders Tab */}
+        {!loading && activeTab === 'orders' ? (
+          <div className="admin-content-area">
+            <div className="admin-card">
+              <h3 className="admin-card-title">إدارة الطلبات</h3>
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>العميل</th>
+                      <th>المنتج</th>
+                      <th>الكمية</th>
+                      <th>المبلغ</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order) => (
+                      <tr key={order.id}>
+                        <td>
+                          <div className="font-semibold text-white text-sm">{order.customer_name}</div>
+                          <div className="text-xs text-gray-500 mt-0.5" dir="ltr">{order.customer_phone}</div>
+                        </td>
+                        <td className="text-sm text-gray-300">{order.product_name ?? 'غير محدد'}</td>
+                        <td className="text-sm text-gray-400">{order.quantity}</td>
+                        <td className="text-sm font-semibold text-cyan-400">
+                          {order.total_price ? `${order.total_price.toLocaleString('ar-EG')} ج.م` : '—'}
+                        </td>
+                        <td>
+                          <select
+                            value={order.status}
+                            onChange={(e) => void handleOrderStatusChange(order.id, e.target.value as OrderStatus)}
+                            className={`admin-status-select ${STATUS_COLORS[order.status] ?? ''}`}
+                          >
+                            {ORDER_STATUS_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString('ar-EG')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {orders.length === 0 ? <p className="text-center text-gray-500 py-8">لا توجد طلبات</p> : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Maintenance Tab */}
+        {!loading && activeTab === 'maintenance' ? (
+          <div className="admin-content-area">
+            <div className="admin-card">
+              <h3 className="admin-card-title">طلبات الصيانة</h3>
+              <div className="admin-requests-grid">
+                {maintenanceRequests.map((req) => (
+                  <div key={req.id} className="admin-request-card">
+                    <div className="admin-request-header">
+                      <div>
+                        <div className="font-semibold text-white">{req.customer_name}</div>
+                        <div className="text-xs text-gray-500 mt-1" dir="ltr">{req.customer_phone}</div>
+                      </div>
+                      <span className={`admin-status-pill ${STATUS_COLORS[req.status] ?? 'bg-gray-500/15 text-gray-300'}`}>
+                        {STATUS_LABELS[req.status] ?? req.status}
+                      </span>
+                    </div>
+                    <div className="admin-request-body">
+                      <div className="admin-request-device">🔧 {req.device_model}</div>
+                      <p className="text-sm text-gray-400 mt-2">{req.issue_description}</p>
+                    </div>
+                    <div className="admin-request-footer">
+                      <span className="text-xs text-gray-600">{new Date(req.created_at).toLocaleDateString('ar-EG')}</span>
+                      {req.estimated_cost ? <span className="text-xs text-cyan-400">التكلفة: {req.estimated_cost} ج.م</span> : null}
+                    </div>
+                  </div>
                 ))}
-                <button onClick={() => void handleSaveSiteConfig()} className="w-full rounded-2xl bg-[var(--neon-cyan)] px-4 py-4 font-black text-black">
-                  حفظ إعدادات الموقع
-                </button>
+                {maintenanceRequests.length === 0 ? <p className="text-center text-gray-500 py-8 col-span-full">لا توجد طلبات صيانة</p> : null}
               </div>
             </div>
+          </div>
+        ) : null}
 
-            <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-              <h2 className="text-2xl font-black text-white">شريط الإعلان</h2>
-              <div className="mt-5 space-y-4">
-                <label className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-                  <input
-                    type="checkbox"
+        {/* Trade Tab */}
+        {!loading && activeTab === 'trade' ? (
+          <div className="admin-content-area">
+            <div className="admin-card">
+              <h3 className="admin-card-title">طلبات الاستبدال</h3>
+              <div className="admin-requests-grid">
+                {tradeRequests.map((req) => (
+                  <div key={req.id} className="admin-request-card">
+                    <div className="admin-request-header">
+                      <div>
+                        <div className="font-semibold text-white">{req.customer_name}</div>
+                        <div className="text-xs text-gray-500 mt-1" dir="ltr">{req.customer_phone}</div>
+                      </div>
+                      <span className={`admin-status-pill ${STATUS_COLORS[req.status] ?? 'bg-gray-500/15 text-gray-300'}`}>
+                        {STATUS_LABELS[req.status] ?? req.status}
+                      </span>
+                    </div>
+                    <div className="admin-request-body">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-400">معاه:</span>
+                        <span className="text-white font-medium">{req.device_model}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm mt-1">
+                        <span className="text-gray-400">يريد:</span>
+                        <span className="text-cyan-400 font-medium">{req.desired_model ?? 'غير محدد'}</span>
+                      </div>
+                      {typeof req.battery_health === 'number' ? (
+                        <div className="text-xs text-gray-500 mt-2">البطارية: {req.battery_health}%</div>
+                      ) : null}
+                    </div>
+                    <div className="admin-request-footer">
+                      <span className="text-xs text-gray-600">{new Date(req.created_at).toLocaleDateString('ar-EG')}</span>
+                      {req.offered_price ? <span className="text-xs text-emerald-400">العرض: {req.offered_price} ج.م</span> : null}
+                    </div>
+                  </div>
+                ))}
+                {tradeRequests.length === 0 ? <p className="text-center text-gray-500 py-8 col-span-full">لا توجد طلبات استبدال</p> : null}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Settings Tab */}
+        {!loading && activeTab === 'settings' ? (
+          <div className="admin-content-area">
+            <div className="grid gap-6 xl:grid-cols-2">
+              <div className="admin-card">
+                <h3 className="admin-card-title">إعدادات الموقع</h3>
+                <div className="admin-form">
+                  {(
+                    [
+                      ['hero_title', 'العنوان الرئيسي'],
+                      ['hero_slogan_line1', 'الشعار - السطر الأول'],
+                      ['hero_slogan_line2', 'الشعار - السطر الثاني'],
+                      ['whatsapp_number', 'رقم واتساب'],
+                      ['maps_url', 'رابط الخريطة'],
+                      ['instagram_url', 'إنستجرام'],
+                      ['facebook_url', 'فيسبوك'],
+                      ['tiktok_url', 'تيك توك'],
+                    ] as Array<[keyof SiteConfigForm, string]>
+                  ).map(([key, label]) => (
+                    <InputField
+                      key={key}
+                      label={label}
+                      value={siteConfig[key]}
+                      onChange={(v) => setSiteConfig((c) => ({ ...c, [key]: v }))}
+                    />
+                  ))}
+                  <button onClick={() => void handleSaveSiteConfig()} className="admin-submit-btn">
+                    حفظ إعدادات الموقع
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-card">
+                <h3 className="admin-card-title">شريط الإعلان</h3>
+                <div className="admin-form">
+                  <CheckboxField
+                    label="إظهار شريط الإعلان"
                     checked={announcement.is_visible}
-                    onChange={(event) => setAnnouncement((current) => ({ ...current, is_visible: event.target.checked }))}
+                    onChange={(v) => setAnnouncement((c) => ({ ...c, is_visible: v }))}
                   />
-                  إظهار الإعلان
-                </label>
-                <textarea
-                  value={announcement.text}
-                  onChange={(event) => setAnnouncement((current) => ({ ...current, text: event.target.value }))}
-                  placeholder="اكتب نص الإعلان"
-                  className="min-h-32 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white outline-none"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-                    لون الخلفية
-                    <input type="color" value={announcement.bg_color} onChange={(event) => setAnnouncement((current) => ({ ...current, bg_color: event.target.value }))} className="mt-3 block h-12 w-full rounded-xl border-0 bg-transparent" />
-                  </label>
-                  <label className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white">
-                    لون الخط
-                    <input type="color" value={announcement.text_color} onChange={(event) => setAnnouncement((current) => ({ ...current, text_color: event.target.value }))} className="mt-3 block h-12 w-full rounded-xl border-0 bg-transparent" />
-                  </label>
+                  <div>
+                    <label className="admin-label">نص الإعلان</label>
+                    <textarea
+                      value={announcement.text}
+                      onChange={(e) => setAnnouncement((c) => ({ ...c, text: e.target.value }))}
+                      placeholder="اكتب نص الإعلان هنا..."
+                      className="admin-input min-h-28 resize-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="admin-label">لون الخلفية</label>
+                      <div className="admin-color-pick">
+                        <input
+                          type="color"
+                          value={announcement.bg_color}
+                          onChange={(e) => setAnnouncement((c) => ({ ...c, bg_color: e.target.value }))}
+                          className="admin-color-input"
+                        />
+                        <span className="text-sm text-gray-400">{announcement.bg_color}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="admin-label">لون النص</label>
+                      <div className="admin-color-pick">
+                        <input
+                          type="color"
+                          value={announcement.text_color}
+                          onChange={(e) => setAnnouncement((c) => ({ ...c, text_color: e.target.value }))}
+                          className="admin-color-input"
+                        />
+                        <span className="text-sm text-gray-400">{announcement.text_color}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {announcement.text ? (
+                    <div className="admin-announcement-preview" style={{ background: announcement.bg_color, color: announcement.text_color }}>
+                      <span className="text-xs opacity-60 mb-1 block">معاينة:</span>
+                      {announcement.text}
+                    </div>
+                  ) : null}
+
+                  <button onClick={() => void handleSaveAnnouncement()} className="admin-submit-btn secondary">
+                    حفظ الإعلان
+                  </button>
                 </div>
-                <button onClick={() => void handleSaveAnnouncement()} className="w-full rounded-2xl bg-white px-4 py-4 font-black text-black">
-                  حفظ الإعلان
-                </button>
               </div>
             </div>
           </div>
         ) : null}
 
+        {/* Logs Tab */}
         {!loading && activeTab === 'logs' ? (
-          <div className="rounded-[32px] border border-white/10 bg-[#0b1018] p-6">
-            <h2 className="text-2xl font-black text-white">سجل نشاط الأدمن</h2>
-            <div className="mt-5 space-y-4">
-              {logs.map((log) => (
-                <div key={log.id} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <div className="font-bold text-white">{log.action}</div>
-                  <div className="mt-1 text-sm text-gray-400">{log.entity_type ?? 'عام'}</div>
-                  <div className="mt-2 text-xs text-gray-500">{new Date(log.performed_at).toLocaleString('ar-EG')}</div>
-                </div>
-              ))}
+          <div className="admin-content-area">
+            <div className="admin-card">
+              <h3 className="admin-card-title">سجل نشاط الأدمن</h3>
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>الإجراء</th>
+                      <th>النوع</th>
+                      <th>التاريخ والوقت</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {logs.map((log) => (
+                      <tr key={log.id}>
+                        <td className="font-medium text-white text-sm">{log.action}</td>
+                        <td className="text-sm text-gray-400">{log.entity_type ?? 'عام'}</td>
+                        <td className="text-sm text-gray-500">{new Date(log.performed_at).toLocaleString('ar-EG')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {logs.length === 0 ? <p className="text-center text-gray-500 py-8">لا يوجد سجل نشاط</p> : null}
+              </div>
             </div>
           </div>
         ) : null}
-      </div>
+      </main>
     </div>
   )
 }
