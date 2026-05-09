@@ -10,4 +10,7 @@ function readEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_K
 
 export const supabaseUrl = readEnv('NEXT_PUBLIC_SUPABASE_URL')
 export const supabaseAnonKey = readEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-export const supabaseServiceRoleKey = readEnv('SUPABASE_SERVICE_ROLE_KEY')
+
+export function getServiceRoleKey() {
+  return readEnv('SUPABASE_SERVICE_ROLE_KEY')
+}
