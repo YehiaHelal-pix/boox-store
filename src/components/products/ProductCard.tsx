@@ -30,7 +30,6 @@ export default function ProductCard({ product }: { product: Product }) {
 
       <Link href={`/products/${product.slug}`} className="block">
         <div className="relative h-52 w-full bg-gradient-to-br from-[#0a0a14] to-[#111827]">
-          {/* Badges */}
           {product.in_stock && (
             <span className="absolute top-3 right-14 z-10 flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
               <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
