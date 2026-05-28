@@ -1,6 +1,9 @@
 'use client'
 import { useState } from 'react'
 
+import Link from 'next/link'
+import { SlidersHorizontal } from 'lucide-react'
+
 const CATS = {
   iphone: '📱 iPhone',
   ipad: '📱 iPad',
@@ -32,6 +35,19 @@ export default function CategoryPills() {
           {p.v}
         </button>
       ))}
+      <Link 
+        href="/products" 
+        className="cat-pill"
+        style={{ 
+          whiteSpace: 'nowrap', 
+          borderColor: 'rgba(34, 211, 238, 0.4)', 
+          color: '#22d3ee', 
+          background: 'rgba(34, 211, 238, 0.05)' 
+        }}
+      >
+        الفلاتر المتقدمة
+        <SlidersHorizontal className="w-3.5 h-3.5 mr-1.5" />
+      </Link>
     </div>
   )
 }

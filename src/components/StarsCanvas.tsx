@@ -15,7 +15,7 @@ export default function StarsCanvas() {
     let W: number, H: number, stars: any[] = []
 
     const CONFIG = {
-      count: 80,
+      count: 40,
       minSize: 0.2,
       maxSize: 1.5,
       minSpeed: 0.02, /* بطيء جداً */
@@ -69,15 +69,6 @@ export default function StarsCanvas() {
         ctx.fillStyle = col
         ctx.fill()
 
-        if (s.size > 1.0) {
-          const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 3)
-          g.addColorStop(0, s.color.replace(/[\d.]+\)$/, (s.opacity * t * 0.3).toFixed(2) + ')'))
-          g.addColorStop(1, 'rgba(0,0,0,0)')
-          ctx.beginPath()
-          ctx.arc(s.x, s.y, s.size * 3, 0, Math.PI * 2)
-          ctx.fillStyle = g
-          ctx.fill()
-        }
 
         s.y -= s.speed
         s.x += s.drift

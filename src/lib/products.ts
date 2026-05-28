@@ -20,10 +20,10 @@ export const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export const CONDITION_LABELS: Record<ProductCondition, string> = {
-  new: 'جديد',
-  like_new: 'شبه جديد',
-  good: 'جيد',
-  fair: 'مقبول',
+  new: 'جديد (مغلف)',
+  like_new: 'كسر الزيرو',
+  good: 'مستعمل',
+  fair: 'مستعمل (حالة مقبولة)',
 }
 
 export const STORAGE_OPTIONS = ['64GB', '128GB', '256GB', '512GB', '1TB'] as const
@@ -212,20 +212,52 @@ export function getWhatsAppNumber(): string {
   return process.env.NEXT_PUBLIC_WHATSAPP || '201113614021'
 }
 
-export function buildWhatsAppUrl(product: Pick<Product, 'name' | 'price' | 'price_on_inquiry' | 'category_name_ar'>): string {
+export function buildWhatsAppUrl(product: Partial<Product> & Pick<Product, 'name'>): string {
+  const phone = process.env.NEXT_PUBLIC_WHATSAPP || '201113614021'
   const lines = [
-    'السلام عليكم بوكس ستور',
-    `أنا مهتم بـ: ${product.name}`,
+    '🍎 *استفسار من Boox Store*',
+    '',
+    `📱 *المنتج:* ${product.name}`,
   ]
 
-  if (!product.price_on_inquiry && typeof product.price === 'number') {
-    lines.push(`السعر: ${product.price.toLocaleString('ar-EG')} جنيه`)
+  if (product.model) {
+    lines.push(`📋 *الموديل:* ${product.model}`)
   }
-
+  
+  const storage = product.storage_size || (product as any).storage
+  if (storage) {
+    lines.push(`💾 *المساحة:* ${storage}`)
+  }
+  
+  if (product.color) {
+    lines.push(`🎨 *اللون:* ${product.color}`)
+  }
+  
+  if (product.condition) {
+    const condLabel = CONDITION_LABELS[product.condition as ProductCondition] || product.condition
+    lines.push(`✅ *الحالة:* ${condLabel}`)
+  }
+  
+  if (typeof product.battery_health === 'number' && product.battery_health > 0) {
+    lines.push(`🔋 *البطارية:* ${product.battery_health}%`)
+  }
+  
   if (product.category_name_ar) {
-    lines.push(`الفئة: ${product.category_name_ar}`)
+    lines.push(`📁 *الفئة:* ${product.category_name_ar}`)
   }
 
-  lines.push('ممكن تفاصيل أكتر؟')
-  return `https://wa.me/${getWhatsAppNumber()}?text=${encodeURIComponent(lines.join('\n'))}`
+  if (!product.price_on_inquiry && typeof product.price === 'number' && product.price > 0) {
+    lines.push(`💰 *السعر:* ${product.price.toLocaleString('ar-EG')} جنيه`)
+  } else {
+    lines.push('💰 *السعر:* للاستفسار')
+  }
+
+  const imageUrl = product.image_url || (product.images && product.images[0])
+  if (imageUrl) {
+    lines.push(`🖼️ *صورة المنتج:* ${imageUrl}`)
+  }
+
+  lines.push('', '💬 أريد الاستفسار عن هذا المنتج وتفاصيل الحجز والضمان.')
+  
+  return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join('\n'))}`
 }

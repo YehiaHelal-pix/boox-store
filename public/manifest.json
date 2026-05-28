@@ -1,24 +1,29 @@
 {
-    "name": "Boox Store",
-    "short_name": "Boox",
-    "description": "متجر Apple الأول في مصر",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#03030a",
-    "theme_color": "#6366f1",
-    "lang": "ar",
-    "dir": "rtl",
-    "icons": [
-        {
-            "src": "/boox-logo.jpg",
-            "sizes": "192x192",
-            "type": "image/jpeg"
-        },
-        {
-            "src": "/boox-logo.jpg",
-            "sizes": "512x512",
-            "type": "image/jpeg",
-            "purpose": "maskable"
-        }
-    ]
+  "name": "Boox Store",
+  "short_name": "Boox",
+  "description": "وجهتك الأولى لأجهزة وخدمات Apple الأصلية في مصر",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#03030a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "/assets/boox-logo-outline.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/boox-logo-outline.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "electronics"],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

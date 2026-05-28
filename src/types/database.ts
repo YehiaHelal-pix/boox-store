@@ -6,11 +6,14 @@ export type RequestStatus = 'pending' | 'in_progress' | 'reviewed' | 'completed'
 export interface Category {
   id: string
   name: string
-  name_ar: string
+  name_ar: string | null
   slug: string
   description: string | null
   is_active: boolean
   created_at: string
+  name_en: string | null
+  icon: string | null
+  display_order: number | null
 }
 
 export interface ProductRow {
@@ -44,6 +47,38 @@ export interface ProductRow {
   storage_size: string | null
   grade: string | null
   is_available: boolean | null
+  name_ar: string | null
+  brand: string | null
+  model_year: number | null
+  short_description: string | null
+  full_description: string | null
+  highlights: string[] | null
+  internal_price: number | null
+  price_hidden: boolean | null
+  discount_percentage: number | null
+  sim_type: string | null
+  region: string | null
+  face_id_status: boolean | null
+  screen_condition: string | null
+  body_condition: string | null
+  processor: string | null
+  ram: string | null
+  battery_cycles: number | null
+  screen_size: string | null
+  network_type: string | null
+  is_new_arrival: boolean | null
+  is_best_seller: boolean | null
+  show_on_homepage: boolean | null
+  homepage_section: string | null
+  display_order: number | null
+  badge_text: string | null
+  badge_color: string | null
+  specs: any | null
+  in_the_box: string[] | null
+  meta_title: string | null
+  meta_description: string | null
+  internal_notes: string | null
+  purchase_price: number | null
 }
 
 export interface Product extends Omit<ProductRow, 'price' | 'original_price' | 'tax_value' | 'images'> {
@@ -173,3 +208,48 @@ export interface ProductWriteInput {
   is_tax_exempt?: boolean | null
   tax_value?: number | null
 }
+
+export type ProductImage = {
+  id: string
+  product_id: string
+  image_url: string
+  alt_text: string | null
+  display_order: number | null
+  is_primary: boolean | null
+  created_at: string
+}
+
+export type FilterDefinition = {
+  id: string
+  category_id: string | null
+  field_name: string
+  label_ar: string
+  filter_type: 'select' | 'multi_select' | 'range' | 'boolean' | 'chips' | null
+  filter_options: any | null
+  display_order: number | null
+  is_active: boolean | null
+}
+
+export type HomepageSection = {
+  id: string
+  section_key: string
+  title_ar: string | null
+  subtitle_ar: string | null
+  display_order: number | null
+  is_active: boolean | null
+  config: any | null
+}
+
+export type Lead = {
+  id: string
+  product_id: string | null
+  product_name: string | null
+  customer_name: string | null
+  customer_phone: string | null
+  customer_message: string | null
+  source: string | null
+  status: 'new' | 'contacted' | 'deal_done' | 'no_deal' | 'follow_up' | null
+  admin_notes: string | null
+  created_at: string
+}
+

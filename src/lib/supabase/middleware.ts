@@ -1,8 +1,10 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { supabaseAnonKey, supabaseUrl } from '@/lib/supabase/env'
+import { getPublicSupabaseEnv } from '@/lib/supabase/env'
 
 export async function updateSession(request: NextRequest) {
+  const { supabaseAnonKey, supabaseUrl } = getPublicSupabaseEnv()
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -32,10 +34,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user && request.nextUrl.pathname.startsWith('/admin')) {
+  const requestPath = request.nextUrl.pathname
+  const isPublicAdminLogin = requestPath === '/admin/login'
+
+  if (!user && requestPath.startsWith('/admin') && !isPublicAdminLogin) {
     const loginUrl = request.nextUrl.clone()
-    loginUrl.pathname = '/auth/login'
-    loginUrl.searchParams.set('next', request.nextUrl.pathname)
+    loginUrl.pathname = '/admin/login'
+    loginUrl.searchParams.set('next', `${request.nextUrl.pathname}${request.nextUrl.search}`)
     return NextResponse.redirect(loginUrl)
   }
 

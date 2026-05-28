@@ -29,7 +29,7 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="bottom-nav glass">
+    <nav className="bottom-nav glass" style={{ animation: 'fadeInUp 0.5s ease 0.8s both' }}>
       <button 
         className={`bnav-btn ${active === 'home' ? 'active' : ''}`} 
         id="bn-home" 
@@ -57,27 +57,15 @@ export default function BottomNav() {
       </button>
       
       <button 
-        className={`bnav-btn ${active === 'maintenance' ? 'active' : ''}`} 
-        id="bn-maintenance" 
-        onClick={() => gSec('maintenance')}
+        className={`bnav-btn ${active === 'services' ? 'active' : ''}`} 
+        id="bn-services" 
+        onClick={() => { window.location.href = '/services' }}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3-3a5 5 0 01-7 7l-4-4a5 5 0 017-7z" />
           <path d="M9 17l-4-4" />
         </svg>
-        <span>صيانة</span>
-        <div className="bnav-indicator"></div>
-      </button>
-      
-      <button 
-        className={`bnav-btn ${active === 'trade' ? 'active' : ''}`} 
-        id="bn-trade" 
-        onClick={() => gSec('trade')}
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l-4-4m4 4l4-4" />
-        </svg>
-        <span>استبدال</span>
+        <span>الخدمات</span>
         <div className="bnav-indicator"></div>
       </button>
       

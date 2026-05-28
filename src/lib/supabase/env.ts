@@ -1,13 +1,16 @@
-function readEnv(name: 'NEXT_PUBLIC_SUPABASE_URL' | 'NEXT_PUBLIC_SUPABASE_ANON_KEY' | 'SUPABASE_SERVICE_ROLE_KEY') {
-  const value = process.env[name]
+export function requireEnv(value: string | undefined, name: string) {
+  const normalized = value?.replace(/^\uFEFF/, '').trim()
 
-  if (!value) {
+  if (!normalized) {
     throw new Error(`Missing required environment variable: ${name}`)
   }
 
-  return value
+  return normalized
 }
 
-export const supabaseUrl = readEnv('NEXT_PUBLIC_SUPABASE_URL')
-export const supabaseAnonKey = readEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-export const supabaseServiceRoleKey = readEnv('SUPABASE_SERVICE_ROLE_KEY')
+export function getPublicSupabaseEnv() {
+  return {
+    supabaseUrl: requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    supabaseAnonKey: requireEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, 'NEXT_PUBLIC_SUPABASE_ANON_KEY'),
+  }
+}

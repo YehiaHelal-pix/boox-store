@@ -23,7 +23,7 @@ function mapMessage(message?: string) {
 function mapError(error?: string) {
   switch (error) {
     case 'session_expired':
-      return 'الجلسة انتهت، سجّل دخولك تاني'
+      return 'الجلسة انتهت، سجل دخولك تاني'
     case 'invalid_credentials':
       return 'بيانات الدخول غير صحيحة'
     case 'not_admin':
@@ -42,6 +42,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(nextPath)
   }
 
+  if (authState.user) {
+    redirect('/auth/forbidden')
+  }
+
   const topMessage = mapMessage(params.message)
   const topError = mapError(params.error)
 
@@ -52,12 +56,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <p className="text-sm uppercase tracking-[0.35em] text-[var(--neon-cyan)]">Boox Store</p>
           <h2 className="mt-4 text-5xl font-black leading-tight text-white">أمان حقيقي للوحة الإدارة</h2>
           <p className="mt-4 max-w-xl text-lg leading-9 text-gray-300">
-            الدخول بقى معتمد على Supabase Auth وجلسة آمنة بالكوكيز، وصلاحية الأدمن بتتراجع من السيرفر قبل أي صفحة أو API حساسة.
+            الدخول ما زال معتمد على Supabase Auth وجلسة آمنة، لكن واجهة الأدمن الآن مخصصة باسم مستخدم وكلمة مرور فقط.
           </p>
           <div className="mt-8 grid gap-4 text-sm text-gray-300">
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">تسجيل دخول بالإيميل والباسورد</div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">تحقق Server-Side من صلاحيات الأدمن</div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">منع الوصول لأي route إداري بدون تصريح فعلي</div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">تسجيل دخول باسم المستخدم وكلمة المرور</div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">إخفاء البيانات افتراضيًا مع زر رؤية أثناء الكتابة</div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4">تحقق Server-Side من صلاحيات الأدمن قبل فتح أي صفحة حساسة</div>
           </div>
         </div>
 

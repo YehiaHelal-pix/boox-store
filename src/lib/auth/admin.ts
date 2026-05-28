@@ -15,7 +15,7 @@ type AdminApiAccess =
 function buildLoginRedirect(nextPath?: string) {
   const target = nextPath && nextPath.startsWith('/admin') ? nextPath : '/admin'
   const search = new URLSearchParams({ next: target })
-  return `/auth/login?${search.toString()}`
+  return `/admin/login?${search.toString()}`
 }
 
 export async function getAuthenticatedUser() {

@@ -32,3 +32,21 @@ export async function GET(request: NextRequest) {
     return jsonError(message, 500)
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  const access = await requireAdminApiAccess()
+  if ('response' in access) return access.response
+
+  try {
+    const { error } = await supabaseAdmin
+      .from('admin_activity_log')
+      .delete()
+      .gte('id', '00000000-0000-0000-0000-000000000000')
+
+    if (error) return jsonError(error.message, 500)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'حدث خطأ غير متوقع'
+    return jsonError(message, 500)
+  }
+}

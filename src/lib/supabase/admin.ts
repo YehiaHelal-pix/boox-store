@@ -1,21 +1,25 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { supabaseServiceRoleKey, supabaseUrl } from '@/lib/supabase/env'
+import { getPublicSupabaseEnv } from '@/lib/supabase/env'
+import { getSupabaseServiceRoleKey } from '@/lib/supabase/server-env'
 
-let _admin: SupabaseClient | null = null
+let adminClient: SupabaseClient | null = null
 
 export function getAdminClient(): SupabaseClient {
-  if (!_admin) {
-    _admin = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  if (!adminClient) {
+    const { supabaseUrl } = getPublicSupabaseEnv()
+    const supabaseServiceRoleKey = getSupabaseServiceRoleKey()
+
+    adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     })
   }
 
-  return _admin
+  return adminClient
 }
 
-// backward compat alias – call as function or use as proxy
+// Backward-compatible alias for existing imports.
 export const supabaseAdmin = new Proxy({} as SupabaseClient, {
-  get(_t, prop) {
-    return (getAdminClient() as unknown as Record<string | symbol, unknown>)[prop]
+  get(_target, property) {
+    return (getAdminClient() as unknown as Record<string | symbol, unknown>)[property]
   },
 })

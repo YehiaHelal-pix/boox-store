@@ -1,21 +1,27 @@
 'use client'
 import type { Product } from '@/types/database'
-import ProductCard from './ProductCard'
+import ProductCardV2 from '@/components/ui/ProductCardV2'
 
 export default function ProductGrid({ products }: { products: Product[] }) {
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-2xl w-full col-span-full min-h-[300px]">
-        <div className="text-[var(--text-muted)] text-lg mb-2 font-bold">لا توجد منتجات</div>
-        <p className="text-sm text-gray-500">جرّب تغيير الفلاتر أو البحث باسم مختلف</p>
+      <div className="ppc-empty-state">
+        <div className="ppc-empty-icon">
+          <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" strokeWidth="1.2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+        </div>
+        <h3 className="ppc-empty-title">لا توجد منتجات</h3>
+        <p className="ppc-empty-text">جرّب تغيير الفلاتر أو البحث باسم مختلف</p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 w-full">
+    <div className="premium-products-grid">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCardV2 key={product.id} product={product} />
       ))}
     </div>
   )
