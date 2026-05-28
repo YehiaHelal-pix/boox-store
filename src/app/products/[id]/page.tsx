@@ -1,9 +1,12 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { buildWhatsAppUrl, getConditionLabel } from '@/lib/products'
 import type { Product } from '@/types/database'
 import { motion } from 'framer-motion'
+import { useProducts } from '@/hooks/useProducts'
+import ProductCard from '@/components/ProductCard'
 
 export default function ProductPage() {
   const params = useParams<{ id: string }>()
@@ -22,6 +25,16 @@ export default function ProductPage() {
   const [oldBattery, setOldBattery] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
+
+  // Fetch all products for similar items
+  const { products: allProducts } = useProducts()
+
+  const otherProducts = useMemo(() => {
+    if (!product) return []
+    return allProducts
+      .filter((p) => p.id !== product.id && p.is_visible && p.is_available)
+      .slice(0, 3)
+  }, [allProducts, product])
 
   const conditionOptions = [
     { value: 'new', label: 'جديد (مغلف)' },
@@ -443,6 +456,30 @@ export default function ProductPage() {
             </div>
           </section>
         </div>
+
+        {/* Other Products Section */}
+        {otherProducts.length > 0 && (
+          <section className="mt-16 border-t border-white/10 pt-16" dir="rtl">
+            <div className="mb-8 flex items-center justify-between">
+              <h2 className="text-2xl md:text-3xl font-black text-white relative pr-4">
+                <span className="absolute right-0 top-0 bottom-0 w-1 bg-cyan-400 rounded-full" />
+                منتجات أخرى قد تعجبك 👀
+              </h2>
+              <Link
+                href="/products"
+                className="text-xs font-bold text-cyan-400 hover:underline hover:text-cyan-300 transition-colors"
+              >
+                عرض كل المنتجات ←
+              </Link>
+            </div>
+
+            <div className="products-grid">
+              {otherProducts.map((p, idx) => (
+                <ProductCard key={p.id} p={p} index={idx} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   )
