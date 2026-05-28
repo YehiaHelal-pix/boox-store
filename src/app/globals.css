@@ -270,16 +270,16 @@
     }
 
     .nav-logo-shell {
-      width: 34px;
-      height: 38px;
+      width: 42px;
+      height: 46px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
     .nav-logo-shell img {
-      width: 34px;
-      height: 38px;
+      width: 42px;
+      height: 46px;
       object-fit: contain;
       filter: brightness(0) saturate(100%) invert(1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.98)) drop-shadow(0 0 10px rgba(132, 232, 255, 0.96)) drop-shadow(0 0 22px rgba(84, 197, 255, 0.88)) drop-shadow(0 0 38px rgba(117, 104, 255, 0.55));
       transition: transform .25s ease, filter .25s ease
@@ -668,7 +668,7 @@
     }
 
     .hero-logo {
-      width: clamp(80px, 18vw, 120px);
+      width: clamp(100px, 22vw, 150px);
       border-radius: 0;
       filter: brightness(0) saturate(100%) invert(1) drop-shadow(0 0 4px rgba(255, 255, 255, 0.98)) drop-shadow(0 0 14px rgba(132, 232, 255, 0.98)) drop-shadow(0 0 32px rgba(84, 197, 255, 0.88)) drop-shadow(0 0 62px rgba(117, 104, 255, .52));
       margin-bottom: 16px;
