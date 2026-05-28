@@ -13,7 +13,7 @@ import {
 } from "react-icons/io5";
 import type { Product } from "@/types/database";
 import { useCart } from "@/store/cart";
-import { getConditionLabel } from "@/lib/products";
+import { getConditionLabel, buildWhatsAppUrl } from "@/lib/products";
 
 function pushToast(msg: string, type: 'success' | 'error' | 'warn' | 'info') {
   window.dispatchEvent(new CustomEvent('boox-toast', { detail: { msg, type } }))
@@ -165,10 +165,19 @@ export default function ProductCard({ p }: { p: Product; index?: number }) {
           {p.price_on_inquiry || p.price === null || !p.in_stock ? (
              <button
               type="button"
-              className="mt-1 flex items-center justify-center gap-2 w-full h-11 rounded-xl text-xs font-bold text-white/80 bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] transition-all duration-300 hover:scale-[1.02]"
+              className={`mt-1 flex items-center justify-center gap-2 w-full h-11 rounded-xl text-xs font-bold transition-all duration-300 hover:scale-[1.02] ${
+                p.in_stock 
+                  ? "text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.02)] hover:shadow-[0_0_15px_rgba(16,185,129,0.08)]"
+                  : "text-white/40 bg-white/[0.02] border border-white/5 cursor-not-allowed hover:scale-100"
+              }`}
               onClick={(e) => {
                 e.preventDefault();
-                pushToast(p.in_stock ? 'يرجى التواصل لمعرفة السعر' : 'المنتج غير متوفر', 'warn');
+                if (p.in_stock) {
+                  const url = buildWhatsAppUrl(p);
+                  window.open(url, '_blank');
+                } else {
+                  pushToast('المنتج غير متوفر', 'warn');
+                }
               }}
             >
               <IoCartOutline className="w-3.5 h-3.5" />
