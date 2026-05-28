@@ -270,16 +270,16 @@
     }
 
     .nav-logo-shell {
-      width: 42px;
-      height: 46px;
+      width: 46px !important;
+      height: 50px !important;
       display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
     .nav-logo-shell img {
-      width: 42px;
-      height: 46px;
+      width: 46px !important;
+      height: 50px !important;
       object-fit: contain;
       filter: brightness(0) saturate(100%) invert(1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.98)) drop-shadow(0 0 10px rgba(132, 232, 255, 0.96)) drop-shadow(0 0 22px rgba(84, 197, 255, 0.88)) drop-shadow(0 0 38px rgba(117, 104, 255, 0.55));
       transition: transform .25s ease, filter .25s ease
