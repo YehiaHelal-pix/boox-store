@@ -254,6 +254,49 @@ export default function ProductPage() {
             <h1 className="text-3xl font-black leading-tight md:text-5xl">{product.name}</h1>
             <p className="mt-3 text-gray-400">{product.description || 'لا يوجد وصف إضافي للمنتج.'}</p>
 
+            {/* Variants Selector */}
+            {product.category === 'iphone' && (() => {
+              const variants = allProducts.filter(
+                (p) => 
+                  p.is_visible && 
+                  p.is_available && 
+                  p.model === product.model
+              );
+              
+              if (variants.length <= 1) return null;
+
+              return (
+                <div className="mt-6 flex flex-col gap-3" dir="rtl">
+                  <span className="text-xs font-bold text-gray-400">الخيارات المتاحة من هذا الموديل:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {variants.map((v) => {
+                      const isCurrent = v.id === product.id;
+                      const storageText = v.storage_size || v.storage || '';
+                      const colorName = v.color?.split(' ')[0] || '';
+                      const batteryText = v.battery_health ? `بطارية ${v.battery_health}%` : '';
+                      const specsLabel = `${colorName} ${storageText ? '• ' + storageText : ''}`;
+
+                      return isCurrent ? (
+                        <div key={v.id} className="px-4 py-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-400/40 text-cyan-300 font-bold text-xs flex flex-col items-center gap-0.5 cursor-default shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+                          <span>{specsLabel}</span>
+                          {batteryText && <span className="text-[10px] opacity-80">{batteryText}</span>}
+                        </div>
+                      ) : (
+                        <Link
+                          key={v.id}
+                          href={`/products/${v.slug}`}
+                          className="px-4 py-2.5 rounded-2xl bg-white/[0.02] border border-white/5 text-white/70 hover:bg-white/5 hover:text-white hover:border-white/10 transition-all duration-300 font-bold text-xs flex flex-col items-center gap-0.5"
+                        >
+                          <span>{specsLabel}</span>
+                          {batteryText && <span className="text-[10px] opacity-60">{batteryText}</span>}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* TradeLine-style Tabs Selector */}
             {product.category === 'iphone' && (
               <div className="mt-6 border-b border-white/10 flex gap-6 text-sm font-bold">
