@@ -28,7 +28,7 @@ export default function Navbar() {
         const supabase = createClient()
         const { data } = await supabase
           .from('products')
-          .select('id, name, slug, price, price_on_inquiry, images')
+          .select('id, name, slug, price, price_on_inquiry, images, storage_size, storage, battery_health, color, condition')
           .eq('is_available', true)
         if (data) setProducts(data)
       } catch (err) {
@@ -93,7 +93,7 @@ export default function Navbar() {
           <div className="navbar-side-item navbar-side-right">
             <Link href="/" className="nav-logo-link" aria-label="Boox Store">
               <span className="nav-logo-shell">
-                <Image src="/assets/boox-logo-outline.png" alt="Boox Store Logo" width={356} height={400} priority />
+                <Image src="/assets/boox-logo-outline.png" alt="Boox Store Logo" width={450} height={500} priority />
               </span>
               <span className="nav-logo-wordmark">Boox Store</span>
             </Link>
@@ -143,35 +143,72 @@ export default function Navbar() {
 
               {/* Autocomplete Dropdown */}
               {expanded && suggestions.length > 0 && (
-                <div className="absolute top-[110%] left-1/2 -translate-x-1/2 w-[300px] sm:w-[360px] md:w-[420px] p-3 rounded-2xl glass border border-white/10 shadow-2xl z-50 text-right overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="text-xs text-cyan-400 font-bold mb-2 pr-1">✨ الاقتراحات السريعة:</div>
+                <div className="absolute top-[110%] left-1/2 -translate-x-1/2 w-[320px] sm:w-[380px] md:w-[460px] p-3 rounded-3xl backdrop-blur-xl bg-black/80 border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.8),0_0_30px_rgba(34,211,238,0.15)] z-50 text-right overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="text-xs text-cyan-400 font-bold mb-3 pr-1 flex items-center gap-1.5 justify-end" dir="rtl">
+                    <span className="animate-pulse">✨</span> الاقتراحات السريعة:
+                  </div>
                   <div className="flex flex-col gap-2">
-                    {suggestions.map((p) => (
-                      <Link 
-                        key={p.id} 
-                        href={`/products/${p.slug || p.id}`}
-                        onClick={() => {
-                          setSearchValue('')
-                          setExpanded(false)
-                          window.dispatchEvent(new CustomEvent('boox-search', { detail: '' }))
-                        }}
-                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition border border-transparent hover:border-white/5"
-                      >
-                        <div className="w-10 h-10 rounded-lg bg-white/5 overflow-hidden flex-shrink-0 flex items-center justify-center p-1 border border-white/5">
-                          {p.images?.[0] ? (
-                            <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain" />
-                          ) : (
-                            <span className="text-xs text-gray-500">📷</span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-right" dir="rtl">
-                          <div className="text-xs font-bold text-white truncate">{p.name}</div>
-                          <div className="text-[10px] text-gray-400 mt-0.5">
-                            {p.price_on_inquiry ? 'السعر عند الطلب' : `${p.price?.toLocaleString('ar-EG')} جنيه`}
+                    {suggestions.map((p) => {
+                      const storageVal = p.storage_size || p.storage;
+                      const condLabel = p.condition === 'new' ? 'جديد' : p.condition === 'like_new' ? 'كسر زيرو' : p.condition === 'good' ? 'مستعمل' : p.condition === 'fair' ? 'مستعمل' : '';
+                      
+                      return (
+                        <Link 
+                          key={p.id} 
+                          href={`/products/${p.slug || p.id}`}
+                          onClick={() => {
+                            setSearchValue('')
+                            setExpanded(false)
+                            window.dispatchEvent(new CustomEvent('boox-search', { detail: '' }))
+                          }}
+                          className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-cyan-500/5 transition duration-300 border border-transparent hover:border-cyan-500/20 group"
+                        >
+                          {/* Image */}
+                          <div className="w-11 h-11 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 flex items-center justify-center p-1 border border-white/5 group-hover:border-cyan-500/30 transition duration-300">
+                            {p.images?.[0] ? (
+                              <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain" />
+                            ) : (
+                              <span className="text-xs text-gray-500">📷</span>
+                            )}
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                          
+                          {/* Info */}
+                          <div className="flex-1 min-w-0 text-right flex flex-col gap-1" dir="rtl">
+                            <div className="text-xs font-black text-white group-hover:text-cyan-400 transition duration-300 truncate">{p.name}</div>
+                            
+                            {/* Badges/Specs Row */}
+                            <div className="flex flex-wrap gap-1.5 items-center justify-start">
+                              {storageVal && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-white/5 text-gray-300 border border-white/5">
+                                  {storageVal}
+                                </span>
+                              )}
+                              {p.battery_health && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">
+                                  🔋 {p.battery_health}%
+                                </span>
+                              )}
+                              {condLabel && (
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${
+                                  p.condition === 'new'
+                                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/10'
+                                    : p.condition === 'like_new'
+                                    ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/10'
+                                    : 'bg-amber-500/10 text-amber-400 border-amber-500/10'
+                                }`}>
+                                  {condLabel}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-[10px] font-bold text-gray-400 group-hover:text-white transition duration-300 whitespace-nowrap pl-1">
+                            {p.price_on_inquiry ? 'السعر عند الطلب' : `${p.price?.toLocaleString('ar-EG')} ج`}
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               )}
