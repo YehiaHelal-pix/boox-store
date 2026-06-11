@@ -161,10 +161,11 @@ export default function Navbar() {
                             setExpanded(false)
                             window.dispatchEvent(new CustomEvent('boox-search', { detail: '' }))
                           }}
+                          dir="rtl"
                           className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-cyan-500/5 transition duration-300 border border-transparent hover:border-cyan-500/20 group"
                         >
                           {/* Image */}
-                          <div className="w-11 h-11 rounded-xl bg-white/5 overflow-hidden flex-shrink-0 flex items-center justify-center p-1 border border-white/5 group-hover:border-cyan-500/30 transition duration-300">
+                          <div className="w-11 h-11 rounded-xl bg-black/40 overflow-hidden flex-shrink-0 flex items-center justify-center p-1 border border-white/10 group-hover:border-cyan-500/40 transition duration-300">
                             {p.images?.[0] ? (
                               <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain" />
                             ) : (
@@ -173,7 +174,7 @@ export default function Navbar() {
                           </div>
                           
                           {/* Info */}
-                          <div className="flex-1 min-w-0 text-right flex flex-col gap-1" dir="rtl">
+                          <div className="flex-1 min-w-0 text-right flex flex-col gap-1">
                             <div className="text-xs font-black text-white group-hover:text-cyan-400 transition duration-300 truncate">{p.name}</div>
                             
                             {/* Badges/Specs Row */}
@@ -203,7 +204,7 @@ export default function Navbar() {
                           </div>
 
                           {/* Price */}
-                          <div className="text-[10px] font-bold text-gray-400 group-hover:text-white transition duration-300 whitespace-nowrap pl-1">
+                          <div className="text-[11px] font-black text-cyan-400 group-hover:text-white transition duration-300 whitespace-nowrap text-left pr-2">
                             {p.price_on_inquiry ? 'السعر عند الطلب' : `${p.price?.toLocaleString('ar-EG')} ج`}
                           </div>
                         </Link>
