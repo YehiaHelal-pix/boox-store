@@ -1,0 +1,6 @@
+{
+  "name": "Box Store Installment Manager",
+  "description": "برنامج متكامل لإدارة الأقساط والجمعيات والفواتير لمتجر بوكس ستور (Box Store) للهواتف والأجهزة الذكية مع مزامنة كاملة لـ Google Sheets",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

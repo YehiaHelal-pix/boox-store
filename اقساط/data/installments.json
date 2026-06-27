@@ -1,0 +1,979 @@
+{
+  "activeCustomers": [
+    {
+      "id": "active_1",
+      "name": "دسوقي",
+      "product": "عملية شراء أجهزة / 13 عادي",
+      "totalAmount": 14500,
+      "paidAmount": 2000,
+      "remainingAmount": 12500,
+      "startDate": "2025-06-01",
+      "monthsCount": 6,
+      "monthlyAmount": 2100,
+      "phone": "",
+      "notes": "دسوقي واخد 13 عادي وباقي عليه 12500 على 6 شهور كل شهر 2100",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-06-01",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2025-06-01"
+        },
+        {
+          "date": "2025-07-01",
+          "amount": 2100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-01",
+          "amount": 2100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-01",
+          "amount": 2100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-01",
+          "amount": 2100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-01",
+          "amount": 2100,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_2",
+      "name": "الزبون زو",
+      "product": "قسط عام",
+      "totalAmount": 16370,
+      "paidAmount": 3170,
+      "remainingAmount": 13200,
+      "startDate": "2025-03-25",
+      "monthsCount": 12,
+      "monthlyAmount": 1060,
+      "phone": "",
+      "notes": "باقي عليه 13200 لمدة 12 شهر كل شهر 1060",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-03-25",
+          "amount": 1060,
+          "status": "paid",
+          "paymentDate": "2025-03-25"
+        },
+        {
+          "date": "2025-04-25",
+          "amount": 1060,
+          "status": "paid",
+          "paymentDate": "2025-04-25"
+        },
+        {
+          "date": "2025-05-25",
+          "amount": 1050,
+          "status": "paid",
+          "paymentDate": "2025-05-25"
+        },
+        {
+          "date": "2025-06-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-07-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-12-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-01-25",
+          "amount": 1060,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-02-25",
+          "amount": 1060,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_3",
+      "name": "إبراهيم سواده",
+      "product": "قسط متبقي جهاز",
+      "totalAmount": 13000,
+      "paidAmount": 2000,
+      "remainingAmount": 11000,
+      "startDate": "2025-06-01",
+      "monthsCount": 4,
+      "monthlyAmount": 2750,
+      "phone": "",
+      "notes": "إبراهيم سواده عليه 11 الف باقي جهاز على 4 شهور كل شهر 2750 - تم دفع أول دفعة 2000 بتاريخ 22/5",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-06-01",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2025-05-22"
+        },
+        {
+          "date": "2025-07-01",
+          "amount": 2750,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-01",
+          "amount": 2750,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-01",
+          "amount": 2750,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-01",
+          "amount": 2750,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_4",
+      "name": "مروان سمير",
+      "product": "هاتف 7+",
+      "totalAmount": 3300,
+      "paidAmount": 300,
+      "remainingAmount": 3000,
+      "startDate": "2025-06-01",
+      "monthsCount": 10,
+      "monthlyAmount": 300,
+      "phone": "01119757425",
+      "notes": "مروان سمير 7+ باقي 3000 على 10 شهور كل شهر 300ج. هاتف بديل: 01148426034",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-06-01",
+          "amount": 300,
+          "status": "paid",
+          "paymentDate": "2025-06-01"
+        },
+        {
+          "date": "2025-07-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-12-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-01-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-02-01",
+          "amount": 300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-03-01",
+          "amount": 300,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_5",
+      "name": "علي (تبع محمد طارق)",
+      "product": "قسط عام",
+      "totalAmount": 19000,
+      "paidAmount": 6000,
+      "remainingAmount": 13000,
+      "startDate": "2025-03-25",
+      "monthsCount": 6,
+      "monthlyAmount": 2000,
+      "phone": "",
+      "notes": "عليه 13 الف لمدة 6 شهور كل شهر 2000 واخر شهر 3000",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-03-25",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2025-03-25"
+        },
+        {
+          "date": "2025-04-25",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2025-04-25"
+        },
+        {
+          "date": "2025-05-25",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2025-05-25"
+        },
+        {
+          "date": "2025-06-25",
+          "amount": 2000,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-07-25",
+          "amount": 2000,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-25",
+          "amount": 3000,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_6",
+      "name": "إيهاب",
+      "product": "استبدال جهاز ومبلغ",
+      "totalAmount": 22400,
+      "paidAmount": 3200,
+      "remainingAmount": 19200,
+      "startDate": "2025-06-01",
+      "monthsCount": 6,
+      "monthlyAmount": 3200,
+      "phone": "",
+      "notes": "إيهاب مبدل وعليه 16 قبل الفايدة وبعد 19200 على 6 شهور كل شهر 3200",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-06-01",
+          "amount": 3200,
+          "status": "paid",
+          "paymentDate": "2025-06-01"
+        },
+        {
+          "date": "2025-07-01",
+          "amount": 3200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-01",
+          "amount": 3200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-01",
+          "amount": 3200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-01",
+          "amount": 3200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-01",
+          "amount": 3200,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_7",
+      "name": "فادي",
+      "product": "فرق استبدال جهاز",
+      "totalAmount": 30000,
+      "paidAmount": 0,
+      "remainingAmount": 30000,
+      "startDate": "2025-06-25",
+      "monthsCount": 12,
+      "monthlyAmount": 2500,
+      "phone": "",
+      "notes": "فادي عليه فرق جهاز 30 الف بعد الفايدة كل شهر 2500 على 12 شهر",
+      "type": "incoming",
+      "schedule": [
+        {
+          "date": "2025-06-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-07-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-08-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-09-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-10-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-12-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-01-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-02-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-03-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-04-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-05-25",
+          "amount": 2500,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_8",
+      "name": "قسط تكييف المحل",
+      "product": "تكييف جديد",
+      "totalAmount": 23500,
+      "paidAmount": 13500,
+      "remainingAmount": 10000,
+      "startDate": "2025-10-01",
+      "monthsCount": 12,
+      "monthlyAmount": 1100,
+      "phone": "",
+      "notes": "التكييف جاي يوم 9/9 أول قسط هيبقى يوم 10/1 كل شهر 1100 على 12 شهر. المدفوع مقدم: 13500 المتبقي: 10000",
+      "type": "outgoing",
+      "schedule": [
+        {
+          "date": "2025-10-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-11-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2025-12-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-01-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-02-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-03-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-04-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-05-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-06-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-07-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-01",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-01",
+          "amount": 1100,
+          "status": "unpaid"
+        }
+      ]
+    },
+    {
+      "id": "active_9",
+      "name": "ياسر ماجد",
+      "product": "اكس ماكس 64 بالكرتونه",
+      "totalAmount": 13800,
+      "paidAmount": 1540,
+      "remainingAmount": 12260,
+      "startDate": "2026-04-20",
+      "monthsCount": 18,
+      "monthlyAmount": 770,
+      "phone": "",
+      "notes": "ياسر ماجد خد اكس ماكس 64 بالكرتونه 12500 قبل الفيده وبعد 13800 ع 45% كل شهر 770",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-04-20", "amount": 770, "status": "paid", "paymentDate": "2026-04-20" },
+        { "date": "2026-05-20", "amount": 770, "status": "paid", "paymentDate": "2026-05-20" },
+        { "date": "2026-06-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-07-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-08-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-09-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-10-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-11-20", "amount": 770, "status": "unpaid" },
+        { "date": "2026-12-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-01-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-02-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-03-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-04-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-05-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-06-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-07-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-08-20", "amount": 770, "status": "unpaid" },
+        { "date": "2027-09-20", "amount": 770, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_10",
+      "name": "رقية رضا",
+      "product": "قسط عام / رقيه رضا",
+      "totalAmount": 46800,
+      "paidAmount": 15600,
+      "remainingAmount": 31200,
+      "startDate": "2026-04-10",
+      "monthsCount": 9,
+      "monthlyAmount": 5200,
+      "phone": "",
+      "notes": "رقيه رضا عليها 46800 بعد الفايده ع 9 شهور 5200 كل شهر",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-04-10", "amount": 5200, "status": "paid", "paymentDate": "2026-04-10" },
+        { "date": "2026-05-10", "amount": 5200, "status": "paid", "paymentDate": "2026-05-10" },
+        { "date": "2026-06-10", "amount": 5200, "status": "paid", "paymentDate": "2026-06-10" },
+        { "date": "2026-07-10", "amount": 5200, "status": "unpaid" },
+        { "date": "2026-08-10", "amount": 5200, "status": "unpaid" },
+        { "date": "2026-09-10", "amount": 5200, "status": "unpaid" },
+        { "date": "2026-10-10", "amount": 5200, "status": "unpaid" },
+        { "date": "2026-11-10", "amount": 5200, "status": "unpaid" },
+        { "date": "2026-12-10", "amount": 5200, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_11",
+      "name": "حساب حمص",
+      "product": "قسط عام / حساب حمص",
+      "totalAmount": 50400,
+      "paidAmount": 21000,
+      "remainingAmount": 29400,
+      "startDate": "2026-02-15",
+      "monthsCount": 12,
+      "monthlyAmount": 4200,
+      "phone": "",
+      "notes": "حساب حمص 150الف ع 12 شهر كل شهر 4200",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-02-15", "amount": 4200, "status": "paid", "paymentDate": "2026-02-15" },
+        { "date": "2026-03-15", "amount": 4200, "status": "paid", "paymentDate": "2026-03-15" },
+        { "date": "2026-04-15", "amount": 4200, "status": "paid", "paymentDate": "2026-04-15" },
+        { "date": "2026-05-15", "amount": 4200, "status": "paid", "paymentDate": "2026-05-15" },
+        { "date": "2026-06-15", "amount": 4200, "status": "paid", "paymentDate": "2026-06-15" },
+        { "date": "2026-07-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2026-08-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2026-09-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2026-10-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2026-11-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2026-12-15", "amount": 4200, "status": "unpaid" },
+        { "date": "2027-01-15", "amount": 4200, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_12",
+      "name": "يوسف بدر",
+      "product": "جهاز اكس ماكس / يوسف بدر",
+      "totalAmount": 15600,
+      "paidAmount": 13000,
+      "remainingAmount": 2600,
+      "startDate": "2025-08-20",
+      "monthsCount": 12,
+      "monthlyAmount": 1300,
+      "phone": "",
+      "notes": "يوسف بدر واخد جهاز اكس ماكس باقي عليه 11500 قبل الفيده وبعد الفيده وصل ل35% ع 12 شهر كل شهر 1300",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2025-08-20", "amount": 1300, "status": "paid", "paymentDate": "2025-08-20" },
+        { "date": "2025-09-20", "amount": 1300, "status": "paid", "paymentDate": "2025-09-20" },
+        { "date": "2025-10-20", "amount": 1300, "status": "paid", "paymentDate": "2025-10-20" },
+        { "date": "2025-11-20", "amount": 1300, "status": "paid", "paymentDate": "2025-11-20" },
+        { "date": "2025-12-20", "amount": 1300, "status": "paid", "paymentDate": "2025-12-20" },
+        { "date": "2026-01-20", "amount": 1300, "status": "paid", "paymentDate": "2026-01-20" },
+        { "date": "2026-02-20", "amount": 1300, "status": "paid", "paymentDate": "2026-02-20" },
+        { "date": "2026-03-20", "amount": 1300, "status": "unpaid" },
+        { "date": "2026-04-20", "amount": 1300, "status": "paid", "paymentDate": "2026-04-20" },
+        { "date": "2026-05-20", "amount": 1300, "status": "paid", "paymentDate": "2026-05-20" },
+        { "date": "2026-06-20", "amount": 1300, "status": "paid", "paymentDate": "2026-06-20" },
+        { "date": "2026-07-20", "amount": 1300, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_13",
+      "name": "عميل 11 برو ماكس",
+      "product": "جهاز 11 برو ماكس",
+      "totalAmount": 13500,
+      "paidAmount": 7700,
+      "remainingAmount": 5800,
+      "startDate": "2025-11-20",
+      "monthsCount": 12,
+      "monthlyAmount": 1100,
+      "phone": "",
+      "notes": "واخد جهاز 11 برو ماكس باقي 10 تلاف بعد الفيده 13500 ع 12 شهر هيبقى كل شهر 1125 (في الجدول مسجل دفعات بقيمة 1100)",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2025-11-20", "amount": 1100, "status": "paid", "paymentDate": "2025-11-20" },
+        { "date": "2025-12-20", "amount": 1100, "status": "paid", "paymentDate": "2025-12-20" },
+        { "date": "2026-01-20", "amount": 1100, "status": "paid", "paymentDate": "2026-01-20" },
+        { "date": "2026-02-20", "amount": 1100, "status": "paid", "paymentDate": "2026-02-20" },
+        { "date": "2026-03-20", "amount": 1100, "status": "unpaid" },
+        { "date": "2026-04-20", "amount": 1100, "status": "paid", "paymentDate": "2026-04-20" },
+        { "date": "2026-05-20", "amount": 1100, "status": "paid", "paymentDate": "2026-05-20" },
+        { "date": "2026-06-20", "amount": 1100, "status": "paid", "paymentDate": "2026-06-20" },
+        { "date": "2026-07-20", "amount": 1100, "status": "unpaid" },
+        { "date": "2026-08-20", "amount": 1100, "status": "unpaid" },
+        { "date": "2026-09-20", "amount": 1100, "status": "unpaid" },
+        { "date": "2026-10-20", "amount": 1400, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_14",
+      "name": "بسام",
+      "product": "اكس ماكس بدون مقدم",
+      "totalAmount": 13800,
+      "paidAmount": 0,
+      "remainingAmount": 13800,
+      "startDate": "2026-07-20",
+      "monthsCount": 12,
+      "monthlyAmount": 1150,
+      "phone": "",
+      "notes": "بسام واخد اكس ماكس بدون مقدم 13800 ع 12 شهر هيبقى كل شهر 1150",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-07-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2026-08-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2026-09-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2026-10-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2026-11-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2026-12-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-01-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-02-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-03-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-04-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-05-20", "amount": 1150, "status": "unpaid" },
+        { "date": "2027-06-20", "amount": 1150, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_15",
+      "name": "حسام سامي",
+      "product": "١٢ برو ماكس / حسام سامي",
+      "totalAmount": 22200,
+      "paidAmount": 11090,
+      "remainingAmount": 11110,
+      "startDate": "2025-08-20",
+      "monthsCount": 12,
+      "monthlyAmount": 1850,
+      "phone": "",
+      "notes": "حسام سامي واخد ١٢ برو ماكس باقي عليه ٢٢٢٠٠ ع ١٢ شهر كل شهر ١٨٥٠",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2025-08-20", "amount": 1850, "status": "paid", "paymentDate": "2025-08-07" },
+        { "date": "2025-09-20", "amount": 1850, "status": "paid", "paymentDate": "2025-09-20" },
+        { "date": "2025-10-20", "amount": 1840, "status": "paid", "paymentDate": "2025-10-20" },
+        { "date": "2025-11-20", "amount": 1850, "status": "paid", "paymentDate": "2025-11-20" },
+        { "date": "2025-12-20", "amount": 1850, "status": "paid", "paymentDate": "2025-12-20" },
+        { "date": "2026-01-20", "amount": 1850, "status": "paid", "paymentDate": "2026-01-20" },
+        { "date": "2026-02-20", "amount": 1850, "status": "unpaid" },
+        { "date": "2026-03-20", "amount": 1850, "status": "unpaid" },
+        { "date": "2026-04-20", "amount": 1850, "status": "unpaid" },
+        { "date": "2026-05-20", "amount": 1850, "status": "unpaid" },
+        { "date": "2026-06-20", "amount": 1850, "status": "unpaid" },
+        { "date": "2026-07-20", "amount": 1850, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_16",
+      "name": "محمود كيلاني",
+      "product": "اكس ماكس / محمود كيلاني",
+      "totalAmount": 13200,
+      "paidAmount": 10950,
+      "remainingAmount": 2250,
+      "startDate": "2025-09-15",
+      "monthsCount": 12,
+      "monthlyAmount": 1100,
+      "phone": "",
+      "notes": "محمود كيلاني واخد اكس ماكس وباقي عليه 13500 ع 12 شهر كل شهر 1100",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2025-09-15", "amount": 1100, "status": "paid", "paymentDate": "2025-09-15" },
+        { "date": "2025-10-15", "amount": 1100, "status": "paid", "paymentDate": "2025-10-15" },
+        { "date": "2025-11-10", "amount": 1100, "status": "paid", "paymentDate": "2025-11-10" },
+        { "date": "2025-12-10", "amount": 1100, "status": "paid", "paymentDate": "2025-12-10" },
+        { "date": "2026-01-10", "amount": 1100, "status": "paid", "paymentDate": "2026-01-10" },
+        { "date": "2026-02-10", "amount": 1100, "status": "paid", "paymentDate": "2026-02-10" },
+        { "date": "2026-03-10", "amount": 1100, "status": "paid", "paymentDate": "2026-03-10" },
+        { "date": "2026-04-10", "amount": 1100, "status": "paid", "paymentDate": "2026-04-10" },
+        { "date": "2026-05-10", "amount": 1050, "status": "paid", "paymentDate": "2026-05-10" },
+        { "date": "2026-06-10", "amount": 1100, "status": "paid", "paymentDate": "2026-06-10" },
+        { "date": "2026-07-10", "amount": 1100, "status": "unpaid" },
+        { "date": "2026-08-10", "amount": 1100, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_17",
+      "name": "طارق",
+      "product": "جهاز ١٠ تلاف / طارق",
+      "totalAmount": 13500,
+      "paidAmount": 12100,
+      "remainingAmount": 1400,
+      "startDate": "2025-08-10",
+      "monthsCount": 12,
+      "monthlyAmount": 1100,
+      "phone": "",
+      "notes": "طارق دافع 13700 باقي 10تلاف ع 35% هيبقى 13500 ع 12 شهر كل شهر 1100 واخر شهر 1400",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2025-08-10", "amount": 1100, "status": "paid", "paymentDate": "2025-08-10" },
+        { "date": "2025-09-10", "amount": 1100, "status": "paid", "paymentDate": "2025-09-10" },
+        { "date": "2025-10-10", "amount": 1100, "status": "paid", "paymentDate": "2025-10-10" },
+        { "date": "2025-11-10", "amount": 1100, "status": "paid", "paymentDate": "2025-11-10" },
+        { "date": "2025-12-10", "amount": 1100, "status": "paid", "paymentDate": "2025-12-10" },
+        { "date": "2026-01-10", "amount": 1100, "status": "paid", "paymentDate": "2026-01-10" },
+        { "date": "2026-02-10", "amount": 1100, "status": "paid", "paymentDate": "2026-02-10" },
+        { "date": "2026-03-10", "amount": 1100, "status": "paid", "paymentDate": "2026-03-10" },
+        { "date": "2026-04-10", "amount": 1100, "status": "paid", "paymentDate": "2026-04-10" },
+        { "date": "2026-05-10", "amount": 1100, "status": "paid", "paymentDate": "2026-05-10" },
+        { "date": "2026-06-10", "amount": 1100, "status": "paid", "paymentDate": "2026-06-10" },
+        { "date": "2026-07-10", "amount": 1400, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_18",
+      "name": "عمار",
+      "product": "قسط عام / عمار",
+      "totalAmount": 12000,
+      "paidAmount": 4000,
+      "remainingAmount": 8000,
+      "startDate": "2026-06-01",
+      "monthsCount": 6,
+      "monthlyAmount": 2000,
+      "phone": "",
+      "notes": "عمار عليه 12000 ع 6 شهور كل شهر 2000",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-06-01", "amount": 2000, "status": "paid", "paymentDate": "2026-06-01" },
+        { "date": "2026-07-01", "amount": 2000, "status": "paid", "paymentDate": "2026-07-01" },
+        { "date": "2026-08-01", "amount": 2000, "status": "unpaid" },
+        { "date": "2026-09-01", "amount": 2000, "status": "unpaid" },
+        { "date": "2026-10-01", "amount": 2000, "status": "unpaid" },
+        { "date": "2026-11-01", "amount": 2000, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_19",
+      "name": "حساب التكييفات الجهاز ٣٢",
+      "product": "تكييفات الجهاز ٣٢",
+      "totalAmount": 31000,
+      "paidAmount": 0,
+      "remainingAmount": 31000,
+      "startDate": "2026-06-25",
+      "monthsCount": 12,
+      "monthlyAmount": 2500,
+      "phone": "",
+      "notes": "وصلي ١٠ باقي ٢٢ بعد الفيده ٣٥٪ ع السنه هيبقى حسابي ٣١ ع ١٢ شهر ٢٥٠٠ كل شهر اولنا ٦/٢٥",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-06-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-07-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-08-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-09-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-10-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-11-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2026-12-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2027-01-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2027-02-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2027-03-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2027-04-25", "amount": 2500, "status": "unpaid" },
+        { "date": "2027-05-25", "amount": 3500, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_20",
+      "name": "محمد فتحي",
+      "product": "قسط عام / محمد فتحي",
+      "totalAmount": 34000,
+      "paidAmount": 0,
+      "remainingAmount": 34000,
+      "startDate": "2026-07-05",
+      "monthsCount": 12,
+      "monthlyAmount": 2820,
+      "phone": "",
+      "notes": "محمد فتحي ٢٥ قبل الفيده وبعد ٣٤ ع ١٢ شهر ٢٨٢٠ اولنا ٧/٥",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-07-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2026-08-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2026-09-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2026-10-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2026-11-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2026-12-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-01-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-02-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-03-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-04-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-05-05", "amount": 2820, "status": "unpaid" },
+        { "date": "2027-06-05", "amount": 2980, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_21",
+      "name": "محمد عيد",
+      "product": "قسط عام / محمد عيد",
+      "totalAmount": 27000,
+      "paidAmount": 4500,
+      "remainingAmount": 22500,
+      "startDate": "2026-05-05",
+      "monthsCount": 12,
+      "monthlyAmount": 2250,
+      "phone": "",
+      "notes": "محمد عيد باقي عليه 20 قبل وبعض 27 ع 12 كل شهر 2250",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-05-05", "amount": 2250, "status": "paid", "paymentDate": "2026-05-05" },
+        { "date": "2026-06-05", "amount": 2250, "status": "paid", "paymentDate": "2026-06-05" },
+        { "date": "2026-07-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2026-08-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2026-09-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2026-10-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2026-11-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2026-12-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2027-01-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2027-02-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2027-03-05", "amount": 2250, "status": "unpaid" },
+        { "date": "2027-04-05", "amount": 2250, "status": "unpaid" }
+      ]
+    },
+    {
+      "id": "active_22",
+      "name": "أحمد مجدي",
+      "product": "قسط عام / أحمد مجدي",
+      "totalAmount": 13500,
+      "paidAmount": 3000,
+      "remainingAmount": 10500,
+      "startDate": "2026-05-01",
+      "monthsCount": 9,
+      "monthlyAmount": 1500,
+      "phone": "",
+      "notes": "احمد مجدي بدل وعليه فرق ١٠٠٠٠ قبل الفايده وبعد ١٣٥٠٠ ع ٩ش كل شهر ١٥٠٠",
+      "type": "incoming",
+      "schedule": [
+        { "date": "2026-05-01", "amount": 1500, "status": "paid", "paymentDate": "2026-05-01" },
+        { "date": "2026-06-01", "amount": 1500, "status": "paid", "paymentDate": "2026-06-01" },
+        { "date": "2026-07-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2026-08-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2026-09-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2026-10-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2026-11-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2026-12-01", "amount": 1500, "status": "unpaid" },
+        { "date": "2027-01-01", "amount": 1500, "status": "unpaid" }
+      ]
+    }
+  ],
+  "quickInstallments": [
+    {
+      "id": "quick_1",
+      "name": "يوسف شعبان",
+      "amount": 2250,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_2",
+      "name": "رمانة",
+      "amount": 3100,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_3",
+      "name": "سليمان",
+      "amount": 1250,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_4",
+      "name": "محمد سيد",
+      "amount": 1500,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_5",
+      "name": "محمد فرج",
+      "amount": 1500,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_8",
+      "name": "شادي",
+      "amount": 800,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_10",
+      "name": "خالد عبدالنبي",
+      "amount": 850,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_12",
+      "name": "محمد إمام",
+      "amount": 1300,
+      "status": "unpaid",
+      "notes": "قسط شهري"
+    },
+    {
+      "id": "quick_13",
+      "name": "يوسف غريب",
+      "amount": 2800,
+      "status": "unpaid",
+      "notes": "قسط على 6 شهور"
+    },
+    {
+      "id": "quick_14",
+      "name": "سكران",
+      "amount": 10500,
+      "status": "unpaid",
+      "notes": "مستحق بالكامل الشهر الجاي"
+    }
+  ],
+  "moneyCircles": [
+    {
+      "id": "circle_1",
+      "name": "جمعية الـ 5000",
+      "totalAmount": 5000,
+      "monthlyPayment": 5000,
+      "monthsCount": 1,
+      "startDate": "2025-03-10",
+      "status": "active",
+      "notes": "دفعت اول الجمعية 5 تلاف بتاريخ 10/3 (10 رمضان)",
+      "schedule": [
+        {
+          "date": "2025-03-10",
+          "paid": true,
+          "amount": 5000,
+          "datePaid": "2025-03-10"
+        }
+      ]
+    }
+  ],
+  "invoices": [
+    {
+      "id": "947",
+      "date": "2025-05-02",
+      "clientName": "احمد حلمي محمد متولي",
+      "itemName": "iphone 13 Pro Max 256G 100% Black",
+      "serialNumber": "356514418587283",
+      "amount": 37000,
+      "storeName": "بوكس ستور (Box Store)",
+      "address": "9 ش ترعه السواحل / الوراق، الجيزة",
+      "status": "paid"
+    }
+  ],
+  "lastUpdated": "2026-06-24T13:00:00.000Z"
+}
