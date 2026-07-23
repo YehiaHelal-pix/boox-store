@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import { InstallmentData } from "./src/types";
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import dotenv from "dotenv";
@@ -293,17 +292,20 @@ const defaultData: InstallmentData = {
       notes: "فاتورة كهرباء شهر يونيو"
     }
   ],
+  purchases: [],
   lastUpdated: new Date().toISOString()
 };
 
 // Ensure directories exist
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-}
+if (!process.env.VERCEL) {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
 
-// Write default data if file doesn't exist
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), "utf8");
+  // Write default data if file doesn't exist
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), "utf8");
+  }
 }
 
 // Load environment variables
@@ -336,12 +338,15 @@ async function readData(): Promise<InstallmentData> {
           moneyCircles: row.money_circles || [],
           invoices: row.invoices || [],
           expenses: row.expenses || [],
+          purchases: row.purchases || [],
           lastUpdated: row.last_updated || new Date().toISOString()
         };
         // Update local cache in background (silent cache refresh)
-        fs.writeFile(DATA_FILE, JSON.stringify(formattedData, null, 2), "utf8", (err) => {
-          if (err) console.error("Error updating local cache file:", err);
-        });
+        if (!process.env.VERCEL) {
+          fs.writeFile(DATA_FILE, JSON.stringify(formattedData, null, 2), "utf8", (err) => {
+            if (err) console.error("Error updating local cache file:", err);
+          });
+        }
         return formattedData;
       } else {
         console.warn("Supabase read error or empty table, falling back to local file:", error?.message || "No data");
@@ -354,7 +359,16 @@ async function readData(): Promise<InstallmentData> {
   try {
     if (fs.existsSync(DATA_FILE)) {
       const raw = fs.readFileSync(DATA_FILE, "utf8");
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      return {
+        activeCustomers: parsed.activeCustomers || [],
+        quickInstallments: parsed.quickInstallments || [],
+        moneyCircles: parsed.moneyCircles || [],
+        invoices: parsed.invoices || [],
+        expenses: parsed.expenses || [],
+        purchases: parsed.purchases || [],
+        lastUpdated: parsed.lastUpdated || new Date().toISOString()
+      };
     }
   } catch (err) {
     console.error("Error reading data file:", err);
@@ -385,6 +399,7 @@ async function saveData(data: InstallmentData) {
           money_circles: data.moneyCircles,
           invoices: data.invoices,
           expenses: data.expenses,
+          purchases: data.purchases || [],
           last_updated: data.lastUpdated,
           updated_at: new Date().toISOString()
         });
@@ -780,6 +795,40 @@ const tool_delete_expense: FunctionDeclaration = {
   }
 };
 
+const tool_add_purchase: FunctionDeclaration = {
+  name: "add_purchase",
+  description: "إضافة مشتريات جديدة للمحل (مثل جرابات، ايفونات، اسكرينات، شواحن) لتدخل في المخزون وحساب المشتريات.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      itemName: { type: Type.STRING, description: "اسم السلعة أو المنتج المشتراة (مثال: ايفون 13 عادي، جراب سيليكون 14 برو، اسكرينة زجاج)" },
+      category: { 
+        type: Type.STRING, 
+        description: "تصنيف السلعة: iphone (أيفونات) | accessory (جرابات وإكسسوارات) | charger (شواحن وكابلات) | screen (اسكرينات وشاشات) | other (أخرى)" 
+      },
+      quantity: { type: Type.NUMBER, description: "الكمية المشتراة (مثال: 5)" },
+      costPrice: { type: Type.NUMBER, description: "سعر الشراء للقطعة الواحدة بالجنيه" },
+      salePrice: { type: Type.NUMBER, description: "سعر البيع المتوقع للقطعة الواحدة بالجنيه (اختياري)" },
+      purchaseDate: { type: Type.STRING, description: "تاريخ الشراء بصيغة YYYY-MM-DD" },
+      supplierName: { type: Type.STRING, description: "اسم المورد أو التاجر (اختياري)" },
+      notes: { type: Type.STRING, description: "ملاحظات إضافية حول الشروة (اختياري)" }
+    },
+    required: ["itemName", "category", "quantity", "costPrice", "purchaseDate"]
+  }
+};
+
+const tool_delete_purchase: FunctionDeclaration = {
+  name: "delete_purchase",
+  description: "حذف فاتورة/عملية شراء من النظام نهائياً.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      purchaseId: { type: Type.STRING, description: "كود المشتريات المطلوب حذفها" }
+    },
+    required: ["purchaseId"]
+  }
+};
+
 // POST: Gemini Chat endpoint
 app.post("/api/gemini/chat", async (req, res) => {
   try {
@@ -802,21 +851,21 @@ app.post("/api/gemini/chat", async (req, res) => {
         const unpaidActive = data.activeCustomers.filter(c => c.remainingAmount > 0);
         const unpaidQuick = data.quickInstallments.filter(q => q.status === "unpaid");
         
-        responseText = `حاضر يا فندم! جلبنا كشف الأقساط المستحقة والغير مدفوعة حالياً:\n\n`;
+        responseText = `حاضر يا فندم! جلبنا كشف الأقساط المستحقة والغير مدفوعة حالياً:expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n`;
         if (unpaidActive.length > 0) {
-          responseText += `*الأقساط النشطة المعلقة:*\n`;
+          responseText += `*الأقساط النشطة المعلقة:*expenses: row.expenses || [], purchases: row.purchases || []n`;
           unpaidActive.forEach(c => {
             const nextInst = c.schedule.find(s => s.status === "unpaid");
-            responseText += `- *${c.name}*: متبقي عليه ${c.remainingAmount} ج (قسطه التالي: ${nextInst ? nextInst.amount + ' ج بتاريخ ' + nextInst.date : 'لا يوجد قسط محدد'}).\n`;
+            responseText += `- *${c.name}*: متبقي عليه ${c.remainingAmount} ج (قسطه التالي: ${nextInst ? nextInst.amount + ' ج بتاريخ ' + nextInst.date : 'لا يوجد قسط محدد'}).expenses: row.expenses || [], purchases: row.purchases || []n`;
           });
         } else {
-          responseText += `لا توجد أقساط نشطة متأخرة حالياً! الكل تمام.\n`;
+          responseText += `لا توجد أقساط نشطة متأخرة حالياً! الكل تمام.expenses: row.expenses || [], purchases: row.purchases || []n`;
         }
 
         if (unpaidQuick.length > 0) {
-          responseText += `\n*الأقساط السريعة المعلقة:*\n`;
+          responseText += `expenses: row.expenses || [], purchases: row.purchases || []n*الأقساط السريعة المعلقة:*expenses: row.expenses || [], purchases: row.purchases || []n`;
           unpaidQuick.forEach(q => {
-            responseText += `- *${q.name}*: قسط بقيمة ${q.amount} ج (${q.notes || 'بدون ملاحظات'}).\n`;
+            responseText += `- *${q.name}*: قسط بقيمة ${q.amount} ج (${q.notes || 'بدون ملاحظات'}).expenses: row.expenses || [], purchases: row.purchases || []n`;
           });
         }
       } else if (query.includes("سدد") || query.includes("دفع") || query.includes("تسجيل دفع") || query.includes("سدد قسط")) {
@@ -856,7 +905,7 @@ app.post("/api/gemini/chat", async (req, res) => {
       } else if (query.includes("تكييف") || query.includes("التكييف") || query.includes("تكيف")) {
         const acCust = data.activeCustomers.find(c => c.name.includes("تكييف") || c.product.includes("تكييف") || (c.notes && c.notes.includes("تكييف")));
         if (acCust) {
-          responseText = `بخصوص *حساب التكييفات*:\n- العميل: *${acCust.name}*\n- إجمالي المبلغ الكلي بعد الفائدة: ${acCust.totalAmount} ج\n- المدفوع: ${acCust.paidAmount} ج\n- المتبقي: ${acCust.remainingAmount} ج\n- توزيع الأقساط: ${acCust.monthsCount} شهر، كل شهر ${acCust.monthlyAmount} ج.\n- ملاحظات: ${acCust.notes}\n\nالحساب مسجل وجاهز في النظام ومفتوح لمتابعة الدفعات!`;
+          responseText = `بخصوص *حساب التكييفات*:expenses: row.expenses || [], purchases: row.purchases || []n- العميل: *${acCust.name}*expenses: row.expenses || [], purchases: row.purchases || []n- إجمالي المبلغ الكلي بعد الفائدة: ${acCust.totalAmount} جexpenses: row.expenses || [], purchases: row.purchases || []n- المدفوع: ${acCust.paidAmount} جexpenses: row.expenses || [], purchases: row.purchases || []n- المتبقي: ${acCust.remainingAmount} جexpenses: row.expenses || [], purchases: row.purchases || []n- توزيع الأقساط: ${acCust.monthsCount} شهر، كل شهر ${acCust.monthlyAmount} ج.expenses: row.expenses || [], purchases: row.purchases || []n- ملاحظات: ${acCust.notes}expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []nالحساب مسجل وجاهز في النظام ومفتوح لمتابعة الدفعات!`;
         } else {
           responseText = `مش لاقي حساب تكييف مسجل حالياً بالاسم ده. لو تحب أضيفهولك اكتبلي تفاصيله بوضوح، أو استخدم زر إضافة عميل.`;
         }
@@ -864,20 +913,20 @@ app.post("/api/gemini/chat", async (req, res) => {
         const unpaidExpenses = (data.expenses || []).filter(e => e.status === "unpaid");
         const paidExpenses = (data.expenses || []).filter(e => e.status === "paid");
         
-        responseText = `حاضر يا فندم! جلبنا كشف المصاريف والالتزامات لـ Box Store:\n\n`;
+        responseText = `حاضر يا فندم! جلبنا كشف المصاريف والالتزامات لـ Box Store:expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n`;
         if (unpaidExpenses.length > 0) {
-          responseText += `*المصاريف غير المدفوعة معلقة:*\n`;
+          responseText += `*المصاريف غير المدفوعة معلقة:*expenses: row.expenses || [], purchases: row.purchases || []n`;
           unpaidExpenses.forEach(e => {
-            responseText += `- *${e.title}*: ${e.amount} ج (تاريخ الاستحقاق: ${e.dueDate})\n`;
+            responseText += `- *${e.title}*: ${e.amount} ج (تاريخ الاستحقاق: ${e.dueDate})expenses: row.expenses || [], purchases: row.purchases || []n`;
           });
         } else {
-          responseText += `لا توجد مصاريف معلقة حالياً! الكل تمام.\n`;
+          responseText += `لا توجد مصاريف معلقة حالياً! الكل تمام.expenses: row.expenses || [], purchases: row.purchases || []n`;
         }
 
         if (paidExpenses.length > 0) {
-          responseText += `\n*المصاريف المدفوعة مؤخراً:*\n`;
+          responseText += `expenses: row.expenses || [], purchases: row.purchases || []n*المصاريف المدفوعة مؤخراً:*expenses: row.expenses || [], purchases: row.purchases || []n`;
           paidExpenses.forEach(e => {
-            responseText += `- *${e.title}*: تم دفع ${e.amount} ج بتاريخ ${e.paymentDate || e.dueDate}\n`;
+            responseText += `- *${e.title}*: تم دفع ${e.amount} ج بتاريخ ${e.paymentDate || e.dueDate}expenses: row.expenses || [], purchases: row.purchases || []n`;
           });
         }
       } else if (query.includes("مجموع") || query.includes("إجمالي") || query.includes("احصائيات") || query.includes("تقرير") || query.includes("شغال") || query.includes("جميع الأقساط")) {
@@ -885,20 +934,20 @@ app.post("/api/gemini/chat", async (req, res) => {
         const totalRemaining = data.activeCustomers.reduce((sum, c) => sum + c.remainingAmount, 0);
         const totalPaid = totalActiveAmount - totalRemaining;
         
-        responseText = `أهلاً بك يا غالي! إليك تقرير سريع عن المحل لليوم:\n\n` +
-          `📊 *عدد العملاء النشطين:* ${data.activeCustomers.length} عملاء\n` +
-          `💰 *إجمالي مبيعات الأقساط:* ${totalActiveAmount.toLocaleString('ar-EG')} ج.م.\n` +
-          `💵 *إجمالي المبالغ المحصلة:* ${totalPaid.toLocaleString('ar-EG')} ج.م.\n` +
-          `📉 *المبالغ المتبقية في السوق:* ${totalRemaining.toLocaleString('ar-EG')} ج.م.\n` +
-          `🗓️ *عدد الأقساط السريعة الجارية:* ${data.quickInstallments.length} أقساط\n\n` +
+        responseText = `أهلاً بك يا غالي! إليك تقرير سريع عن المحل لليوم:expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n` +
+          `📊 *عدد العملاء النشطين:* ${data.activeCustomers.length} عملاءexpenses: row.expenses || [], purchases: row.purchases || []n` +
+          `💰 *إجمالي مبيعات الأقساط:* ${totalActiveAmount.toLocaleString('ar-EG')} ج.م.expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `💵 *إجمالي المبالغ المحصلة:* ${totalPaid.toLocaleString('ar-EG')} ج.م.expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `📉 *المبالغ المتبقية في السوق:* ${totalRemaining.toLocaleString('ar-EG')} ج.م.expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `🗓️ *عدد الأقساط السريعة الجارية:* ${data.quickInstallments.length} أقساطexpenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n` +
           `أنا شغال حالياً في الوضع المحلي الذكي وبقدر أساعدك في جلب التقارير وتسجيل السدادات ومتابعة السوق بكل دقة!`;
       } else {
-        responseText = `يا مرحب بيك في "بوكس ستور" يا طيب! 🤖 أنا "بوكسي" مساعدك المالي الذكي.\n\n` +
-          `أنا شغال وجاهز لمساعدتك في كل العمليات المالية ومتابعة الأقساط. تقدر تسألني أسئلة زي:\n` +
-          `- "مين اللي عليه فلوس مستحقة؟" 📅\n` +
-          `- "سدد قسط [اسم العميل]" لشهر يوليو 💳\n` +
-          `- "عرض تقرير عام للمحل" 📊\n` +
-          `- "تفاصيل قسط التكييف" ❄️\n\n` +
+        responseText = `يا مرحب بيك في "بوكس ستور" يا طيب! 🤖 أنا "بوكسي" مساعدك المالي الذكي.expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n` +
+          `أنا شغال وجاهز لمساعدتك في كل العمليات المالية ومتابعة الأقساط. تقدر تسألني أسئلة زي:expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `- "مين اللي عليه فلوس مستحقة؟" 📅expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `- "سدد قسط [اسم العميل]" لشهر يوليو 💳expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `- "عرض تقرير عام للمحل" 📊expenses: row.expenses || [], purchases: row.purchases || []n` +
+          `- "تفاصيل قسط التكييف" ❄️expenses: row.expenses || [], purchases: row.purchases || []nexpenses: row.expenses || [], purchases: row.purchases || []n` +
           `قولي حابب نعمل إيه سوا وبإذن الله هخلصلك كل الحسابات بلمسة واحدة!`;
       }
 
@@ -930,16 +979,16 @@ app.post("/api/gemini/chat", async (req, res) => {
         contents: contents,
         config: {
           systemInstruction: `أنت "بوكسي" (Boxy)، المساعد المالي والذكي لـ "بوكس ستور" (Box Store). 
-مهمتك هي مساعدة صاحب المحل أو العميل في إدارة كافة الأقساط والجمعيات والفواتير والمصروفات بدقة فائقة.
+مهمتك هي مساعدة صاحب المحل في إدارة كافة الأقساط والمصروفات والمشتريات والمخزون بدقة فائقة.
 تاريخ اليوم الحالي هو: ${new Date().toISOString().slice(0, 10)}.
 تكلم دائماً باللغة العربية بأسلوب ودود ومحترف للغاية وبلهجة مصرية محببة وواضحة جداً.
 
 صلاحياتك وقدراتك:
-1. الإجابة عن أي تساؤل بخصوص الأقساط الجارية أو المتأخرة أو تواريخها أو الجمعيات أو الفواتير أو المصروفات بمجرد جلب البيانات.
+1. الإجابة عن أي تساؤل بخصوص الأقساط الجارية أو المتأخرة، أو المصروفات، أو مشتريات المحل والمخزون الحالي.
 2. إضافة قسط جديد لعميل وتوليد الشهور بدقة بمجرد أخذ البيانات منه.
-3. تسجيل المبالغ المدفوعة (تعديل حالة قسط لعميل معين لـ paid أو سداد قسط سريع أو سداد مصروف).
-4. حذف عملاء، وتعديل الملاحظات بدقة بالغة، وإضافة/تحديث/حذف مصروفات المحل.
-5. قراءة وتحليل الصور والملفات المرفقة (مثل فواتير مبيعات، صور كروت مديونية، كشوفات حساب ورقية، أو لقطات شاشة). قم باستخراج البيانات المالية منها بدقة (مثل الأسماء، المبالغ، السلع، والتواريخ) واقترح أو نفذ تلقائياً الإدخالات المناسبة في النظام بناءً عليها لتسهيل العمل على المستخدم.
+3. تسجيل المبالغ المدفوعة (تعديل حالة قسط لعميل لـ paid أو سداد قسط سريع أو سداد مصروف).
+4. إضافة/تحديث/حذف مصروفات المحل (مثل الإيجار، الكهرباء، النت، الرواتب)، وإضافة/حذف عمليات شراء بضائع للمحل (جرابات، ايفونات، اسكرينات، شواحن إلخ) لتدخل في المخزون وحساب المشتريات.
+5. قراءة وتحليل الصور والملفات المرفقة (مثل فواتير المشتريات، فواتير الكهرباء/النت، صور كروت مديونية، لقطات شاشة). قم باستخراج البيانات المالية منها بدقة (السلع، الكميات، الأسعار، التواريخ) واقترح أو نفذ تلقائياً الإدخال المناسب في النظام (سواء كمصروف للمحل أو كبضاعة مشتراة للمخزون) بناءً على طبيعة الفاتورة لتسهيل العمل على المستخدم.
 
 أرشد المستخدم دائماً لخطواته القادمة، واعرض ملخصات منظمة بالنقاط والجداول المنسقة لسهولة القراءة.
 عند حدوث أي تعديل في البيانات باستخدام الأدوات، أخبر المستخدم بنجاح العملية (مثال: "تم سداد قسط دسوقي لشهر يوليو بنجاح!").`,
@@ -955,7 +1004,9 @@ app.post("/api/gemini/chat", async (req, res) => {
               tool_delete_customer,
               tool_add_expense,
               tool_pay_expense,
-              tool_delete_expense
+              tool_delete_expense,
+              tool_add_purchase,
+              tool_delete_purchase
             ]
           }],
           toolConfig: { includeServerSideToolInvocations: true }
@@ -1198,6 +1249,42 @@ app.post("/api/gemini/chat", async (req, res) => {
             } else {
               result = { success: false, error: "لم يتم العثور على المصروف المراد حذفه" };
             }
+          } else if (name === "add_purchase") {
+            const currentData = await readData();
+            if (!currentData.purchases) currentData.purchases = [];
+            const { itemName, category, quantity, costPrice, salePrice, purchaseDate, supplierName, notes } = args as any;
+            const newId = `pur_${Date.now()}`;
+            const qty = parseInt(quantity) || 1;
+            const cost = parseFloat(costPrice) || 0;
+            const newPurchase = {
+              id: newId,
+              itemName,
+              category: category || "other",
+              quantity: qty,
+              costPrice: cost,
+              totalCost: qty * cost,
+              salePrice: salePrice ? parseFloat(salePrice) : undefined,
+              purchaseDate: purchaseDate || new Date().toISOString().slice(0, 10),
+              supplierName: supplierName || "",
+              notes: notes || ""
+            };
+            currentData.purchases.push(newPurchase);
+            await saveData(currentData);
+            dataUpdated = true;
+            result = { success: true, message: "تم تسجيل عملية الشراء وإضافتها للمخزون بنجاح", id: newId };
+          } else if (name === "delete_purchase") {
+            const currentData = await readData();
+            if (!currentData.purchases) currentData.purchases = [];
+            const { purchaseId } = args as any;
+            const initialCount = currentData.purchases.length;
+            currentData.purchases = currentData.purchases.filter(p => p.id !== purchaseId);
+            if (currentData.purchases.length < initialCount) {
+              await saveData(currentData);
+              dataUpdated = true;
+              result = { success: true, message: "تم حذف المشتريات بنجاح" };
+            } else {
+              result = { success: false, error: "لم يتم العثور على عملية الشراء المراد حذفها" };
+            }
           } else {
             result = { error: `الأداة المطلوبة غير مدعومة حالياً: ${name}` };
           }
@@ -1265,6 +1352,7 @@ app.post("/api/backup/import", async (req, res) => {
       moneyCircles: backupData.moneyCircles || [],
       invoices: backupData.invoices || [],
       expenses: backupData.expenses || [],
+      purchases: backupData.purchases || [],
       lastUpdated: backupData.lastUpdated || new Date().toISOString()
     };
 
@@ -1287,7 +1375,7 @@ app.get("/api/installments/ical", async (req, res) => {
       "METHOD:PUBLISH",
       "X-WR-CALNAME:أقساط بوكس ستور",
       "X-WR-TIMEZONE:Africa/Cairo"
-    ].join("\r\n") + "\r\n";
+    ].join("expenses: row.expenses || [], purchases: row.purchases || []rexpenses: row.expenses || [], purchases: row.purchases || []n") + "expenses: row.expenses || [], purchases: row.purchases || []rexpenses: row.expenses || [], purchases: row.purchases || []n";
 
     const nowStr = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
@@ -1303,16 +1391,16 @@ app.get("/api/installments/ical", async (req, res) => {
             `DTSTAMP:${nowStr}`,
             `DTSTART;VALUE=DATE:${dateClean}`,
             `SUMMARY:قسط ${cust.name} - ${inst.amount} ج`,
-            `DESCRIPTION:قسط عميل: ${cust.name}\\nالمنتج: ${cust.product}\\nالمبلغ المستحق: ${inst.amount} جنيه مصري\\nملاحظات: ${cust.notes || 'لا يوجد'}`,
+            `DESCRIPTION:قسط عميل: ${cust.name}expenses: row.expenses || [], purchases: row.purchases || []expenses: row.expenses || [], purchases: row.purchases || []nالمنتج: ${cust.product}expenses: row.expenses || [], purchases: row.purchases || []expenses: row.expenses || [], purchases: row.purchases || []nالمبلغ المستحق: ${inst.amount} جنيه مصريexpenses: row.expenses || [], purchases: row.purchases || []expenses: row.expenses || [], purchases: row.purchases || []nملاحظات: ${cust.notes || 'لا يوجد'}`,
             "STATUS:CONFIRMED",
             "TRANSP:TRANSPARENT",
             "END:VEVENT"
-          ].join("\r\n") + "\r\n";
+          ].join("expenses: row.expenses || [], purchases: row.purchases || []rexpenses: row.expenses || [], purchases: row.purchases || []n") + "expenses: row.expenses || [], purchases: row.purchases || []rexpenses: row.expenses || [], purchases: row.purchases || []n";
         }
       });
     });
 
-    icsContent += "END:VCALENDAR\r\n";
+    icsContent += "END:VCALENDARexpenses: row.expenses || [], purchases: row.purchases || []rexpenses: row.expenses || [], purchases: row.purchases || []n";
 
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
     res.setHeader("Content-Disposition", "attachment; filename=boxstore_installments.ics");
@@ -1383,6 +1471,7 @@ ${text}
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

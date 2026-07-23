@@ -73,7 +73,7 @@ export default function App() {
 
   // Filter/Search states
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<'active' | 'quick' | 'circles' | 'invoices' | 'expenses'>('active');
+  const [activeTab, setActiveTab] = useState<'active' | 'quick' | 'circles' | 'invoices' | 'expenses' | 'purchases' | 'reports'>('active');
   const [selectedCustomer, setSelectedCustomer] = useState<ActiveCustomer | null>(null);
   const [invoiceToPrint, setInvoiceToPrint] = useState<Invoice | null>(null);
   const [receiptToPrint, setReceiptToPrint] = useState<{ customer: ActiveCustomer; installment: InstallmentScheduleItem } | null>(null);
@@ -111,7 +111,7 @@ export default function App() {
   const [cPhone, setCPhone] = useState("");
   const [cNotes, setCNotes] = useState("");
   const [cType, setCType] = useState<'incoming' | 'outgoing'>('incoming');
-  const [cStartDate, setCStartDate] = useState("2025-06-01");
+  const [cStartDate, setCStartDate] = useState("2026-07-21");
 
   // Quick Installment Fields
   const [qName, setQName] = useState("");
@@ -124,7 +124,7 @@ export default function App() {
   const [circleTotal, setCircleTotal] = useState("");
   const [circleMonths, setCircleMonths] = useState("1");
   const [circleMonthly, setCircleMonthly] = useState("");
-  const [circleStart, setCircleStart] = useState("2025-03-10");
+  const [circleStart, setCircleStart] = useState("2026-07-21");
   const [circleNotes, setCircleNotes] = useState("");
 
   // Invoice Fields
@@ -135,7 +135,7 @@ export default function App() {
   const [invAmount, setInvAmount] = useState("");
   const [invStore, setInvStore] = useState("بوكس ستور (Box Store)");
   const [invAddress, setInvAddress] = useState("9 ش ترعه السواحل / الوراق، الجيزة");
-  const [invDate, setInvDate] = useState("2025-05-02");
+  const [invDate, setInvDate] = useState("2026-07-21");
 
   // Expense Fields
   const [expTitle, setExpTitle] = useState("");
@@ -664,7 +664,7 @@ export default function App() {
       .reduce((sum, item) => sum + Number(item.amount), 0);
     const remaining = Math.max(0, total - paid);
     
-    const updatedCustomers = data.activeCustomers.map(c => {
+    const updatedCustomers = (data.activeCustomers || []).map(c => {
       if (c.id !== editCustomerId) return c;
       return {
         ...c,
@@ -832,7 +832,7 @@ export default function App() {
   const handleToggleInstallment = (customerId: string, installmentDate: string) => {
     if (!data) return;
     
-    const updatedCustomers = data.activeCustomers.map(customer => {
+    const updatedCustomers = (data.activeCustomers || []).map(customer => {
       if (customer.id !== customerId) return customer;
       
       let updatedSchedule = customer.schedule.map(item => {
@@ -878,7 +878,7 @@ export default function App() {
   // Toggle quick installment list status
   const handleToggleQuickInstallment = (id: string) => {
     if (!data) return;
-    const updatedQuick = data.quickInstallments.map(q => {
+    const updatedQuick = (data.quickInstallments || []).map(q => {
       if (q.id !== id) return q;
       return { ...q, status: q.status === "paid" ? "unpaid" : "paid" as 'paid' | 'unpaid' };
     });
@@ -1044,7 +1044,7 @@ export default function App() {
   const handleDeleteCustomer = (customerId: string) => {
     if (!data) return;
     askConfirmation("هل أنت متأكد من حذف هذا العميل وسجل أقساطه بالكامل؟", () => {
-      const updatedCustomers = data.activeCustomers.filter(c => c.id !== customerId);
+      const updatedCustomers = (data.activeCustomers || []).filter(c => c.id !== customerId);
       const updatedData = { ...data, activeCustomers: updatedCustomers };
       saveAllData(updatedData);
       setSelectedCustomer(null);
@@ -1055,7 +1055,7 @@ export default function App() {
   const handleDeleteQuick = (id: string) => {
     if (!data) return;
     askConfirmation("هل تريد حذف هذا السجل السريع؟", () => {
-      const updatedQuick = data.quickInstallments.filter(q => q.id !== id);
+      const updatedQuick = (data.quickInstallments || []).filter(q => q.id !== id);
       saveAllData({ ...data, quickInstallments: updatedQuick });
       showToast("تم حذف السجل بنجاح", "info");
     });
@@ -1064,7 +1064,7 @@ export default function App() {
   const handleDeleteCircle = (id: string) => {
     if (!data) return;
     askConfirmation("هل تريد حذف هذه الجمعية؟", () => {
-      const updatedCircles = data.moneyCircles.filter(c => c.id !== id);
+      const updatedCircles = (data.moneyCircles || []).filter(c => c.id !== id);
       saveAllData({ ...data, moneyCircles: updatedCircles });
       showToast("تم حذف الجمعية بنجاح", "info");
     });
@@ -1073,7 +1073,7 @@ export default function App() {
   const handleDeleteInvoice = (id: string) => {
     if (!data) return;
     askConfirmation("هل تريد حذف هذه الفاتورة؟", () => {
-      const updatedInvoices = data.invoices.filter(i => i.id !== id);
+      const updatedInvoices = (data.invoices || []).filter(i => i.id !== id);
       saveAllData({ ...data, invoices: updatedInvoices });
       showToast("تم حذف الفاتورة بنجاح", "info");
     });
@@ -1085,6 +1085,15 @@ export default function App() {
       const updatedExpenses = (data.expenses || []).filter(e => e.id !== id);
       saveAllData({ ...data, expenses: updatedExpenses });
       showToast("تم حذف المصروف بنجاح", "info");
+    });
+  };
+
+  const handleDeletePurchase = (id: string) => {
+    if (!data) return;
+    askConfirmation("هل تريد حذف هذا السجل من المشتريات نهائياً؟", () => {
+      const updatedPurchases = (data.purchases || []).filter(p => p.id !== id);
+      saveAllData({ ...data, purchases: updatedPurchases });
+      showToast("تم حذف البضاعة/المشتريات بنجاح", "info");
     });
   };
 
@@ -1155,51 +1164,93 @@ export default function App() {
 
   // Calculations for dashboard
   const getTotals = () => {
-    if (!data) return { totalIncoming: 0, collectedThisMonth: 0, pendingThisMonth: 0, outgoingTotal: 0, quickPendingTotal: 0 };
-    
-    // Total detailed incoming remaining
-    const detailedIncoming = data.activeCustomers
+    if (!data) return { 
+      totalIncoming: 0, 
+      collectedThisMonth: 0, 
+      pendingThisMonth: 0, 
+      outgoingTotal: 0, 
+      totalExpensesAndPurchases: 0,
+      quickPendingTotal: 0,
+      collectionRate: 0,
+      currentMonthLabel: "الحالي" 
+    };
+
+    // 1. Detailed incoming remaining + quick unpaid
+    const detailedIncoming = (data.activeCustomers || [])
       .filter(c => c.type === 'incoming')
-      .reduce((sum, c) => sum + c.remainingAmount, 0);
+      .reduce((sum, c) => sum + (c.remainingAmount || 0), 0);
 
-    // Outgoing (AC, etc)
-    const outgoingTotal = data.activeCustomers
-      .filter(c => c.type === 'outgoing')
-      .reduce((sum, c) => sum + c.remainingAmount, 0);
-
-    // Quick unpaid total (Summing WhatsApp installments pending)
-    const quickPendingTotal = data.quickInstallments
+    const quickPendingTotal = (data.quickInstallments || [])
       .filter(q => q.status === 'unpaid')
-      .reduce((sum, q) => sum + q.amount, 0);
+      .reduce((sum, q) => sum + (q.amount || 0), 0);
 
-    // Sum total outstanding collection
     const totalIncoming = detailedIncoming + quickPendingTotal;
 
-    // Monthly analysis based on June 2025 (current view simulation)
-    const currentMonthPrefix = "2025-06";
+    // 2. Outgoing commitments (obligations to suppliers/others)
+    const outgoingTotal = (data.activeCustomers || [])
+      .filter(c => c.type === 'outgoing')
+      .reduce((sum, c) => sum + (c.remainingAmount || 0), 0);
+
+    // 3. Operating Expenses & Inventory Purchases
+    const totalPaidExpenses = (data.expenses || [])
+      .filter(e => e.status === 'paid')
+      .reduce((sum, e) => sum + (e.amount || 0), 0);
+
+    const totalPurchasesCost = (data.purchases || [])
+      .reduce((sum, p) => sum + (p.totalCost || ((p.costPrice || 0) * (p.quantity || 1))), 0);
+
+    const totalExpensesAndPurchases = totalPaidExpenses + totalPurchasesCost;
+
+    // 4. Current Month Analysis
+    const now = new Date();
+    const activeMonthPrefix = now.toISOString().slice(0, 7);
+
     let collectedThisMonth = 0;
     let pendingThisMonth = 0;
 
-    data.activeCustomers.forEach(c => {
+    // Detailed Customers
+    (data.activeCustomers || []).forEach(c => {
       if (c.type === 'incoming') {
-        c.schedule.forEach(item => {
-          if (item.date.startsWith(currentMonthPrefix)) {
-            if (item.status === 'paid') {
-              collectedThisMonth += item.amount;
-            } else {
-              pendingThisMonth += item.amount;
+        (c.schedule || []).forEach(item => {
+          if (item.status === 'paid') {
+            const paymentMonth = item.paymentDate ? item.paymentDate.slice(0, 7) : (item.date ? item.date.slice(0, 7) : "");
+            if (paymentMonth === activeMonthPrefix) {
+              collectedThisMonth += item.amount || 0;
+            }
+          } else {
+            // Unpaid items due this month or earlier (overdue)
+            if (item.date && item.date.slice(0, 7) <= activeMonthPrefix) {
+              pendingThisMonth += item.amount || 0;
             }
           }
         });
       }
     });
 
+    // Sales Invoices for current month
+    (data.invoices || []).forEach(inv => {
+      if (inv.date && inv.date.slice(0, 7) === activeMonthPrefix) {
+        collectedThisMonth += inv.amount || 0;
+      }
+    });
+
+    const totalTargetThisMonth = collectedThisMonth + pendingThisMonth;
+    const collectionRate = totalTargetThisMonth > 0 ? Math.round((collectedThisMonth / totalTargetThisMonth) * 100) : 0;
+
+    const [y, m] = activeMonthPrefix.split('-');
+    const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+    const monthName = monthNames[parseInt(m, 10) - 1] || m;
+    const currentMonthLabel = `${monthName} ${y}`;
+
     return {
       totalIncoming,
       collectedThisMonth,
       pendingThisMonth,
       outgoingTotal,
-      quickPendingTotal
+      totalExpensesAndPurchases,
+      quickPendingTotal,
+      collectionRate,
+      currentMonthLabel
     };
   };
 
@@ -1209,7 +1260,7 @@ export default function App() {
     if (!data) return [];
     let today = new Date();
     const currentYear = today.getFullYear();
-    const hasCurrentYearInstallments = data.activeCustomers.some(c => 
+    const hasCurrentYearInstallments = (data.activeCustomers || []).some(c => 
       c.schedule.some(item => item.date.startsWith(currentYear.toString()))
     );
 
@@ -1229,7 +1280,7 @@ export default function App() {
       daysRemaining: number;
     }> = [];
 
-    data.activeCustomers.forEach(c => {
+    (data.activeCustomers || []).forEach(c => {
       c.schedule.forEach(item => {
         if (item.status === 'unpaid') {
           const dueDate = new Date(item.date);
@@ -1437,7 +1488,7 @@ export default function App() {
   };
 
   const runQuickAutoCampaign = async () => {
-    const unpaidQuick = data?.quickInstallments.filter(q => q.status === 'unpaid' && q.phone) || [];
+    const unpaidQuick = (data?.quickInstallments || []).filter(q => q.status === 'unpaid' && q.phone) || [];
     if (unpaidQuick.length === 0) {
       showToast("لا يوجد أقساط سريعة غير مدفوعة تملك أرقام هواتف مسجلة حالياً! يرجى كتابة الأرقام أولاً في جدول الأقساط السريعة بالأسفل.", "info");
       return;
@@ -1513,19 +1564,19 @@ export default function App() {
   };
 
   // Search filter
-  const filteredActiveCustomers = data?.activeCustomers.filter(c => 
+  const filteredActiveCustomers = (data?.activeCustomers || []).filter(c => 
     c.name.includes(searchTerm) || (c.product && c.product.includes(searchTerm))
   ) || [];
 
-  const filteredQuickInstallments = data?.quickInstallments.filter(q => 
+  const filteredQuickInstallments = (data?.quickInstallments || []).filter(q => 
     q.name.includes(searchTerm) || (q.notes && q.notes.includes(searchTerm))
   ) || [];
 
-  const filteredMoneyCircles = data?.moneyCircles.filter(c => 
+  const filteredMoneyCircles = (data?.moneyCircles || []).filter(c => 
     c.name.includes(searchTerm) || (c.notes && c.notes.includes(searchTerm))
   ) || [];
 
-  const filteredInvoices = data?.invoices.filter(i => 
+  const filteredInvoices = (data?.invoices || []).filter(i => 
     i.clientName.includes(searchTerm) || i.itemName.includes(searchTerm) || i.id.includes(searchTerm)
   ) || [];
 
@@ -1767,76 +1818,159 @@ export default function App() {
         {/* Main Workspace Body */}
         <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
           
-          {/* A. Top Financial Dashboard Metrics */}
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* Metric 1 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">إجمالي مستحقات الأقساط والتحصيل</span>
-                <p className="text-2xl font-black text-slate-900 dark:text-slate-100">
-                  {totals.totalIncoming.toLocaleString()} <span className="text-sm font-medium">ج.م.</span>
-                </p>
-                <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                  شامل الأقساط التفصيلية والجداول السريعة
+          {/* A. Top Financial Dashboard Metrics (Rebuilt & Redesigned) */}
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white/60 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    الإحصائيات المالية والحركات التفاعلية 📊
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 animate-pulse">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                      تزامن لحظي
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">تحديث مباشر وتلقائي لأرقام الأقساط، التحصيلات، الالتزامات والمصروفات</p>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6" />
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  شهر {totals.currentMonthLabel || "الحالي"}
+                </span>
               </div>
             </div>
 
-            {/* Metric 2 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">التحصيل لشهر يونيو الحالي</span>
-                <p className="text-2xl font-black text-emerald-700 dark:text-emerald-500">
-                  {totals.collectedThisMonth.toLocaleString()} <span className="text-sm font-medium">ج.م.</span>
-                </p>
-                <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                  تم تحصيلها من عملاء الأقساط النشطة
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              
+              {/* Card 1: Total Receivables */}
+              <div className="relative group overflow-hidden bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 p-5 rounded-2xl border border-slate-800 shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 text-white">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-teal-500"></div>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
+                      إجمالي مستحقات الأقساط
+                    </span>
+                    <p className="text-2xl font-black tracking-tight text-white">
+                      {totals.totalIncoming.toLocaleString()} <span className="text-xs font-semibold text-emerald-400">ج.م.</span>
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shadow-inner">
+                    <TrendingUp className="w-5.5 h-5.5" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400">شامل التفصيلية والسريعة</span>
+                  <span className="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">إيراد قادم</span>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-            </div>
 
-            {/* Metric 3 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">المتبقي للتحصيل هذا الشهر</span>
-                <p className="text-2xl font-black text-amber-600 dark:text-amber-500">
-                  {totals.pendingThisMonth.toLocaleString()} <span className="text-sm font-medium">ج.م.</span>
-                </p>
-                <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                  قيد الانتظار للتحصيل قبل نهاية الشهر
+              {/* Card 2: Collected This Month */}
+              <div className="relative group overflow-hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      التحصيل لشهر {totals.currentMonthLabel}
+                    </span>
+                    <p className="text-2xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
+                      {totals.collectedThisMonth.toLocaleString()} <span className="text-xs font-semibold text-slate-500">ج.م.</span>
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                    <CheckCircle2 className="w-5.5 h-5.5" />
+                  </div>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="mt-3 space-y-1.5">
+                  <div className="flex justify-between items-center text-[10px] font-bold">
+                    <span className="text-emerald-700 dark:text-emerald-300">نسبة التحصيل الشهري</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded">{totals.collectionRate}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div 
+                      className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
+                      style={{ width: `${Math.min(100, Math.max(0, totals.collectionRate))}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6" />
-              </div>
-            </div>
 
-            {/* Metric 4 */}
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between transition-colors duration-300">
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">أقساط والتزامات خارجة (للغير)</span>
-                <p className="text-2xl font-black text-rose-700 dark:text-rose-500">
-                  {totals.outgoingTotal.toLocaleString()} <span className="text-sm font-medium">ج.م.</span>
-                </p>
-                <div className="text-[10px] text-rose-500 dark:text-rose-400 font-medium">
-                  التزامات مشتريات المحل (مثل التكييف)
+              {/* Card 3: Remaining Due */}
+              <div className="relative group overflow-hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200/80 dark:border-amber-900/60 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500"></div>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      المتبقي للتحصيل هذا الشهر
+                    </span>
+                    <p className="text-2xl font-black tracking-tight text-amber-600 dark:text-amber-400">
+                      {totals.pendingThisMonth.toLocaleString()} <span className="text-xs font-semibold text-slate-500">ج.م.</span>
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <AlertCircle className="w-5.5 h-5.5" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400 dark:text-slate-500">مطلوب سداده حالياً</span>
+                  <span className="font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-md">مستحق / متأخر</span>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                <ArrowUpRight className="w-6 h-6" />
+
+              {/* Card 4: Outgoing Obligations */}
+              <div className="relative group overflow-hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-rose-200/80 dark:border-rose-900/60 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-rose-500"></div>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      أقساط والتزامات خارجة (للغير)
+                    </span>
+                    <p className="text-2xl font-black tracking-tight text-rose-600 dark:text-rose-400">
+                      {totals.outgoingTotal.toLocaleString()} <span className="text-xs font-semibold text-slate-500">ج.م.</span>
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                    <ArrowUpRight className="w-5.5 h-5.5" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400 dark:text-slate-500">ديون والتزامات المحل</span>
+                  <span className="font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950 px-2 py-0.5 rounded-md">التزام للخارج</span>
+                </div>
               </div>
-            </div>
 
-          </section>
+              {/* Card 5: Expenses & Purchases */}
+              <div className="relative group overflow-hidden bg-white dark:bg-slate-900 p-5 rounded-2xl border border-indigo-200/80 dark:border-indigo-900/60 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-indigo-500"></div>
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      المصروفات ومشتريات البضاعة
+                    </span>
+                    <p className="text-2xl font-black tracking-tight text-indigo-600 dark:text-indigo-400">
+                      {totals.totalExpensesAndPurchases.toLocaleString()} <span className="text-xs font-semibold text-slate-500">ج.م.</span>
+                    </p>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <FileText className="w-5.5 h-5.5" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-400 dark:text-slate-500">مصاريف التشغيل وتكلفة المخزون</span>
+                  <span className="font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-md">مدفوعات</span>
+                </div>
+              </div>
 
-          {/* Upcoming Collections Notifications Panel */}
+            </section>
+          </div>
+
+{/* Upcoming Collections Notifications Panel */}
           {false && getUpcomingInstallments().length > 0 && (
             <section className="bg-gradient-to-l from-slate-50 to-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-4" dir="rtl">
@@ -2202,42 +2336,54 @@ export default function App() {
             </div>
 
             {/* Tab Swappers */}
-            <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full sm:w-auto overflow-x-auto text-xs sm:text-sm">
+            <div className="flex flex-wrap gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full sm:w-auto text-xs sm:text-sm">
               <button 
                 onClick={() => { setActiveTab('active'); setSelectedCustomer(null); }}
                 className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'active' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
               >
-                الأقساط التفصيلية ({data?.activeCustomers.length || 0})
+                الأقساط التفصيلية ({(data?.activeCustomers || []).length || 0})
               </button>
               <button 
                 onClick={() => { setActiveTab('quick'); setSelectedCustomer(null); }}
                 className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'quick' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
               >
-                الأقساط الجارية السريعة ({data?.quickInstallments.length || 0})
+                الأقساط الجارية السريعة ({(data?.quickInstallments || []).length || 0})
               </button>
               <button 
                 onClick={() => { setActiveTab('circles'); setSelectedCustomer(null); }}
                 className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'circles' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
               >
-                الجمعيات ({data?.moneyCircles.length || 0})
+                الجمعيات ({(data?.moneyCircles || []).length || 0})
               </button>
               <button 
                 onClick={() => { setActiveTab('invoices'); setSelectedCustomer(null); }}
                 className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'invoices' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
               >
-                الفواتير والمبيعات ({data?.invoices.length || 0})
+                الفواتير والمبيعات ({(data?.invoices || []).length || 0})
               </button>
               <button 
                 onClick={() => { setActiveTab('expenses'); setSelectedCustomer(null); }}
                 className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'expenses' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
               >
-                المصروفات ({data?.expenses?.length || 0})
+                المصروفات ({(data?.expenses || []).length || 0})
+              </button>
+              <button 
+                onClick={() => { setActiveTab('purchases'); setSelectedCustomer(null); }}
+                className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'purchases' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+              >
+                📦 البضاعة والمشتريات ({(data?.purchases || []).length || 0})
+              </button>
+              <button 
+                onClick={() => { setActiveTab('reports'); setSelectedCustomer(null); }}
+                className={`px-4 py-2 rounded-lg font-bold transition whitespace-nowrap ${activeTab === 'reports' ? 'bg-white dark:bg-slate-700 text-slate-950 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+              >
+                📊 التقارير والأرباح
               </button>
             </div>
 
             {/* Quick Add Button */}
             <button 
-              onClick={() => { setIsAddModalOpen(true); setAddType(activeTab === 'circles' ? 'circle' : activeTab === 'invoices' ? 'invoice' : activeTab === 'expenses' ? 'expense' : activeTab); }}
+              onClick={() => { setIsAddModalOpen(true); setAddType(activeTab === 'circles' ? 'circle' : activeTab === 'invoices' ? 'invoice' : activeTab === 'expenses' ? 'expense' : activeTab === 'purchases' ? 'purchase' : (activeTab as any)); }}
               className="w-full sm:w-auto bg-slate-950 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold px-5 py-2 rounded-xl transition text-sm flex items-center justify-center gap-2 shadow-sm border border-transparent dark:border-slate-700"
             >
               <Plus className="w-4 h-4" />
@@ -2341,21 +2487,6 @@ export default function App() {
                   {/* TAB 2: QUICK WHATSAPP LIST */}
                   {activeTab === 'quick' && (
                     <div className="space-y-4">
-                      
-                      {/* WhatsApp calculations warning banner */}
-                      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3 transition-colors duration-300">
-                        <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                        <div className="space-y-1">
-                          <h4 className="font-bold text-amber-900 dark:text-amber-400 text-sm">مستحقات التحصيل الجارية (قائمة لقطات الواتساب)</h4>
-                          <p className="text-xs text-amber-700 dark:text-amber-500/80 leading-relaxed">
-                            هذه هي قائمة الأقساط السريعة المستخرجة من شات الواتساب للتحصيل الجاري. إجمالي مبالغ القائمة كاملة هو <span className="font-bold">19,450 ج.م.</span> ويتم الإشراف عليها شهرياً.
-                          </p>
-                          <div className="pt-2 text-xs font-semibold text-amber-950 dark:text-amber-300 flex gap-4">
-                            <span>إجمالي المتبقي للتحصيل: <span className="underline font-black">{totals.quickPendingTotal.toLocaleString()} ج.م.</span></span>
-                            <span>العملاء قيد السداد: {data?.quickInstallments.filter(q => q.status === 'unpaid').length}</span>
-                          </div>
-                        </div>
-                      </div>
 
                       {/* Quick Campaign Trigger */}
                       <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl flex items-center justify-between flex-wrap gap-4 transition-colors duration-300">
@@ -2853,6 +2984,791 @@ export default function App() {
               )}
 
             </div>
+
+          
+                  {/* TAB 6: PURCHASES & INVENTORY */}
+                  {activeTab === 'purchases' && (
+                    <div className="space-y-6">
+                      
+                      {/* Inventory Summary Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        
+                        {/* Total Spent Card */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-slate-900 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 p-5 shadow-sm transition-all duration-300">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">إجمالي تكلفة المشتريات</p>
+                              <h3 className="text-2xl font-black text-indigo-700 dark:text-indigo-300 mt-1">
+                                {(data?.purchases || [])
+                                  .reduce((sum, p) => sum + p.totalCost, 0)
+                                  .toLocaleString()}{" "}
+                                <span className="text-xs font-bold">ج.م</span>
+                              </h3>
+                            </div>
+                            <span className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                              <CreditCard className="w-5 h-5" />
+                            </span>
+                          </div>
+                          <p className="text-xxs text-slate-400 dark:text-slate-500 mt-2">إجمالي تكلفة شراء السلع والمخزون</p>
+                        </div>
+
+                        {/* iPhones Count Card */}
+                        <div className="bg-gradient-to-br from-cyan-50 to-white dark:from-cyan-950/20 dark:to-slate-900 rounded-2xl border border-cyan-100 dark:border-cyan-900/30 p-5 shadow-sm transition-all duration-300">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-xs text-cyan-600 dark:text-cyan-400 font-bold">الأيفونات المشتراة</p>
+                              <h3 className="text-2xl font-black text-cyan-700 dark:text-cyan-300 mt-1">
+                                {(data?.purchases || [])
+                                  .filter(p => p.category === 'iphone')
+                                  .reduce((sum, p) => sum + p.quantity, 0)}{" "}
+                                <span className="text-xs font-bold">قطع</span>
+                              </h3>
+                            </div>
+                            <span className="p-2.5 rounded-xl bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400">
+                              <Smartphone className="w-5 h-5" />
+                            </span>
+                          </div>
+                          <p className="text-xxs text-slate-400 dark:text-slate-500 mt-2">إجمالي أجهزة أيفون في المخزون والمشتريات</p>
+                        </div>
+
+                        {/* Accessories/Screens Card */}
+                        <div className="bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-slate-900 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 p-5 shadow-sm transition-all duration-300">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold">الجرابات والاسكرينات</p>
+                              <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">
+                                {(data?.purchases || [])
+                                  .filter(p => p.category === 'accessory' || p.category === 'screen')
+                                  .reduce((sum, p) => sum + p.quantity, 0)}{" "}
+                                <span className="text-xs font-bold">قطع</span>
+                              </h3>
+                            </div>
+                            <span className="p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-450">
+                              <Sparkles className="w-5 h-5" />
+                            </span>
+                          </div>
+                          <p className="text-xxs text-slate-400 dark:text-slate-500 mt-2">الجرابات، الاسكرينات، والشاشات</p>
+                        </div>
+
+                        {/* Chargers and Cables Card */}
+                        <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-slate-900 rounded-2xl border border-amber-100 dark:border-amber-900/30 p-5 shadow-sm transition-all duration-300">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">شواحن وكابلات</p>
+                              <h3 className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">
+                                {(data?.purchases || [])
+                                  .filter(p => p.category === 'charger')
+                                  .reduce((sum, p) => sum + p.quantity, 0)}{" "}
+                                <span className="text-xs font-bold">قطع</span>
+                              </h3>
+                            </div>
+                            <span className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+                              <RotateCw className="w-5 h-5" />
+                            </span>
+                          </div>
+                          <p className="text-xxs text-slate-400 dark:text-slate-500 mt-2">الشواحن، الوصلات والكابلات</p>
+                        </div>
+
+                      </div>
+
+                      {/* Control bar */}
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between shadow-sm transition-colors duration-300">
+                        <div className="flex flex-wrap gap-4 items-center text-xs">
+                          {/* Search */}
+                          <div className="relative">
+                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                              <Search className="h-4 w-4 text-slate-400" />
+                            </span>
+                            <input
+                              type="text"
+                              placeholder="البحث في المشتريات..."
+                              value={searchTerm}
+                              onChange={(e) => setSearchTerm(e.target.value)}
+                              className="bg-slate-100 dark:bg-slate-800 text-slate-850 dark:text-slate-100 pr-9 pl-4 py-1.5 w-48 sm:w-64 rounded-xl border border-slate-200/50 dark:border-slate-700 font-bold focus:outline-hidden focus:ring-2 focus:ring-slate-950 dark:focus:ring-slate-500 transition text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Export Button */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              const headers = ["المنتج/السلعة", "التصنيف", "الكمية", "سعر الشراء", "إجمالي التكلفة", "سعر البيع المتوقع", "تاريخ الشراء", "المورد", "ملاحظات"];
+                              const rows = (data?.purchases || []).map(p => [
+                                p.itemName,
+                                p.category === 'iphone' ? 'أيفون' : p.category === 'accessory' ? 'إكسسوار' : p.category === 'charger' ? 'شاحن' : p.category === 'screen' ? 'اسكرينة' : 'أخرى',
+                                p.quantity.toString(),
+                                p.costPrice.toString() + " ج.م",
+                                p.totalCost.toString() + " ج.م",
+                                p.salePrice ? p.salePrice.toString() + " ج.م" : "",
+                                p.purchaseDate,
+                                p.supplierName || "",
+                                p.notes || ""
+                              ]);
+                              downloadCSV("مشتريات_المحل_والمخزون.csv", headers, rows);
+                            }}
+                            className="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-lg transition text-xs flex items-center gap-1.5 shadow-xs cursor-pointer animate-pulse"
+                          >
+                            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                            تصدير المشتريات 📊
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Purchases Table */}
+                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-300">
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                          <h3 className="font-bold text-slate-900 dark:text-slate-100">سجل بضائع ومشتريات المحل</h3>
+                          <p className="text-xs text-slate-550 dark:text-slate-400">سجل المشتريات من جرابات، شاشات، اسكرينات، أجهزة أيفون ومتابعة المخزون.</p>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-right border-collapse text-xs sm:text-sm">
+                            <thead>
+                              <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                                <th className="p-4">اسم المنتج/السلعة</th>
+                                <th className="p-4">التصنيف</th>
+                                <th className="p-4 text-center">الكمية</th>
+                                <th className="p-4">سعر الشراء للقطعة</th>
+                                <th className="p-4">إجمالي التكلفة</th>
+                                <th className="p-4">سعر البيع المتوقع</th>
+                                <th className="p-4">تاريخ الشراء</th>
+                                <th className="p-4">المورد</th>
+                                <th className="p-4">ملاحظات</th>
+                                <th className="p-4 text-center">حذف</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {(() => {
+                                const list = (data?.purchases || []).filter(p => 
+                                  p.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                  (p.supplierName && p.supplierName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                                  (p.notes && p.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+                                );
+
+                                if (list.length === 0) {
+                                  return (
+                                    <tr>
+                                      <td colSpan={10} className="p-8 text-center text-slate-400 dark:text-slate-500">لا توجد بضائع مشتراة مسجلة حالياً</td>
+                                    </tr>
+                                  );
+                                }
+
+                                return list.map((pur) => (
+                                  <tr key={pur.id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                    <td className="p-4 font-bold text-slate-950 dark:text-slate-100">{pur.itemName}</td>
+                                    <td className="p-4">
+                                      <span className={`px-2 py-0.5 rounded text-xxs font-extrabold ${
+                                        pur.category === 'iphone' ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 border border-cyan-100 dark:border-cyan-800' :
+                                        pur.category === 'accessory' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' :
+                                        pur.category === 'charger' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-100 dark:border-amber-800' :
+                                        pur.category === 'screen' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-100 dark:border-purple-800' :
+                                        'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                      }`}>
+                                        {pur.category === 'iphone' ? 'أيفون' :
+                                         pur.category === 'accessory' ? 'جراب/إكسسوار' :
+                                         pur.category === 'charger' ? 'شاحن' :
+                                         pur.category === 'screen' ? 'اسكرينة/شاشة' : 'أخرى'}
+                                      </span>
+                                    </td>
+                                    <td className="p-4 text-center font-bold text-slate-800 dark:text-slate-200">{pur.quantity}</td>
+                                    <td className="p-4 font-extrabold text-slate-700 dark:text-slate-300">{pur.costPrice.toLocaleString()} ج.م</td>
+                                    <td className="p-4 font-black text-slate-900 dark:text-slate-100">{(pur.quantity * pur.costPrice).toLocaleString()} ج.م</td>
+                                    <td className="p-4 text-emerald-600 dark:text-emerald-450 font-bold">{pur.salePrice ? `${pur.salePrice.toLocaleString()} ج.م` : "-"}</td>
+                                    <td className="p-4 font-mono text-xs text-slate-500">{pur.purchaseDate}</td>
+                                    <td className="p-4 text-slate-650 dark:text-slate-350">{pur.supplierName || "-"}</td>
+                                    <td className="p-4 text-slate-500 dark:text-slate-450 max-w-[150px] truncate" title={pur.notes}>{pur.notes || "-"}</td>
+                                    <td className="p-4 text-center">
+                                      <button 
+                                        onClick={() => handleDeletePurchase(pur.id)}
+                                        className="text-red-500 hover:text-red-400 p-1 rounded-lg transition cursor-pointer"
+                                      >
+                                        <Trash2 className="w-4 h-4 mx-auto" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ));
+                              })()}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+
+                  {/* TAB 7: REPORTS & PROFITS */}
+                  {activeTab === 'reports' && (() => {
+                    if (!data) return null;
+                    const d = data;
+                    const getFinancialReports = () => {
+                      // 1. Calculate Revenues
+                      let collectedInstallments = 0;
+                      let expectedFutureInstallments = 0;
+                      d.activeCustomers.forEach(c => {
+                        if (c.type === 'incoming') {
+                          c.schedule.forEach(item => {
+                            if (item.status === 'paid') {
+                              collectedInstallments += item.amount;
+                            } else {
+                              expectedFutureInstallments += item.amount;
+                            }
+                          });
+                        }
+                      });
+
+                      let collectedQuick = 0;
+                      let pendingQuick = 0;
+                      d.quickInstallments.forEach(q => {
+                        if (q.status === 'paid') {
+                          collectedQuick += q.amount;
+                        } else {
+                          pendingQuick += q.amount;
+                        }
+                      });
+
+                      const totalInvoices = d.invoices.reduce((sum, inv) => sum + inv.amount, 0);
+                      const totalRevenues = collectedInstallments + collectedQuick + totalInvoices;
+
+                      // 2. Calculate Expenses and Purchases
+                      const totalExpenses = (d.expenses || [])
+                        .filter(e => e.status === 'paid')
+                        .reduce((sum, e) => sum + e.amount, 0);
+
+                      const totalPurchases = (d.purchases || [])
+                        .reduce((sum, p) => sum + p.totalCost, 0);
+
+                      let paidOutgoing = 0;
+                      d.activeCustomers.forEach(c => {
+                        if (c.type === 'outgoing') {
+                          c.schedule.forEach(item => {
+                            if (item.status === 'paid') {
+                              paidOutgoing += item.amount;
+                            }
+                          });
+                        }
+                      });
+
+                      const totalOutflow = totalExpenses + totalPurchases + paidOutgoing;
+                      const netProfit = totalRevenues - totalOutflow;
+                      const expectedFutureProfit = expectedFutureInstallments + pendingQuick;
+
+                      // 3. Monthly Breakdown
+                      const monthlyMap: { [key: string]: { revenue: number, expense: number, purchase: number, profit: number } } = {};
+
+                      const getMonthKey = (dateStr: string) => {
+                        if (!dateStr) return '';
+                        return dateStr.substring(0, 7); // "YYYY-MM"
+                      };
+
+                      // Add Invoices
+                      d.invoices.forEach(inv => {
+                        const month = getMonthKey(inv.date);
+                        if (month) {
+                          if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, expense: 0, purchase: 0, profit: 0 };
+                          monthlyMap[month].revenue += inv.amount;
+                        }
+                      });
+
+                      // Add Paid Installments
+                      d.activeCustomers.forEach(c => {
+                        if (c.type === 'incoming') {
+                          c.schedule.forEach(item => {
+                            if (item.status === 'paid') {
+                              const date = item.paymentDate || item.date;
+                              const month = getMonthKey(date);
+                              if (month) {
+                                if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, expense: 0, purchase: 0, profit: 0 };
+                                monthlyMap[month].revenue += item.amount;
+                              }
+                            }
+                          });
+                        } else if (c.type === 'outgoing') {
+                          c.schedule.forEach(item => {
+                            if (item.status === 'paid') {
+                              const date = item.paymentDate || item.date;
+                              const month = getMonthKey(date);
+                              if (month) {
+                                if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, expense: 0, purchase: 0, profit: 0 };
+                                monthlyMap[month].expense += item.amount;
+                              }
+                            }
+                          });
+                        }
+                      });
+
+                      // Add Paid Expenses
+                      (d.expenses || []).forEach(e => {
+                        if (e.status === 'paid') {
+                          const date = e.paymentDate || e.dueDate;
+                          const month = getMonthKey(date);
+                          if (month) {
+                            if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, expense: 0, purchase: 0, profit: 0 };
+                            monthlyMap[month].expense += e.amount;
+                          }
+                        }
+                      });
+
+                      // Add Purchases
+                      (d.purchases || []).forEach(p => {
+                        const month = getMonthKey(p.purchaseDate);
+                        if (month) {
+                          if (!monthlyMap[month]) monthlyMap[month] = { revenue: 0, expense: 0, purchase: 0, profit: 0 };
+                          monthlyMap[month].purchase += p.totalCost;
+                        }
+                      });
+
+                      // Compute profit per month
+                      Object.keys(monthlyMap).forEach(month => {
+                        const m = monthlyMap[month];
+                        m.profit = m.revenue - (m.expense + m.purchase);
+                      });
+
+                      const sortedMonths = Object.keys(monthlyMap).sort().reverse();
+
+                      // Category breakdowns
+                      const expensesByCategory: { [key: string]: number } = {};
+                      (d.expenses || []).filter(e => e.status === 'paid').forEach(e => {
+                        expensesByCategory[e.category] = (expensesByCategory[e.category] || 0) + e.amount;
+                      });
+
+                      const purchasesByCategory: { [key: string]: number } = {};
+                      (d.purchases || []).forEach(p => {
+                        purchasesByCategory[p.category] = (purchasesByCategory[p.category] || 0) + p.totalCost;
+                      });
+
+                      return {
+                        totalRevenues,
+                        totalExpenses,
+                        totalPurchases,
+                        totalOutflow,
+                        netProfit,
+                        expectedFutureProfit,
+                        monthlyMap,
+                        sortedMonths,
+                        expensesByCategory,
+                        purchasesByCategory,
+                        collectedInstallments,
+                        collectedQuick,
+                        totalInvoices,
+                        paidOutgoing
+                      };
+                    };
+
+                    const r = getFinancialReports();
+
+                    const handleExportMonthCSV = (month: string) => {
+                      if (!data) return;
+                      const headers = ["التاريخ", "النوع", "البيان / الاسم", "التفاصيل / السلعة", "المبلغ الكلي", "تفاصيل إضافية"];
+                      const rows: string[][] = [];
+
+                      d.invoices.forEach(inv => {
+                        if (inv.date.startsWith(month)) {
+                          rows.push([
+                            inv.date,
+                            "إيراد - بيع كاش",
+                            inv.clientName,
+                            inv.itemName,
+                            inv.amount.toString(),
+                            `فاتورة رقم ${inv.id}`
+                          ]);
+                        }
+                      });
+
+                      d.activeCustomers.forEach(c => {
+                        c.schedule.forEach(item => {
+                          if (item.status === 'paid') {
+                            const date = item.paymentDate || item.date;
+                            if (date.startsWith(month)) {
+                              rows.push([
+                                date,
+                                c.type === 'incoming' ? "إيراد - تحصيل قسط" : "مصروف - دفع قسط خارج",
+                                c.name,
+                                c.product,
+                                item.amount.toString(),
+                                c.type === 'incoming' ? `تحصيل قسط شهري` : `سداد قسط`
+                              ]);
+                            }
+                          }
+                        });
+                      });
+
+                      (d.expenses || []).forEach(e => {
+                        if (e.status === 'paid') {
+                          const date = e.paymentDate || e.dueDate;
+                          if (date.startsWith(month)) {
+                            rows.push([
+                              date,
+                              "مصروف - تشغيل",
+                              e.title,
+                              e.category === 'rent' ? 'إيجار' : e.category === 'electricity' ? 'كهرباء' : e.category === 'internet' ? 'إنترنت' : e.category === 'salary' ? 'رواتب' : e.category === 'maintenance' ? 'صيانة' : 'أخرى',
+                              e.amount.toString(),
+                              e.notes || ""
+                            ]);
+                          }
+                        }
+                      });
+
+                      (d.purchases || []).forEach(p => {
+                        if (p.purchaseDate.startsWith(month)) {
+                          rows.push([
+                            p.purchaseDate,
+                            "تكلفة - شراء بضاعة",
+                            p.itemName,
+                            `الكمية: ${p.quantity} - سعر القطعة: ${p.costPrice}`,
+                            p.totalCost.toString(),
+                            `المورد: ${p.supplierName || ''}`
+                          ]);
+                        }
+                      });
+
+                      rows.sort((a, b) => a[0].localeCompare(b[0]));
+                      downloadCSV(`تقرير_أرباح_ومصاريف_شهر_${month}.csv`, headers, rows);
+                    };
+
+                    const getCategoryLabel = (cat: string) => {
+                      switch(cat) {
+                        case 'rent': return 'إيجار المحل';
+                        case 'electricity': return 'فاتورة الكهرباء';
+                        case 'internet': return 'فاتورة الإنترنت';
+                        case 'salary': return 'مرتبات الموظفين';
+                        case 'maintenance': return 'صيانة وإصلاحات';
+                        case 'iphone': return 'هواتف أيفون';
+                        case 'accessory': return 'جرابات وإكسسوارات';
+                        case 'charger': return 'شواحن وكابلات';
+                        case 'screen': return 'اسكرينات وشاشات';
+                        default: return 'أخرى / تصنيفات متنوعة';
+                      }
+                    };
+
+                    const formatArabicMonth = (ymStr: string) => {
+                      const [y, m] = ymStr.split('-');
+                      const months = [
+                        'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+                        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+                      ];
+                      const idx = parseInt(m) - 1;
+                      return `${months[idx]} ${y}`;
+                    };
+
+                    const totalRevenuesVal = r.totalRevenues || 1;
+                    const expensePercent = Math.min(100, Math.round((r.totalExpenses / totalRevenuesVal) * 100));
+                    const purchasePercent = Math.min(100 - expensePercent, Math.round((r.totalPurchases / totalRevenuesVal) * 100));
+                    const netPercent = Math.max(0, 100 - expensePercent - purchasePercent);
+
+                    return (
+                      <div className="space-y-6">
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap gap-4 items-center justify-between shadow-sm transition-colors duration-300">
+                          <div>
+                            <h3 className="font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                              <TrendingUp className="w-5 h-5 text-emerald-500" />
+                              <span>التحليلات والتقارير المالية المفصلة</span>
+                            </h3>
+                            <p className="text-xs text-slate-550 dark:text-slate-400 mt-1">تحليل شامل للأرباح والخسائر وحساب التدفق النقدي الفعلي للمحل.</p>
+                          </div>
+                          
+                          <button
+                            onClick={() => {
+                              const headers = ["الشهر", "إجمالي الإيرادات", "المصاريف التشغيلية", "مشتريات البضائع", "صافي الأرباح/الخسائر"];
+                              const rows = r.sortedMonths.map(m => {
+                                const val = r.monthlyMap[m];
+                                return [
+                                  formatArabicMonth(m),
+                                  val.revenue.toString() + " ج.م",
+                                  val.expense.toString() + " ج.م",
+                                  val.purchase.toString() + " ج.م",
+                                  val.profit.toString() + " ج.م"
+                                ];
+                              });
+                              downloadCSV("التقرير_المالي_الشهري_العام.csv", headers, rows);
+                            }}
+                            className="text-xs bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2 transition cursor-pointer"
+                          >
+                            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                            <span>تصدير التقرير المالي العام 📊</span>
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                          <div className={`rounded-2xl border p-5 shadow-sm transition-all duration-300 ${
+                            r.netProfit >= 0 
+                              ? 'bg-gradient-to-br from-emerald-50 to-white dark:from-emerald-950/20 dark:to-slate-900 border-emerald-100 dark:border-emerald-900/30' 
+                              : 'bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/20 dark:to-slate-900 border-rose-100 dark:border-rose-900/30'
+                          }`}>
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className={`text-xs font-bold ${r.netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                  صافي الأرباح المحققة (كاش)
+                                </p>
+                                <h3 className={`text-2xl font-black mt-1 ${r.netProfit >= 0 ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                                  {r.netProfit.toLocaleString()}{" "}
+                                  <span className="text-xs font-bold">ج.م</span>
+                                </h3>
+                              </div>
+                              <span className={`p-2.5 rounded-xl ${
+                                r.netProfit >= 0 
+                                  ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-450' 
+                                  : 'bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-450'
+                              }`}>
+                                {r.netProfit >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                              </span>
+                            </div>
+                            <p className="text-xxs text-slate-400 dark:text-slate-500 mt-3">
+                              طرح إجمالي التكاليف والمشتريات من الإيرادات المحصلة
+                            </p>
+                          </div>
+
+                          <div className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-slate-900 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 p-5 shadow-sm transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">إجمالي الإيرادات (المحصلة)</p>
+                                <h3 className="text-2xl font-black text-indigo-700 dark:text-indigo-300 mt-1">
+                                  {r.totalRevenues.toLocaleString()}{" "}
+                                  <span className="text-xs font-bold">ج.م</span>
+                                </h3>
+                              </div>
+                              <span className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                                <ArrowUpRight className="w-5 h-5" />
+                              </span>
+                            </div>
+                            <div className="text-xxs text-slate-500 dark:text-slate-450 mt-2 space-y-0.5">
+                              <div>• أقساط محصلة: {r.collectedInstallments.toLocaleString()} ج.م</div>
+                              <div>• بيع كاش (فواتير): {r.totalInvoices.toLocaleString()} ج.م</div>
+                              <div>• أقساط سريعة: {r.collectedQuick.toLocaleString()} ج.م</div>
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-slate-900 rounded-2xl border border-amber-100 dark:border-amber-900/30 p-5 shadow-sm transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">إجمالي المصروفات والمشتريات</p>
+                                <h3 className="text-2xl font-black text-amber-700 dark:text-amber-300 mt-1">
+                                  {r.totalOutflow.toLocaleString()}{" "}
+                                  <span className="text-xs font-bold">ج.م</span>
+                                </h3>
+                              </div>
+                              <span className="p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
+                                <ArrowDownLeft className="w-5 h-5" />
+                              </span>
+                            </div>
+                            <div className="text-xxs text-slate-500 dark:text-slate-450 mt-2 space-y-0.5">
+                              <div>• مشتريات بضاعة: {r.totalPurchases.toLocaleString()} ج.م</div>
+                              <div>• مصاريف المحل: {r.totalExpenses.toLocaleString()} ج.م</div>
+                              {r.paidOutgoing > 0 && <div>• أقساط خارجة مدفوعة: {r.paidOutgoing.toLocaleString()} ج.م</div>}
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-br from-sky-50 to-white dark:from-sky-950/20 dark:to-slate-900 rounded-2xl border border-sky-100 dark:border-sky-900/30 p-5 shadow-sm transition-all duration-300">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="text-xs text-sky-600 dark:text-sky-400 font-bold">أرباح وديون مستحقة (بالخارج)</p>
+                                <h3 className="text-2xl font-black text-sky-700 dark:text-sky-300 mt-1">
+                                  {r.expectedFutureProfit.toLocaleString()}{" "}
+                                  <span className="text-xs font-bold">ج.م</span>
+                                </h3>
+                              </div>
+                              <span className="p-2.5 rounded-xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400">
+                                <CreditCard className="w-5 h-5" />
+                              </span>
+                            </div>
+                            <p className="text-xxs text-slate-400 dark:text-slate-500 mt-3">
+                              الأقساط المتبقية طرف العملاء والجمعيات (مستحقات آجلة)
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-colors duration-300">
+                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-3">شريط التوزيع المالي والتدفق النقدي</h4>
+                          <div className="h-6 w-full rounded-xl overflow-hidden flex text-xxs font-bold text-white">
+                            {r.totalRevenues > 0 ? (
+                              <>
+                                {expensePercent > 0 && (
+                                  <div 
+                                    style={{ width: `${expensePercent}%` }} 
+                                    className="bg-red-500 flex items-center justify-center transition-all duration-500"
+                                    title={`المصاريف التشغيلية: ${expensePercent}%`}
+                                  >
+                                    مصاريف ({expensePercent}%)
+                                  </div>
+                                )}
+                                {purchasePercent > 0 && (
+                                  <div 
+                                    style={{ width: `${purchasePercent}%` }} 
+                                    className="bg-amber-500 flex items-center justify-center transition-all duration-500 border-r border-amber-600/20"
+                                    title={`المشتريات والبضائع: ${purchasePercent}%`}
+                                  >
+                                    مشتريات ({purchasePercent}%)
+                                  </div>
+                                )}
+                                {netPercent > 0 && r.netProfit >= 0 && (
+                                  <div 
+                                    style={{ width: `${netPercent}%` }} 
+                                    className="bg-emerald-500 flex items-center justify-center transition-all duration-500 border-r border-emerald-600/20"
+                                    title={`صافي الأرباح: ${netPercent}%`}
+                                  >
+                                    صافي الربح ({netPercent}%)
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <div className="w-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center">
+                                لا توجد بيانات تدفق نقدي كافية
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex justify-between items-center text-xxs text-slate-500 dark:text-slate-400 mt-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded bg-emerald-500"></span>
+                              <span>صافي الأرباح المحققة</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded bg-amber-500"></span>
+                              <span>مشتريات البضاعة والمخزون</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded bg-red-500"></span>
+                              <span>المصاريف والالتزامات التشغيلية</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-colors duration-300">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b pb-3 mb-4">تحليل المصروفات التشغيلية حسب الفئة</h4>
+                            <div className="space-y-4">
+                              {(() => {
+                                const categories = Object.keys(r.expensesByCategory);
+                                if (categories.length === 0) {
+                                  return <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">لا توجد مصاريف مدفوعة مسجلة</p>;
+                                }
+                                
+                                const maxExp = Math.max(...categories.map(c => r.expensesByCategory[c]));
+
+                                return categories.map(cat => {
+                                  const amt = r.expensesByCategory[cat];
+                                  const percent = maxExp > 0 ? Math.round((amt / maxExp) * 100) : 0;
+                                  return (
+                                    <div key={cat} className="space-y-1.5">
+                                      <div className="flex justify-between text-xs">
+                                        <span className="font-bold text-slate-800 dark:text-slate-200">{getCategoryLabel(cat)}</span>
+                                        <span className="font-black text-slate-950 dark:text-white">{amt.toLocaleString()} ج.م</span>
+                                      </div>
+                                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                        <div 
+                                          style={{ width: `${percent}%` }} 
+                                          className="bg-rose-500 dark:bg-rose-600 h-full rounded-full transition-all duration-500"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  );
+                                });
+                              })()}
+                            </div>
+                          </div>
+
+                          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm transition-colors duration-300">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-100 border-b pb-3 mb-4">توزيع رأس المال في بضاعة ومخزون المحل</h4>
+                            <div className="space-y-4">
+                              {(() => {
+                                const categories = Object.keys(r.purchasesByCategory);
+                                if (categories.length === 0) {
+                                  return <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-6">لا توجد بضائع ومشتريات مسجلة</p>;
+                                }
+                                
+                                const maxPur = Math.max(...categories.map(c => r.purchasesByCategory[c]));
+
+                                return categories.map(cat => {
+                                  const amt = r.purchasesByCategory[cat];
+                                  const percent = maxPur > 0 ? Math.round((amt / maxPur) * 100) : 0;
+                                  return (
+                                    <div key={cat} className="space-y-1.5">
+                                      <div className="flex justify-between text-xs">
+                                        <span className="font-bold text-slate-800 dark:text-slate-200">{getCategoryLabel(cat)}</span>
+                                        <span className="font-black text-slate-950 dark:text-white">{amt.toLocaleString()} ج.م</span>
+                                      </div>
+                                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                        <div 
+                                          style={{ width: `${percent}%` }} 
+                                          className="bg-indigo-500 dark:bg-indigo-600 h-full rounded-full transition-all duration-500"
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  );
+                                });
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors duration-300">
+                          <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                            <h3 className="font-bold text-slate-900 dark:text-slate-100">الأداء المالي وحركة الأرباح شهرياً</h3>
+                            <p className="text-xs text-slate-550 dark:text-slate-400">جدول تفصيلي يوضح الإيرادات، المصاريف، المشتريات، وصافي الأرباح لكل شهر بشكل منفصل.</p>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-right border-collapse text-xs sm:text-sm">
+                              <thead>
+                                <tr className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-700">
+                                  <th className="p-4">الشهر</th>
+                                  <th className="p-4 text-center">إجمالي الإيرادات</th>
+                                  <th className="p-4 text-center">المصاريف التشغيلية</th>
+                                  <th className="p-4 text-center">مشتريات البضائع</th>
+                                  <th className="p-4 text-center">إجمالي التكاليف</th>
+                                  <th className="p-4 text-center">صافي الأرباح / الخسائر</th>
+                                  <th className="p-4 text-center">تحميل تقرير الشهر</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {r.sortedMonths.length === 0 ? (
+                                  <tr>
+                                    <td colSpan={7} className="p-8 text-center text-slate-400 dark:text-slate-500">لا توجد سجلات مالية مسجلة بعد</td>
+                                  </tr>
+                                ) : (
+                                  r.sortedMonths.map(month => {
+                                    const item = r.monthlyMap[month];
+                                    const totalCosts = item.expense + item.purchase;
+                                    const isProfit = item.profit >= 0;
+                                    return (
+                                      <tr key={month} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                                        <td className="p-4 font-bold text-slate-950 dark:text-slate-150">{formatArabicMonth(month)}</td>
+                                        <td className="p-4 text-center font-bold text-emerald-600 dark:text-emerald-450">{item.revenue.toLocaleString()} ج.م</td>
+                                        <td className="p-4 text-center text-rose-500 font-medium">{item.expense.toLocaleString()} ج.م</td>
+                                        <td className="p-4 text-center text-indigo-500 font-medium">{item.purchase.toLocaleString()} ج.م</td>
+                                        <td className="p-4 text-center text-amber-600 dark:text-amber-500 font-bold">{totalCosts.toLocaleString()} ج.م</td>
+                                        <td className="p-4 text-center">
+                                          <span className={`px-2.5 py-1 rounded-full text-xxs font-extrabold flex items-center justify-center gap-1 mx-auto w-24 ${
+                                            isProfit 
+                                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800' 
+                                              : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-450 border border-rose-100 dark:border-rose-800'
+                                          }`}>
+                                            {isProfit ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+                                            <span>{item.profit.toLocaleString()} ج.م</span>
+                                          </span>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                          <button
+                                            onClick={() => handleExportMonthCSV(month)}
+                                            className="px-2.5 py-1 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-bold transition text-xxs inline-flex items-center gap-1 cursor-pointer"
+                                            title="تحميل كشف حساب تفصيلي عن معاملات هذا الشهر"
+                                          >
+                                            <Download className="w-3.5 h-3.5" />
+                                            <span>تصدير الشهر 📊</span>
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    );
+                                  })
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
 
           </section>
 
@@ -4024,7 +4940,7 @@ export default function App() {
                     onClick={() => {
                       if (!data || !data.activeCustomers) return;
                       const headers = ["الاسم بالكامل", "المنتج / المعاملة", "رقم الهاتف", "المبلغ الكلي", "المدفوع", "المتبقي", "عدد الشهور", "القسط الشهري", "تاريخ البدء", "نوع المعاملة", "ملاحظات"];
-                      const rows = data.activeCustomers.map(c => [
+                      const rows = (data.activeCustomers || []).map(c => [
                         c.name,
                         c.product,
                         c.phone || "غير مسجل",
@@ -4050,7 +4966,7 @@ export default function App() {
                     onClick={() => {
                       if (!data || !data.quickInstallments) return;
                       const headers = ["الاسم", "رقم الهاتف", "التاريخ والوقت", "المبلغ المستحق", "حالة القسط", "ملاحظات"];
-                      const rows = data.quickInstallments.map(q => [
+                      const rows = (data.quickInstallments || []).map(q => [
                         q.name,
                         q.phone || "غير مسجل",
                         "",
@@ -4071,7 +4987,7 @@ export default function App() {
                     onClick={() => {
                       if (!data || !data.moneyCircles) return;
                       const headers = ["اسم الجمعية", "رئيس الجمعية", "قيمة القسط", "المبلغ الإجمالي الكلي", "الحد الأقصى للمشتركين", "تاريخ البدء", "حالة الجمعية"];
-                      const rows = data.moneyCircles.map(c => [
+                      const rows = (data.moneyCircles || []).map(c => [
                         c.name,
                         "",
                         c.monthlyPayment.toString() + " ج.م",
@@ -4093,7 +5009,7 @@ export default function App() {
                     onClick={() => {
                       if (!data || !data.invoices) return;
                       const headers = ["رقم الفاتورة", "العميل", "الهاتف", "المنتج المباع", "الرقم التسلسلي S/N", "التاريخ", "المبلغ الكلي للمبيعات"];
-                      const rows = data.invoices.map(inv => [
+                      const rows = (data.invoices || []).map(inv => [
                         inv.id,
                         inv.clientName,
                         "غير مسجل",

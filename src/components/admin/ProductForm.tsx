@@ -88,8 +88,15 @@ export default function ProductForm({ initialData, categories, mode }: ProductFo
     ...initialData
   })
 
-  const [files, setFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>(initialData?.images || [])
+  interface ImageItem {
+    id: string
+    url: string
+    file?: File
+  }
+
+  const [images, setImages] = useState<ImageItem[]>(
+    (initialData?.images || []).map((url: string) => ({ id: url, url }))
+  )
 
   const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target
@@ -102,17 +109,23 @@ export default function ProductForm({ initialData, categories, mode }: ProductFo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files)
-      setFiles(prev => [...prev, ...newFiles])
-      
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file))
-      setImagePreviews(prev => [...prev, ...newPreviews])
+      const newItems = newFiles.map(file => ({
+        id: crypto.randomUUID(),
+        url: URL.createObjectURL(file),
+        file
+      }))
+      setImages(prev => [...prev, ...newItems])
     }
   }
 
-  const removeImage = (index: number) => {
-    setImagePreviews(prev => prev.filter((_, i) => i !== index))
-    // Also remove from files if it's a new one
-    // (Simplification: logic to track which index is file vs existing URL)
+  const removeImage = (id: string) => {
+    setImages(prev => {
+      const itemToRemove = prev.find(item => item.id === id)
+      if (itemToRemove && itemToRemove.url.startsWith('blob:')) {
+        URL.revokeObjectURL(itemToRemove.url)
+      }
+      return prev.filter(item => item.id !== id)
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,6 +134,10 @@ export default function ProductForm({ initialData, categories, mode }: ProductFo
 
     const submissionData = new FormData()
     Object.keys(formData).forEach(key => {
+      if (key === 'images') {
+        // Skip appending original raw images array because we handle it via existingImages/files
+        return
+      }
       if (Array.isArray(formData[key])) {
         formData[key].forEach((item: any) => submissionData.append(key, item))
       } else {
@@ -128,11 +145,13 @@ export default function ProductForm({ initialData, categories, mode }: ProductFo
       }
     })
 
-    files.forEach(file => submissionData.append('files', file))
-    
-    // Track existing images that weren't deleted
-    imagePreviews.forEach(url => {
-      if (url.startsWith('http')) submissionData.append('existingImages', url)
+    // Append files and track existing images
+    images.forEach(item => {
+      if (item.file) {
+        submissionData.append('files', item.file)
+      } else {
+        submissionData.append('existingImages', item.url)
+      }
     })
 
     try {
@@ -265,13 +284,13 @@ export default function ProductForm({ initialData, categories, mode }: ProductFo
                   <p className="text-gray-500 mt-2">اسحب الصور هنا أو اضغط للاختيار. يمكنك اختيار أكثر من صورة.</p>
                 </div>
 
-                {imagePreviews.length > 0 && (
+                {images.length > 0 && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {imagePreviews.map((url, i) => (
-                      <div key={i} className="relative group aspect-square rounded-2xl overflow-hidden border border-white/5 bg-white/5">
-                        <img src={url} alt={`Preview ${i}`} className="w-full h-full object-contain p-2" />
+                    {images.map((item, i) => (
+                      <div key={item.id} className="relative group aspect-square rounded-2xl overflow-hidden border border-white/5 bg-white/5">
+                        <img src={item.url} alt={`Preview ${i}`} className="w-full h-full object-contain p-2" />
                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                           <button type="button" onClick={() => removeImage(i)} className="p-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600 transition-colors">
+                           <button type="button" onClick={() => removeImage(item.id)} className="p-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600 transition-colors">
                               <IoTrashOutline />
                            </button>
                         </div>

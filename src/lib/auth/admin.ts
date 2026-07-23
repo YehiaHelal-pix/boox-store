@@ -44,16 +44,45 @@ export async function isAdminUser(userId: string) {
   return Boolean(data)
 }
 
+export async function getAdminShopDetails(userId: string) {
+  const { data, error } = await supabaseAdmin
+    .from('admin_users')
+    .select('shop_id, shops:shops(id, name, slug, is_active)')
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error || !data || !data.shops) {
+    return null
+  }
+
+  const shopObj = Array.isArray(data.shops) ? data.shops[0] : data.shops
+  if (!shopObj || !shopObj.is_active) {
+    return null
+  }
+
+  return {
+    shopId: data.shop_id,
+    shopName: shopObj.name,
+    shopSlug: shopObj.slug
+  }
+}
+
 export async function getAdminAuthState() {
   const user = await getAuthenticatedUser()
 
   if (!user) {
-    return { user: null, isAdmin: false }
+    return { user: null, isAdmin: false, shopId: null, shopSlug: null, shopName: null }
   }
+
+  const shopDetails = await getAdminShopDetails(user.id)
 
   return {
     user,
-    isAdmin: await isAdminUser(user.id),
+    isAdmin: Boolean(shopDetails),
+    shopId: shopDetails?.shopId ?? null,
+    shopSlug: shopDetails?.shopSlug ?? null,
+    shopName: shopDetails?.shopName ?? null,
   }
 }
 
@@ -64,16 +93,16 @@ export async function requireAdminPage(nextPath = '/admin') {
     redirect(buildLoginRedirect(nextPath))
   }
 
-  const isAdmin = await isAdminUser(user.id)
+  const shopDetails = await getAdminShopDetails(user.id)
 
-  if (!isAdmin) {
+  if (!shopDetails) {
     redirect('/auth/forbidden')
   }
 
   return user
 }
 
-export async function requireAdminApiAccess(): Promise<AdminApiAccess> {
+export async function requireAdminApiAccess() {
   const user = await getAuthenticatedUser()
 
   if (!user) {
@@ -82,15 +111,20 @@ export async function requireAdminApiAccess(): Promise<AdminApiAccess> {
     }
   }
 
-  const isAdmin = await isAdminUser(user.id)
+  const shopDetails = await getAdminShopDetails(user.id)
 
-  if (!isAdmin) {
+  if (!shopDetails) {
     return {
-      response: NextResponse.json({ error: 'صلاحيات الأدمن مطلوبة' }, { status: 403 }),
+      response: NextResponse.json({ error: 'صلاحيات الإدارة غير صالحة أو المحل معطل' }, { status: 403 }),
     }
   }
 
-  return { user }
+  return {
+    user,
+    shopId: shopDetails.shopId,
+    shopSlug: shopDetails.shopSlug,
+    shopName: shopDetails.shopName
+  }
 }
 
 export function sanitizeAdminNextPath(nextPath?: string) {

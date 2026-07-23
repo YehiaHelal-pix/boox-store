@@ -78,11 +78,25 @@ export interface Expense {
   notes?: string;
 }
 
+export interface Purchase {
+  id: string;
+  itemName: string;
+  category: 'iphone' | 'accessory' | 'charger' | 'screen' | 'other';
+  quantity: number;
+  costPrice: number;
+  totalCost: number;
+  salePrice?: number;
+  purchaseDate: string; // YYYY-MM-DD
+  supplierName?: string;
+  notes?: string;
+}
+
 export interface InstallmentData {
   activeCustomers: ActiveCustomer[];
   quickInstallments: QuickInstallment[];
   moneyCircles: MoneyCircle[];
   invoices: Invoice[];
   expenses: Expense[];
+  purchases: Purchase[];
   lastUpdated: string;
 }

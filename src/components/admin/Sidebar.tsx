@@ -10,7 +10,8 @@ import {
   IoHomeOutline, 
   IoChatbubblesOutline,
   IoLogOutOutline,
-  IoSettingsOutline
+  IoSettingsOutline,
+  IoWalletOutline
 } from 'react-icons/io5'
 import { motion } from 'framer-motion'
 
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/filters', label: 'الفلاتر', icon: IoFilterOutline },
   { href: '/admin/homepage', label: 'الصفحة الرئيسية', icon: IoHomeOutline },
   { href: '/admin/leads', label: 'الطلبات والاستفسارات', icon: IoChatbubblesOutline },
+  { href: '/admin/accounts', label: 'حساباتي', icon: IoWalletOutline },
 ]
 
 export default function Sidebar() {

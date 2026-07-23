@@ -497,24 +497,98 @@
       "notes": "ياسر ماجد خد اكس ماكس 64 بالكرتونه 12500 قبل الفيده وبعد 13800 ع 45% كل شهر 770",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-04-20", "amount": 770, "status": "paid", "paymentDate": "2026-04-20" },
-        { "date": "2026-05-20", "amount": 770, "status": "paid", "paymentDate": "2026-05-20" },
-        { "date": "2026-06-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-07-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-08-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-09-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-10-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-11-20", "amount": 770, "status": "unpaid" },
-        { "date": "2026-12-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-01-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-02-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-03-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-04-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-05-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-06-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-07-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-08-20", "amount": 770, "status": "unpaid" },
-        { "date": "2027-09-20", "amount": 770, "status": "unpaid" }
+        {
+          "date": "2026-04-20",
+          "amount": 770,
+          "status": "paid",
+          "paymentDate": "2026-04-20"
+        },
+        {
+          "date": "2026-05-20",
+          "amount": 770,
+          "status": "paid",
+          "paymentDate": "2026-05-20"
+        },
+        {
+          "date": "2026-06-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-07-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-02-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-03-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-04-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-05-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-06-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-07-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-08-20",
+          "amount": 770,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-09-20",
+          "amount": 770,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -531,15 +605,54 @@
       "notes": "رقيه رضا عليها 46800 بعد الفايده ع 9 شهور 5200 كل شهر",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-04-10", "amount": 5200, "status": "paid", "paymentDate": "2026-04-10" },
-        { "date": "2026-05-10", "amount": 5200, "status": "paid", "paymentDate": "2026-05-10" },
-        { "date": "2026-06-10", "amount": 5200, "status": "paid", "paymentDate": "2026-06-10" },
-        { "date": "2026-07-10", "amount": 5200, "status": "unpaid" },
-        { "date": "2026-08-10", "amount": 5200, "status": "unpaid" },
-        { "date": "2026-09-10", "amount": 5200, "status": "unpaid" },
-        { "date": "2026-10-10", "amount": 5200, "status": "unpaid" },
-        { "date": "2026-11-10", "amount": 5200, "status": "unpaid" },
-        { "date": "2026-12-10", "amount": 5200, "status": "unpaid" }
+        {
+          "date": "2026-04-10",
+          "amount": 5200,
+          "status": "paid",
+          "paymentDate": "2026-04-10"
+        },
+        {
+          "date": "2026-05-10",
+          "amount": 5200,
+          "status": "paid",
+          "paymentDate": "2026-05-10"
+        },
+        {
+          "date": "2026-06-10",
+          "amount": 5200,
+          "status": "paid",
+          "paymentDate": "2026-06-10"
+        },
+        {
+          "date": "2026-07-10",
+          "amount": 5200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-10",
+          "amount": 5200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-10",
+          "amount": 5200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-10",
+          "amount": 5200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-10",
+          "amount": 5200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-10",
+          "amount": 5200,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -556,18 +669,71 @@
       "notes": "حساب حمص 150الف ع 12 شهر كل شهر 4200",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-02-15", "amount": 4200, "status": "paid", "paymentDate": "2026-02-15" },
-        { "date": "2026-03-15", "amount": 4200, "status": "paid", "paymentDate": "2026-03-15" },
-        { "date": "2026-04-15", "amount": 4200, "status": "paid", "paymentDate": "2026-04-15" },
-        { "date": "2026-05-15", "amount": 4200, "status": "paid", "paymentDate": "2026-05-15" },
-        { "date": "2026-06-15", "amount": 4200, "status": "paid", "paymentDate": "2026-06-15" },
-        { "date": "2026-07-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2026-08-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2026-09-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2026-10-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2026-11-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2026-12-15", "amount": 4200, "status": "unpaid" },
-        { "date": "2027-01-15", "amount": 4200, "status": "unpaid" }
+        {
+          "date": "2026-02-15",
+          "amount": 4200,
+          "status": "paid",
+          "paymentDate": "2026-02-15"
+        },
+        {
+          "date": "2026-03-15",
+          "amount": 4200,
+          "status": "paid",
+          "paymentDate": "2026-03-15"
+        },
+        {
+          "date": "2026-04-15",
+          "amount": 4200,
+          "status": "paid",
+          "paymentDate": "2026-04-15"
+        },
+        {
+          "date": "2026-05-15",
+          "amount": 4200,
+          "status": "paid",
+          "paymentDate": "2026-05-15"
+        },
+        {
+          "date": "2026-06-15",
+          "amount": 4200,
+          "status": "paid",
+          "paymentDate": "2026-06-15"
+        },
+        {
+          "date": "2026-07-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-15",
+          "amount": 4200,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-15",
+          "amount": 4200,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -584,18 +750,76 @@
       "notes": "يوسف بدر واخد جهاز اكس ماكس باقي عليه 11500 قبل الفيده وبعد الفيده وصل ل35% ع 12 شهر كل شهر 1300",
       "type": "incoming",
       "schedule": [
-        { "date": "2025-08-20", "amount": 1300, "status": "paid", "paymentDate": "2025-08-20" },
-        { "date": "2025-09-20", "amount": 1300, "status": "paid", "paymentDate": "2025-09-20" },
-        { "date": "2025-10-20", "amount": 1300, "status": "paid", "paymentDate": "2025-10-20" },
-        { "date": "2025-11-20", "amount": 1300, "status": "paid", "paymentDate": "2025-11-20" },
-        { "date": "2025-12-20", "amount": 1300, "status": "paid", "paymentDate": "2025-12-20" },
-        { "date": "2026-01-20", "amount": 1300, "status": "paid", "paymentDate": "2026-01-20" },
-        { "date": "2026-02-20", "amount": 1300, "status": "paid", "paymentDate": "2026-02-20" },
-        { "date": "2026-03-20", "amount": 1300, "status": "unpaid" },
-        { "date": "2026-04-20", "amount": 1300, "status": "paid", "paymentDate": "2026-04-20" },
-        { "date": "2026-05-20", "amount": 1300, "status": "paid", "paymentDate": "2026-05-20" },
-        { "date": "2026-06-20", "amount": 1300, "status": "paid", "paymentDate": "2026-06-20" },
-        { "date": "2026-07-20", "amount": 1300, "status": "unpaid" }
+        {
+          "date": "2025-08-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2025-08-20"
+        },
+        {
+          "date": "2025-09-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2025-09-20"
+        },
+        {
+          "date": "2025-10-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2025-10-20"
+        },
+        {
+          "date": "2025-11-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2025-11-20"
+        },
+        {
+          "date": "2025-12-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2025-12-20"
+        },
+        {
+          "date": "2026-01-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2026-01-20"
+        },
+        {
+          "date": "2026-02-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2026-02-20"
+        },
+        {
+          "date": "2026-03-20",
+          "amount": 1300,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-04-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2026-04-20"
+        },
+        {
+          "date": "2026-05-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2026-05-20"
+        },
+        {
+          "date": "2026-06-20",
+          "amount": 1300,
+          "status": "paid",
+          "paymentDate": "2026-06-20"
+        },
+        {
+          "date": "2026-07-20",
+          "amount": 1300,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -612,18 +836,73 @@
       "notes": "واخد جهاز 11 برو ماكس باقي 10 تلاف بعد الفيده 13500 ع 12 شهر هيبقى كل شهر 1125 (في الجدول مسجل دفعات بقيمة 1100)",
       "type": "incoming",
       "schedule": [
-        { "date": "2025-11-20", "amount": 1100, "status": "paid", "paymentDate": "2025-11-20" },
-        { "date": "2025-12-20", "amount": 1100, "status": "paid", "paymentDate": "2025-12-20" },
-        { "date": "2026-01-20", "amount": 1100, "status": "paid", "paymentDate": "2026-01-20" },
-        { "date": "2026-02-20", "amount": 1100, "status": "paid", "paymentDate": "2026-02-20" },
-        { "date": "2026-03-20", "amount": 1100, "status": "unpaid" },
-        { "date": "2026-04-20", "amount": 1100, "status": "paid", "paymentDate": "2026-04-20" },
-        { "date": "2026-05-20", "amount": 1100, "status": "paid", "paymentDate": "2026-05-20" },
-        { "date": "2026-06-20", "amount": 1100, "status": "paid", "paymentDate": "2026-06-20" },
-        { "date": "2026-07-20", "amount": 1100, "status": "unpaid" },
-        { "date": "2026-08-20", "amount": 1100, "status": "unpaid" },
-        { "date": "2026-09-20", "amount": 1100, "status": "unpaid" },
-        { "date": "2026-10-20", "amount": 1400, "status": "unpaid" }
+        {
+          "date": "2025-11-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-11-20"
+        },
+        {
+          "date": "2025-12-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-12-20"
+        },
+        {
+          "date": "2026-01-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-01-20"
+        },
+        {
+          "date": "2026-02-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-02-20"
+        },
+        {
+          "date": "2026-03-20",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-04-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-04-20"
+        },
+        {
+          "date": "2026-05-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-05-20"
+        },
+        {
+          "date": "2026-06-20",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-06-20"
+        },
+        {
+          "date": "2026-07-20",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-20",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-20",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-20",
+          "amount": 1400,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -640,18 +919,66 @@
       "notes": "بسام واخد اكس ماكس بدون مقدم 13800 ع 12 شهر هيبقى كل شهر 1150",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-07-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2026-08-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2026-09-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2026-10-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2026-11-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2026-12-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-01-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-02-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-03-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-04-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-05-20", "amount": 1150, "status": "unpaid" },
-        { "date": "2027-06-20", "amount": 1150, "status": "unpaid" }
+        {
+          "date": "2026-07-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-02-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-03-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-04-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-05-20",
+          "amount": 1150,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-06-20",
+          "amount": 1150,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -668,18 +995,72 @@
       "notes": "حسام سامي واخد ١٢ برو ماكس باقي عليه ٢٢٢٠٠ ع ١٢ شهر كل شهر ١٨٥٠",
       "type": "incoming",
       "schedule": [
-        { "date": "2025-08-20", "amount": 1850, "status": "paid", "paymentDate": "2025-08-07" },
-        { "date": "2025-09-20", "amount": 1850, "status": "paid", "paymentDate": "2025-09-20" },
-        { "date": "2025-10-20", "amount": 1840, "status": "paid", "paymentDate": "2025-10-20" },
-        { "date": "2025-11-20", "amount": 1850, "status": "paid", "paymentDate": "2025-11-20" },
-        { "date": "2025-12-20", "amount": 1850, "status": "paid", "paymentDate": "2025-12-20" },
-        { "date": "2026-01-20", "amount": 1850, "status": "paid", "paymentDate": "2026-01-20" },
-        { "date": "2026-02-20", "amount": 1850, "status": "unpaid" },
-        { "date": "2026-03-20", "amount": 1850, "status": "unpaid" },
-        { "date": "2026-04-20", "amount": 1850, "status": "unpaid" },
-        { "date": "2026-05-20", "amount": 1850, "status": "unpaid" },
-        { "date": "2026-06-20", "amount": 1850, "status": "unpaid" },
-        { "date": "2026-07-20", "amount": 1850, "status": "unpaid" }
+        {
+          "date": "2025-08-20",
+          "amount": 1850,
+          "status": "paid",
+          "paymentDate": "2025-08-07"
+        },
+        {
+          "date": "2025-09-20",
+          "amount": 1850,
+          "status": "paid",
+          "paymentDate": "2025-09-20"
+        },
+        {
+          "date": "2025-10-20",
+          "amount": 1840,
+          "status": "paid",
+          "paymentDate": "2025-10-20"
+        },
+        {
+          "date": "2025-11-20",
+          "amount": 1850,
+          "status": "paid",
+          "paymentDate": "2025-11-20"
+        },
+        {
+          "date": "2025-12-20",
+          "amount": 1850,
+          "status": "paid",
+          "paymentDate": "2025-12-20"
+        },
+        {
+          "date": "2026-01-20",
+          "amount": 1850,
+          "status": "paid",
+          "paymentDate": "2026-01-20"
+        },
+        {
+          "date": "2026-02-20",
+          "amount": 1850,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-03-20",
+          "amount": 1850,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-04-20",
+          "amount": 1850,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-05-20",
+          "amount": 1850,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-06-20",
+          "amount": 1850,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-07-20",
+          "amount": 1850,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -696,18 +1077,76 @@
       "notes": "محمود كيلاني واخد اكس ماكس وباقي عليه 13500 ع 12 شهر كل شهر 1100",
       "type": "incoming",
       "schedule": [
-        { "date": "2025-09-15", "amount": 1100, "status": "paid", "paymentDate": "2025-09-15" },
-        { "date": "2025-10-15", "amount": 1100, "status": "paid", "paymentDate": "2025-10-15" },
-        { "date": "2025-11-10", "amount": 1100, "status": "paid", "paymentDate": "2025-11-10" },
-        { "date": "2025-12-10", "amount": 1100, "status": "paid", "paymentDate": "2025-12-10" },
-        { "date": "2026-01-10", "amount": 1100, "status": "paid", "paymentDate": "2026-01-10" },
-        { "date": "2026-02-10", "amount": 1100, "status": "paid", "paymentDate": "2026-02-10" },
-        { "date": "2026-03-10", "amount": 1100, "status": "paid", "paymentDate": "2026-03-10" },
-        { "date": "2026-04-10", "amount": 1100, "status": "paid", "paymentDate": "2026-04-10" },
-        { "date": "2026-05-10", "amount": 1050, "status": "paid", "paymentDate": "2026-05-10" },
-        { "date": "2026-06-10", "amount": 1100, "status": "paid", "paymentDate": "2026-06-10" },
-        { "date": "2026-07-10", "amount": 1100, "status": "unpaid" },
-        { "date": "2026-08-10", "amount": 1100, "status": "unpaid" }
+        {
+          "date": "2025-09-15",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-09-15"
+        },
+        {
+          "date": "2025-10-15",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-10-15"
+        },
+        {
+          "date": "2025-11-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-11-10"
+        },
+        {
+          "date": "2025-12-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-12-10"
+        },
+        {
+          "date": "2026-01-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-01-10"
+        },
+        {
+          "date": "2026-02-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-02-10"
+        },
+        {
+          "date": "2026-03-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-03-10"
+        },
+        {
+          "date": "2026-04-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-04-10"
+        },
+        {
+          "date": "2026-05-10",
+          "amount": 1050,
+          "status": "paid",
+          "paymentDate": "2026-05-10"
+        },
+        {
+          "date": "2026-06-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-06-10"
+        },
+        {
+          "date": "2026-07-10",
+          "amount": 1100,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-10",
+          "amount": 1100,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -724,18 +1163,77 @@
       "notes": "طارق دافع 13700 باقي 10تلاف ع 35% هيبقى 13500 ع 12 شهر كل شهر 1100 واخر شهر 1400",
       "type": "incoming",
       "schedule": [
-        { "date": "2025-08-10", "amount": 1100, "status": "paid", "paymentDate": "2025-08-10" },
-        { "date": "2025-09-10", "amount": 1100, "status": "paid", "paymentDate": "2025-09-10" },
-        { "date": "2025-10-10", "amount": 1100, "status": "paid", "paymentDate": "2025-10-10" },
-        { "date": "2025-11-10", "amount": 1100, "status": "paid", "paymentDate": "2025-11-10" },
-        { "date": "2025-12-10", "amount": 1100, "status": "paid", "paymentDate": "2025-12-10" },
-        { "date": "2026-01-10", "amount": 1100, "status": "paid", "paymentDate": "2026-01-10" },
-        { "date": "2026-02-10", "amount": 1100, "status": "paid", "paymentDate": "2026-02-10" },
-        { "date": "2026-03-10", "amount": 1100, "status": "paid", "paymentDate": "2026-03-10" },
-        { "date": "2026-04-10", "amount": 1100, "status": "paid", "paymentDate": "2026-04-10" },
-        { "date": "2026-05-10", "amount": 1100, "status": "paid", "paymentDate": "2026-05-10" },
-        { "date": "2026-06-10", "amount": 1100, "status": "paid", "paymentDate": "2026-06-10" },
-        { "date": "2026-07-10", "amount": 1400, "status": "unpaid" }
+        {
+          "date": "2025-08-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-08-10"
+        },
+        {
+          "date": "2025-09-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-09-10"
+        },
+        {
+          "date": "2025-10-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-10-10"
+        },
+        {
+          "date": "2025-11-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-11-10"
+        },
+        {
+          "date": "2025-12-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2025-12-10"
+        },
+        {
+          "date": "2026-01-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-01-10"
+        },
+        {
+          "date": "2026-02-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-02-10"
+        },
+        {
+          "date": "2026-03-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-03-10"
+        },
+        {
+          "date": "2026-04-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-04-10"
+        },
+        {
+          "date": "2026-05-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-05-10"
+        },
+        {
+          "date": "2026-06-10",
+          "amount": 1100,
+          "status": "paid",
+          "paymentDate": "2026-06-10"
+        },
+        {
+          "date": "2026-07-10",
+          "amount": 1400,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -752,12 +1250,38 @@
       "notes": "عمار عليه 12000 ع 6 شهور كل شهر 2000",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-06-01", "amount": 2000, "status": "paid", "paymentDate": "2026-06-01" },
-        { "date": "2026-07-01", "amount": 2000, "status": "paid", "paymentDate": "2026-07-01" },
-        { "date": "2026-08-01", "amount": 2000, "status": "unpaid" },
-        { "date": "2026-09-01", "amount": 2000, "status": "unpaid" },
-        { "date": "2026-10-01", "amount": 2000, "status": "unpaid" },
-        { "date": "2026-11-01", "amount": 2000, "status": "unpaid" }
+        {
+          "date": "2026-06-01",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2026-06-01"
+        },
+        {
+          "date": "2026-07-01",
+          "amount": 2000,
+          "status": "paid",
+          "paymentDate": "2026-07-01"
+        },
+        {
+          "date": "2026-08-01",
+          "amount": 2000,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-01",
+          "amount": 2000,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-01",
+          "amount": 2000,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-01",
+          "amount": 2000,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -774,18 +1298,66 @@
       "notes": "وصلي ١٠ باقي ٢٢ بعد الفيده ٣٥٪ ع السنه هيبقى حسابي ٣١ ع ١٢ شهر ٢٥٠٠ كل شهر اولنا ٦/٢٥",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-06-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-07-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-08-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-09-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-10-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-11-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2026-12-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2027-01-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2027-02-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2027-03-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2027-04-25", "amount": 2500, "status": "unpaid" },
-        { "date": "2027-05-25", "amount": 3500, "status": "unpaid" }
+        {
+          "date": "2026-06-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-07-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-02-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-03-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-04-25",
+          "amount": 2500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-05-25",
+          "amount": 3500,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -802,18 +1374,66 @@
       "notes": "محمد فتحي ٢٥ قبل الفيده وبعد ٣٤ ع ١٢ شهر ٢٨٢٠ اولنا ٧/٥",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-07-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2026-08-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2026-09-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2026-10-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2026-11-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2026-12-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-01-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-02-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-03-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-04-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-05-05", "amount": 2820, "status": "unpaid" },
-        { "date": "2027-06-05", "amount": 2980, "status": "unpaid" }
+        {
+          "date": "2026-07-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-02-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-03-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-04-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-05-05",
+          "amount": 2820,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-06-05",
+          "amount": 2980,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -830,18 +1450,68 @@
       "notes": "محمد عيد باقي عليه 20 قبل وبعض 27 ع 12 كل شهر 2250",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-05-05", "amount": 2250, "status": "paid", "paymentDate": "2026-05-05" },
-        { "date": "2026-06-05", "amount": 2250, "status": "paid", "paymentDate": "2026-06-05" },
-        { "date": "2026-07-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2026-08-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2026-09-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2026-10-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2026-11-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2026-12-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2027-01-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2027-02-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2027-03-05", "amount": 2250, "status": "unpaid" },
-        { "date": "2027-04-05", "amount": 2250, "status": "unpaid" }
+        {
+          "date": "2026-05-05",
+          "amount": 2250,
+          "status": "paid",
+          "paymentDate": "2026-05-05"
+        },
+        {
+          "date": "2026-06-05",
+          "amount": 2250,
+          "status": "paid",
+          "paymentDate": "2026-06-05"
+        },
+        {
+          "date": "2026-07-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-02-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-03-05",
+          "amount": 2250,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-04-05",
+          "amount": 2250,
+          "status": "unpaid"
+        }
       ]
     },
     {
@@ -858,15 +1528,53 @@
       "notes": "احمد مجدي بدل وعليه فرق ١٠٠٠٠ قبل الفايده وبعد ١٣٥٠٠ ع ٩ش كل شهر ١٥٠٠",
       "type": "incoming",
       "schedule": [
-        { "date": "2026-05-01", "amount": 1500, "status": "paid", "paymentDate": "2026-05-01" },
-        { "date": "2026-06-01", "amount": 1500, "status": "paid", "paymentDate": "2026-06-01" },
-        { "date": "2026-07-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2026-08-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2026-09-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2026-10-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2026-11-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2026-12-01", "amount": 1500, "status": "unpaid" },
-        { "date": "2027-01-01", "amount": 1500, "status": "unpaid" }
+        {
+          "date": "2026-05-01",
+          "amount": 1500,
+          "status": "paid",
+          "paymentDate": "2026-05-01"
+        },
+        {
+          "date": "2026-06-01",
+          "amount": 1500,
+          "status": "paid",
+          "paymentDate": "2026-06-01"
+        },
+        {
+          "date": "2026-07-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-08-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-09-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-10-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-11-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2026-12-01",
+          "amount": 1500,
+          "status": "unpaid"
+        },
+        {
+          "date": "2027-01-01",
+          "amount": 1500,
+          "status": "unpaid"
+        }
       ]
     }
   ],
