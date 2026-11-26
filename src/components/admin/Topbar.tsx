@@ -10,9 +10,9 @@ interface TopbarProps {
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const [userEmail, setUserEmail] = useState<string | null>(null)
-  const supabase = createClient()
-
+  
   useEffect(() => {
+    const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       setUserEmail(data.user?.email || null)
     })
