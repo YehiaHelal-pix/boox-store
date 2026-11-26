@@ -38,7 +38,6 @@ function VisibilityButton({
 }
 
 export function LoginForm({ nextPath }: { nextPath: string }) {
-  const supabase = createClient()
   const [pending, setPending] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -49,6 +48,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     event.preventDefault()
     setPending(true)
     setError(null)
+    const supabase = createClient()
 
     try {
       const normalizedEmail = email.trim().toLowerCase()
