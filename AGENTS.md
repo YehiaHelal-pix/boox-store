@@ -35,3 +35,7 @@ Stack: Next.js 15, React 19, TypeScript, Tailwind v4, Supabase, Zustand, framer-
 
 ## Notes
 - `اقساط/` is a separate standalone app with its own config; it is excluded from this repo's root typecheck — do not include it in store builds.
+
+## Experience (locked)
+- Everything is dynamic and live: updates reach the customer on screen without refresh where it matters (replies, availability, request status).
+- Easy and uncomplicated for the customer: few steps, one clear action per screen, plain language, no jargon, no dead ends. If a flow takes more than 3 steps, simplify it.
