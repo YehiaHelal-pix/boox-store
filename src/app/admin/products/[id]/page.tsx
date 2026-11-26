@@ -2,6 +2,9 @@ import { getAdminProductCategories, findAdminProduct } from '@/lib/admin-product
 import ProductForm from '@/components/admin/ProductForm'
 import { notFound } from 'next/navigation'
 
+// Admin pages fetch live data per request; never prerender them at build time.
+export const dynamic = 'force-dynamic'
+
 interface EditProductPageProps {
   params: Promise<{ id: string }>
 }
