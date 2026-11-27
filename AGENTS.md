@@ -20,7 +20,7 @@ Stack: Next.js 15, React 19, TypeScript, Tailwind v4, Supabase, Zustand, framer-
 
 ## Product rules
 - No fake data: no invented prices, no fake ratings or reviews. Prices come from the owner only.
-- Every iPhone model with all its official colors; one page per model; unavailable variants stay visible, greyed, with a WhatsApp inquiry CTA — never hidden.
+- Unavailable products show NOTHING written on them — only their photo is faded/dimmed vs the other photos. (Supersedes the old greyed + "غير متاح حالياً" + WhatsApp CTA rule.) Tapping the faded product still opens the «نبّهني لما يتوفر» waitlist flow.
 - iPhone 18 Pro / 18 Pro Max only (base iPhone 18 is "coming soon", no colors invented).
 - Categories are open: the admin can list any product type (laptops, iPads, Apple displays, AirPods, cases, ...). Photos and descriptions are editable from the admin dashboard.
 - Each model page has a «جرابات الهاتف» (phone cases) tab that opens the cases page for that model — cases are linked to their model in the admin dashboard.
@@ -45,6 +45,7 @@ Stack: Next.js 15, React 19, TypeScript, Tailwind v4, Supabase, Zustand, framer-
 
 ## Comments
 - Customers can comment on products. For each comment the customer chooses, like Facebook, to post it anonymously or with their real identity.
+- The admin dashboard knows the real identity of every commenter even when anonymous to customers; the admin can delete any comment and move its position up or down among the comments.
 
 ## Tax (Egyptian tax system)
 - Each product carries tax status, managed in the admin dashboard and shown on the product page per the admin's choice: whether the phone has tax, whether the tax value is displayed, and whether it is tax-exempt.
